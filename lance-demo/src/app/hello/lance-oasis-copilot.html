@@ -115,28 +115,32 @@
 
 <!-- COPILOT PAGE -->
 <div id="copilot-page" class="hidden">
-  <header class="bg-white border-b px-8 py-4 sticky top-0">
+  <header
+    class="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-20 backdrop-blur-lg bg-opacity-95"
+  >
     <div class="flex justify-between items-center">
+      <!-- Left: Back + Patient Info -->
       <div class="flex items-center space-x-6">
-        <button (click)="showPage('dashboard-page')" class="text-slate-400 hover:text-slate-600">
+        <button
+          onclick="showPage('dashboard-page')"
+          class="text-slate-400 hover:text-slate-600 transition-colors"
+        >
           <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
         </button>
-
         <div class="flex items-center space-x-3">
           <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
             LANCE AI
           </div>
           <div class="w-px h-8 bg-slate-200"></div>
-
           <div>
             <div class="flex items-center space-x-2">
               <h1 class="text-base font-semibold text-slate-900">Maria Garcia</h1>
               <button
-                (click)="quickEligibilityCheck($event)"
-                class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded"
+                onclick="quickEligibilityCheck(event)"
+                class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"
               >
-                <ion-icon name="shield-checkmark-outline"></ion-icon>
-                Check Eligibility
+                <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
+                <span>Check Eligibility</span>
               </button>
             </div>
             <p class="text-xs text-slate-500">MRN-98765 • Start of Care</p>
@@ -144,23 +148,57 @@
         </div>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <span id="progress-text" class="text-sm font-medium text-slate-700">0%</span>
-
-        <div class="w-40 h-2 bg-slate-200 rounded-full overflow-hidden">
-          <div id="progress-bar" class="h-full bg-indigo-600"></div>
+      <!-- Right: Stats + Actions -->
+      <div class="flex items-center space-x-6">
+        <!-- Progress -->
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <p class="text-xs text-slate-500">Completion</p>
+            <p id="progress-text" class="text-sm font-semibold text-slate-900">15%</p>
+          </div>
+          <div class="w-20 bg-slate-100 rounded-full h-1.5">
+            <div
+              id="progress-bar"
+              class="bg-indigo-600 h-1.5 rounded-full transition-all"
+              style="width: 15%"
+            ></div>
+          </div>
         </div>
 
-        <div class="flex items-center space-x-1">
-          <span class="text-slate-600 text-sm">PDGM:</span>
-          <span id="pdgm-value" class="font-bold text-slate-900">$2875.50</span>
+        <div class="w-px h-8 bg-slate-200"></div>
+
+        <!-- PDGM -->
+        <div class="text-right">
+          <p class="text-xs text-slate-500">Est. Payment</p>
+          <p id="pdgm-value" class="text-sm font-semibold text-slate-900 transition-all">
+            $2,875.50
+          </p>
         </div>
+
+        <div class="w-px h-8 bg-slate-200"></div>
+
+        <!-- Actions -->
+        <button
+          onclick="validateForm()"
+          class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors flex items-center space-x-1"
+        >
+          <ion-icon name="alert-circle-outline" class="text-lg"></ion-icon>
+          <span>Validate Form</span>
+        </button>
 
         <button
-          (click)="showModal('export-modal')"
-          class="p-2 bg-white border rounded-lg shadow-sm hover:bg-indigo-50"
+          onclick="resetDemo()"
+          class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center space-x-1"
         >
-          <ion-icon name="download-outline"></ion-icon>
+          <ion-icon name="refresh-outline" class="text-lg"></ion-icon>
+          <span>Reset</span>
+        </button>
+
+        <button
+          onclick="showModal('export-modal')"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+        >
+          Finalize & Export
         </button>
       </div>
     </div>
@@ -303,15 +341,113 @@
 <!-- ELIGIBILITY MODAL -->
 <div
   id="eligibility-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
 >
-  <div class="bg-white p-8 rounded-xl shadow-xl w-[420px]">
-    <h2 class="text-xl font-bold mb-4">Eligibility Check</h2>
-    <p class="text-sm mb-4">Checking eligibility for <strong>Maria Garcia</strong>.</p>
+  <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+          <ion-icon name="shield-checkmark" class="text-2xl text-emerald-600"></ion-icon>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-900">Eligibility Verified</h2>
+      </div>
+      <button onclick="hideModal('eligibility-modal')" class="text-slate-400 hover:text-slate-600">
+        <ion-icon name="close" class="text-2xl"></ion-icon>
+      </button>
+    </div>
 
-    <div class="flex justify-end">
-      <button class="px-4 py-2 bg-indigo-600 text-white rounded" (click)="checkEligibility()">
-        OK
+    <div class="space-y-4 mb-6">
+      <!-- Patient Info -->
+      <div class="bg-slate-50 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Patient Information</p>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-xs text-slate-500">Name</p>
+            <p class="font-semibold text-slate-900">Maria Garcia</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">MRN</p>
+            <p class="font-semibold text-slate-900">98765</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">DOB</p>
+            <p class="font-semibold text-slate-900">05/12/1948</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">Age</p>
+            <p class="font-semibold text-slate-900">76 years</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medicare Status -->
+      <div class="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-500">
+        <p class="text-xs text-emerald-700 uppercase tracking-wide mb-2 font-semibold">
+          Medicare Status: Active
+        </p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-700">Part A (Hospital Insurance)</span>
+            <span class="flex items-center text-emerald-700 font-medium">
+              <ion-icon name="checkmark-circle" class="mr-1"></ion-icon>
+              Active
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-700">Part B (Medical Insurance)</span>
+            <span class="flex items-center text-emerald-700 font-medium">
+              <ion-icon name="checkmark-circle" class="mr-1"></ion-icon>
+              Active
+            </span>
+          </div>
+          <div class="text-xs text-slate-600 mt-2 pt-2 border-t border-emerald-200">
+            Effective: 01/01/2025 - 12/31/2025
+          </div>
+        </div>
+      </div>
+
+      <!-- Home Health Benefit -->
+      <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+        <p class="text-xs text-blue-700 uppercase tracking-wide mb-2 font-semibold">
+          Home Health Benefit
+        </p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700">Available</span>
+          </div>
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700">No prior authorization required</span>
+          </div>
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700"
+              >Estimated remaining benefit days: <strong>60</strong></span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Details -->
+      <div class="text-xs text-slate-500 text-center pt-2">
+        <p>Last verified: Just now • Source: CMS Medicare Portal</p>
+      </div>
+    </div>
+
+    <div class="flex space-x-3">
+      <button
+        onclick="hideModal('eligibility-modal')"
+        class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+      >
+        Continue with Assessment
+      </button>
+      <button
+        onclick="recheckEligibility(event)"
+        class="px-4 text-emerald-600 hover:text-emerald-700 border border-emerald-600 hover:border-emerald-700 font-medium rounded-lg transition-colors flex items-center"
+      >
+        <ion-icon name="refresh-outline" class="mr-1"></ion-icon>
+        Re-check
       </button>
     </div>
   </div>
