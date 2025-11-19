@@ -1,4 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-lance-oasis-copilot',
@@ -7,6 +8,8 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
   styleUrls: ['./lance-oasis-copilot.css'],
 })
 export class LanceOasisCopilotComponent implements OnInit {
+  public router = inject(Router);
+
   // mirrors your original JS vars
   itemsAccepted = 0;
   totalItems = 89;
@@ -14,13 +17,13 @@ export class LanceOasisCopilotComponent implements OnInit {
 
   ngOnInit(): void {
     // default page is login
-    this.showPage('login-page');
+    this.showPage('copilot-page');
   }
 
   // ======= page switching =======
 
-  showPage(pageId: 'login-page' | 'dashboard-page' | 'copilot-page'): void {
-    const pages = ['login-page', 'dashboard-page', 'copilot-page'];
+  showPage(pageId: 'copilot-page'): void {
+    const pages = ['copilot-page'];
     pages.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -32,6 +35,9 @@ export class LanceOasisCopilotComponent implements OnInit {
     });
   }
 
+  showDashboard(): void {
+    this.router.navigate(['/']);
+  }
   // ======= modals =======
 
   showModal(modalId: string): void {
@@ -61,11 +67,81 @@ export class LanceOasisCopilotComponent implements OnInit {
     this.hideModal('eligibility-modal');
   }
 
-  quickEligibilityCheck(event?: Event): void {
-    if (event) {
-      event.stopPropagation();
+  recheckEligibility(e: Event): void {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    // Find the button that triggered the action
+    const recheckBtn = target.closest('button') as HTMLButtonElement | null;
+    if (!recheckBtn) return;
+
+    const originalHTML = recheckBtn.innerHTML;
+
+    // Set loading state
+    recheckBtn.innerHTML =
+      '<ion-icon name="hourglass-outline" class="animate-spin"></ion-icon><span>Checking...</span>';
+    recheckBtn.disabled = true;
+
+    // Simulated API call
+    setTimeout(() => {
+      // Restore button
+      recheckBtn.innerHTML = originalHTML;
+      recheckBtn.disabled = false;
+
+      // Update timestamp
+      this.updateEligibilityTimestamp();
+
+      // Highlight feedback
+      const timestamp = document.querySelector(
+        '#eligibility-modal .text-xs.text-slate-500.text-center'
+      ) as HTMLElement | null;
+
+      if (timestamp) {
+        timestamp.classList.add('text-emerald-600', 'font-semibold');
+        setTimeout(() => {
+          timestamp.classList.remove('text-emerald-600', 'font-semibold');
+        }, 1500);
+      }
+    }, 1500);
+  }
+
+  quickEligibilityCheck(e: Event): void {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    // Find the button
+    const button = target.closest('button') as HTMLButtonElement | null;
+    if (!button) return;
+
+    const originalHTML = button.innerHTML;
+
+    // Set loading state
+    button.innerHTML =
+      '<ion-icon name="hourglass-outline" class="text-sm animate-spin"></ion-icon><span>Checking...</span>';
+    button.disabled = true;
+
+    // Simulate API call
+    setTimeout(() => {
+      // Restore button
+      button.innerHTML = originalHTML;
+      button.disabled = false;
+
+      // Show the modal
+      this.showModal('eligibility-modal');
+
+      // Update timestamp
+      this.updateEligibilityTimestamp();
+    }, 1500);
+  }
+
+  updateEligibilityTimestamp(): void {
+    const timestamp = document.querySelector(
+      '#eligibility-modal .text-xs.text-slate-500.text-center p'
+    ) as HTMLElement | null;
+
+    if (timestamp) {
+      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
     }
-    this.checkEligibility();
   }
 
   // ======= upload / processing overlay =======
@@ -109,22 +185,31 @@ export class LanceOasisCopilotComponent implements OnInit {
 
   // ======= recommendations =======
 
-  selectRecommendation(cardEl: HTMLElement, oasisId: string, docId: string): void {
-    // highlight selected card
-    const cards = document.querySelectorAll('.recommendation-card');
+  selectRecommendation(event: Event, oasisId: string, docId: string): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    // Find the card element (in case click is on a child)
+    const cardEl = target.closest('.recommendation-card') as HTMLElement | null;
+    if (!cardEl) return;
+
+    // Highlight selected card
+    const cards = document.querySelectorAll('.recommendation-card') as NodeListOf<HTMLElement>;
     cards.forEach((c) => c.classList.remove('selected'));
     cardEl.classList.add('selected');
 
-    // ensure correct document tab is visible
+    // Ensure correct document tab is visible
     const docTab = document.querySelector(`.doc-tab[data-doc-id="${docId}"]`) as HTMLElement | null;
+
     if (docTab) {
       this.switchDocumentTab(docTab, docId);
     }
 
-    // scroll to evidence in document, if present
+    // Scroll to evidence in document, if present
     const targetEvidence = document.querySelector(
       `[data-evidence-for="${oasisId}"]`
     ) as HTMLElement | null;
+
     if (targetEvidence) {
       targetEvidence.scrollIntoView({ behavior: 'smooth', block: 'center' });
       targetEvidence.classList.add('form-field-highlight');
@@ -136,39 +221,230 @@ export class LanceOasisCopilotComponent implements OnInit {
     event: Event,
     oasisId: string,
     value: string,
-    affectsPayment: boolean,
-    paymentDelta: number
+    triggersPdgmUpdate = false,
+    progressIncrement = 0 // currently unused, but kept for compatibility
   ): void {
-    event.stopPropagation();
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
 
-    const button = event.currentTarget as HTMLElement;
-    const card = button.closest('.recommendation-card') as HTMLElement | null;
-    if (card) {
-      card.classList.add('accepted');
+    const card = target.closest('.recommendation-card') as HTMLElement | null;
+    if (!card) return;
+
+    const formId = card.getAttribute('data-form-id');
+    if (!formId) return;
+
+    // Special handling for "Other Diagnoses" - add to list instead of overwriting
+    if (formId === 'form-I8000-other-diagnoses-container') {
+      const container = document.getElementById(formId) as HTMLElement | null;
+      if (container) {
+        // Remove placeholder if it exists
+        const placeholder = container.querySelector('.border-dashed') as HTMLElement | null;
+        if (placeholder) {
+          placeholder.remove();
+        }
+
+        // Create new diagnosis entry
+        const diagnosisDiv = document.createElement('div');
+        diagnosisDiv.className =
+          'p-2 bg-emerald-50 border-2 border-solid border-emerald-400 rounded min-h-[40px] flex items-center justify-between text-xs form-field-highlight';
+        diagnosisDiv.innerHTML = `
+        <span class="font-semibold text-slate-800">${value}</span>
+        <ion-icon name="checkmark-circle" class="text-emerald-600 text-lg"></ion-icon>
+      `;
+        container.appendChild(diagnosisDiv);
+
+        // Highlight animation
+        setTimeout(() => diagnosisDiv.classList.remove('form-field-highlight'), 1500);
+
+        // Scroll to container
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } else {
+      // Normal handling for single-value fields
+      const formField = document.getElementById(formId) as HTMLElement | null;
+      if (formField) {
+        formField.innerHTML = value;
+        formField.classList.remove(
+          'form-field-placeholder',
+          'border-dashed',
+          'border-yellow-400',
+          'bg-yellow-50',
+          'text-slate-600',
+          'justify-center'
+        );
+        formField.classList.add(
+          'form-field-value',
+          'border-emerald-400',
+          'bg-emerald-50',
+          'border-solid'
+        );
+
+        // Add highlight animation
+        formField.classList.add('form-field-highlight');
+        setTimeout(() => formField.classList.remove('form-field-highlight'), 1500);
+
+        // Scroll form to this field
+        formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
-    this.itemsAccepted++;
-    this.updateProgress();
+    // Update progress
+    this.itemsAccepted += 1;
+    const progress = this.totalItems
+      ? Math.min(Math.round((this.itemsAccepted / this.totalItems) * 100), 100)
+      : 0;
 
-    if (affectsPayment) {
-      this.currentPayment += paymentDelta;
-      this.updatePaymentDisplay();
+    const progressBar = document.getElementById('progress-bar') as HTMLElement | null;
+    const progressText = document.getElementById('progress-text') as HTMLElement | null;
+
+    if (progressBar) {
+      progressBar.style.width = progress + '%';
+    }
+    if (progressText) {
+      progressText.innerText = progress + '%';
     }
 
-    // TODO: update the corresponding OASIS form field in DOM based on oasisId/value
-    console.log('Accepted', { oasisId, value, affectsPayment, paymentDelta });
+    // Update PDGM if applicable
+    if (triggersPdgmUpdate) {
+      const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
+      const paymentEstimateEl = document.getElementById('payment-estimate') as HTMLElement | null;
+
+      console.log('Payment update triggered for:', oasisId);
+      console.log('Found pdgm-value element:', pdgmValueEl);
+      console.log('Found payment-estimate element:', paymentEstimateEl);
+
+      if (!pdgmValueEl || !pdgmValueEl.parentElement) {
+        console.error('ERROR: pdgm-value element or parent not found!');
+      } else {
+        // Create LARGE increase indicator
+        const increaseEl = document.createElement('div');
+        increaseEl.className =
+          'absolute -top-10 right-0 text-emerald-600 font-black text-2xl animate-bounce z-50';
+        increaseEl.innerHTML = '+$287';
+
+        pdgmValueEl.parentElement.style.position = 'relative';
+        pdgmValueEl.parentElement.appendChild(increaseEl);
+
+        // Scale up dramatically
+        pdgmValueEl.style.transform = 'scale(1.8)';
+        pdgmValueEl.style.color = '#10b981';
+        pdgmValueEl.style.fontWeight = '900';
+        pdgmValueEl.style.transition = 'all 0.4s ease-in-out';
+
+        setTimeout(() => {
+          // Update payment
+          if (oasisId === 'I8000-comorbidity') {
+            this.currentPayment = 3162.5; // Base + $287 comorbidity adjustment
+          } else {
+            this.currentPayment += 287;
+          }
+
+          console.log('New payment amount:', this.currentPayment);
+
+          pdgmValueEl.innerText = '$' + this.currentPayment.toFixed(2);
+          if (paymentEstimateEl) {
+            paymentEstimateEl.innerText = '$' + this.currentPayment.toFixed(2);
+          }
+
+          // Reset styling after animation completes
+          setTimeout(() => {
+            pdgmValueEl.style.transform = 'scale(1)';
+            pdgmValueEl.style.color = '';
+            pdgmValueEl.style.fontWeight = '';
+            increaseEl.remove();
+          }, 2000);
+        }, 400);
+
+        // Update Summary Card comorbidity tier
+        const summaryComorbidityEl = document.getElementById(
+          'summary-comorbidity-tier'
+        ) as HTMLElement | null;
+
+        if (summaryComorbidityEl && oasisId === 'I8000-comorbidity') {
+          summaryComorbidityEl.innerText = 'High';
+          summaryComorbidityEl.classList.add('form-field-highlight');
+          setTimeout(() => summaryComorbidityEl.classList.remove('form-field-highlight'), 1500);
+        }
+      }
+    }
+
+    // Update Summary Card items completed
+    const summaryItemsEl = document.getElementById('summary-items-completed') as HTMLElement | null;
+    if (summaryItemsEl) {
+      summaryItemsEl.innerText = `${this.itemsAccepted} / ${this.totalItems}`;
+    }
+
+    // Mark card as accepted
+    card.classList.add('accepted');
+    const buttons = card.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    buttons.forEach((btn) => {
+      btn.disabled = true;
+      if (btn.textContent && btn.textContent.includes('Accept')) {
+        btn.innerHTML = '✓ Accepted';
+        btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        btn.classList.add('bg-slate-400', 'cursor-not-allowed');
+      }
+    });
+
+    // Auto-advance to next recommendation after a brief delay
+    setTimeout(() => {
+      this.moveToNextRecommendation(card);
+    }, 800);
   }
 
-  rejectRecommendation(event: Event): void {
-    event.stopPropagation();
+  moveToNextRecommendation(currentCard: HTMLElement): void {
+    // Get all recommendation cards
+    const allCards = Array.from(document.querySelectorAll('.recommendation-card')) as HTMLElement[];
 
-    const button = event.currentTarget as HTMLElement;
-    const card = button.closest('.recommendation-card') as HTMLElement | null;
-    if (card) {
-      card.classList.add('rejected');
+    const currentIndex = allCards.indexOf(currentCard);
+    if (currentIndex === -1) {
+      return;
     }
 
-    this.updateProgress();
+    // Find the next card that hasn't been accepted or rejected
+    let nextCard: HTMLElement | null = null;
+    for (let i = currentIndex + 1; i < allCards.length; i++) {
+      const card = allCards[i];
+      if (!card.classList.contains('accepted') && !card.classList.contains('rejected')) {
+        nextCard = card;
+        break;
+      }
+    }
+
+    // If found, scroll to it and trigger its click
+    if (nextCard) {
+      // Scroll the card into view in the recommendations panel
+      nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Trigger the card's onclick to show evidence in document
+      nextCard.click();
+
+      // Add subtle pulse effect
+      nextCard.classList.add('ring-2', 'ring-indigo-400', 'ring-opacity-50');
+      setTimeout(() => {
+        nextCard?.classList.remove('ring-2', 'ring-indigo-400', 'ring-opacity-50');
+      }, 2000);
+    }
+  }
+
+  pendingRejectCard: HTMLElement | null = null;
+
+  rejectRecommendation(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    // Find the recommendation card
+    this.pendingRejectCard = target.closest('.recommendation-card') as HTMLElement | null;
+
+    // Show the modal
+    this.showModal('reject-modal');
+
+    // Clear previous radio selection
+    const reasonInputs = document.querySelectorAll(
+      'input[name="reject-reason"]'
+    ) as NodeListOf<HTMLInputElement>;
+
+    reasonInputs.forEach((input) => (input.checked = false));
   }
 
   acceptGGRecommendation(event: Event, ggId: string, code: string): void {

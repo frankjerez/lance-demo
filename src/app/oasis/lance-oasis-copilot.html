@@ -1,118 +1,3 @@
-<!-- LOGIN PAGE -->
-<div id="login-page">
-  <div class="min-h-screen flex items-center justify-center bg-slate-50">
-    <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-slate-900">LANCE AI</h1>
-        <p class="text-slate-600 text-sm mt-1">OASIS Co-Pilot</p>
-        <p class="text-slate-500 mt-2">Welcome back. Please sign in.</p>
-      </div>
-
-      <form>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-slate-700">Email Address</label>
-          <input
-            type="email"
-            value="nurse.jackie@homehealth.com"
-            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm"
-          />
-        </div>
-
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-slate-700">Password</label>
-          <input
-            type="password"
-            value="••••••••"
-            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm"
-          />
-        </div>
-
-        <div>
-          <button
-            type="button"
-            (click)="showPage('dashboard-page')"
-            class="w-full py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            Sign In
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- DASHBOARD PAGE -->
-<div id="dashboard-page" class="hidden min-h-screen">
-  <header class="bg-white border-b px-8 py-4 sticky top-0">
-    <div class="flex justify-between items-center">
-      <div class="flex items-center space-x-4">
-        <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-          LANCE AI
-        </div>
-        <div class="w-px h-8 bg-slate-200"></div>
-        <h1 class="text-base font-semibold">Patient Assessments</h1>
-      </div>
-
-      <div class="flex items-center space-x-4">
-        <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
-          <option>All Status</option>
-          <option>AI Draft Ready</option>
-          <option>In Review</option>
-          <option>Completed</option>
-        </select>
-
-        <div class="relative">
-          <input
-            type="search"
-            placeholder="Search patients..."
-            class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
-          />
-          <ion-icon
-            name="search-outline"
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          ></ion-icon>
-        </div>
-
-        <button
-          (click)="showModal('upload-modal')"
-          class="flex items-center space-x-2 bg-indigo-600 text-white py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700"
-        >
-          <ion-icon name="add-circle-outline"></ion-icon>
-          <span>New Assessment</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="p-8 overflow-y-auto">
-    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-      <thead class="bg-slate-100 text-xs text-slate-600">
-        <tr>
-          <th class="px-6 py-3 text-left font-medium">Patient</th>
-          <th class="px-6 py-3 text-left font-medium">MRN</th>
-          <th class="px-6 py-3 text-left font-medium">Assessment</th>
-          <th class="px-6 py-3 text-left font-medium">AI Status</th>
-          <th class="px-6 py-3 text-left font-medium">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody class="text-sm">
-        <tr class="border-t">
-          <td class="px-6 py-4">Maria Garcia</td>
-          <td class="px-6 py-4">98765</td>
-          <td class="px-6 py-4">Start of Care</td>
-          <td class="px-6 py-4 text-indigo-600 font-medium">AI Draft Ready</td>
-          <td class="px-6 py-4">
-            <button (click)="showPage('copilot-page')" class="text-indigo-600 hover:underline">
-              Review
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
 <!-- COPILOT PAGE -->
 <div id="copilot-page" class="hidden">
   <header
@@ -122,7 +7,7 @@
       <!-- Left: Back + Patient Info -->
       <div class="flex items-center space-x-6">
         <button
-          onclick="showPage('dashboard-page')"
+          (click)="showDashboard()"
           class="text-slate-400 hover:text-slate-600 transition-colors"
         >
           <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
@@ -136,7 +21,7 @@
             <div class="flex items-center space-x-2">
               <h1 class="text-base font-semibold text-slate-900">Maria Garcia</h1>
               <button
-                onclick="quickEligibilityCheck(event)"
+                (click)="quickEligibilityCheck($event)"
                 class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"
               >
                 <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
@@ -179,7 +64,7 @@
 
         <!-- Actions -->
         <button
-          onclick="validateForm()"
+          (click)="validateForm()"
           class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors flex items-center space-x-1"
         >
           <ion-icon name="alert-circle-outline" class="text-lg"></ion-icon>
@@ -187,7 +72,7 @@
         </button>
 
         <button
-          onclick="resetDemo()"
+          (click)="resetDemo()"
           class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center space-x-1"
         >
           <ion-icon name="refresh-outline" class="text-lg"></ion-icon>
@@ -195,7 +80,7 @@
         </button>
 
         <button
-          onclick="showModal('export-modal')"
+          (click)="showModal('export-modal')"
           class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
         >
           Finalize & Export
@@ -206,31 +91,488 @@
 
   <main class="grid grid-cols-12 h-[calc(100vh-73px)]">
     <!-- LEFT COLUMN (AI Recommendations) -->
-    <aside class="col-span-3 border-r bg-white overflow-y-auto p-6 space-y-6">
-      <h2 class="text-base font-semibold text-slate-900">AI Recommendations</h2>
+    <aside
+      class="col-span-4 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+    >
+      <div class="px-6 py-4 border-b border-slate-100">
+        <h2 class="text-sm font-semibold text-slate-900">AI Recommendations</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Review and accept suggestions</p>
+      </div>
 
-      <div class="space-y-4">
-        <!-- Example Recommendation -->
+      <!-- Payment Optimization Alert Banner (Clean & Factual) -->
+      <div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
+        <div class="flex items-start space-x-3">
+          <div class="bg-blue-500 rounded-full p-1 flex-shrink-0 mt-0.5">
+            <ion-icon name="information" class="text-white text-sm"></ion-icon>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xs font-semibold text-blue-900 mb-1">High-Value Comorbidity</h3>
+            <p class="text-xs text-blue-700 leading-relaxed mb-2">
+              COPD (J44.1) qualifies for High Comorbidity tier.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-blue-600">Tier: None → High</span>
+              <span class="text-blue-900 font-semibold">+$287</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="recommendations-list"
+        class="overflow-y-auto h-[calc(100%-210px)] px-6 py-4 space-y-3"
+      >
+        <!-- ICD-10 Primary Diagnosis (OASIS-E1: I8000) -->
         <div
-          class="recommendation-card border p-4 rounded-lg hover:bg-slate-50 cursor-pointer"
-          (click)="selectRecommendation($any($event.target), 'I8000', 'discharge-doc')"
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-primary', 'discharge-doc')"
+          data-form-id="form-I8000-primary-answer"
         >
-          <p class="font-medium text-sm">I8000 – Diagnosis</p>
-          <p class="text-xs text-slate-600 mt-1">
-            Suggest adding: <strong>N17.9 – Acute Kidney Injury</strong>
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">Primary Diagnosis</p>
+              <p class="text-sm font-semibold text-slate-900">S72.001D</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">95%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Hip fracture aftercare, requires skilled PT/OT services
           </p>
 
-          <div class="mt-3 flex space-x-2">
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">PDGM: MS-Rehab</span>
+            <span class="text-slate-500">📄 Discharge, Visit</span>
+          </div>
+
+          <div class="flex space-x-2">
             <button
-              (click)="acceptRecommendation($event, 'I8000', 'N17.9', true, 100)"
-              class="text-xs bg-emerald-600 text-white px-3 py-1 rounded"
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'I8000-primary',
+                  'S72.001D - Fracture of neck of right femur, subsequent encounter',
+                  true,
+                  25
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
             >
               Accept
             </button>
-
             <button
               (click)="rejectRecommendation($event)"
-              class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- Comorbidity - High Value! -->
+        <div
+          class="recommendation-card border border-emerald-200 bg-emerald-50 rounded-xl p-4 cursor-pointer hover:border-emerald-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-comorbidity', 'discharge-doc')"
+          data-form-id="form-I8000-other-diagnoses-container"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <div class="flex items-center space-x-2 mb-1">
+                <p class="text-xs font-medium text-slate-500">Other Diagnosis</p>
+                <span class="px-1.5 py-0.5 text-xs bg-emerald-600 text-white rounded font-medium"
+                  >High Value</span
+                >
+              </div>
+              <p class="text-sm font-semibold text-slate-900">J44.1</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">100%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            COPD with exacerbation, patient on oxygen therapy at home
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-emerald-200"
+          >
+            <span class="text-emerald-700">High Comorbidity</span>
+            <span class="text-slate-500">📄 Discharge</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'I8000-comorbidity',
+                  'J44.1 - COPD with acute exacerbation',
+                  true,
+                  30
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- Additional Comorbidity - Diabetes -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-diabetes', 'discharge-doc')"
+          data-form-id="form-I8000-other-diagnoses-container"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">Other Diagnosis</p>
+              <p class="text-sm font-semibold text-slate-900">E11.9</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">98%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Type 2 diabetes without complications
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Low Comorbidity</span>
+            <span class="text-slate-500">📄 Discharge</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'I8000-diabetes',
+                  'E11.9 - Type 2 diabetes mellitus',
+                  false,
+                  5
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- Additional Diagnosis - HTN -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-htn', 'discharge-doc')"
+          data-form-id="form-I8000-other-diagnoses-container"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">Other Diagnosis</p>
+              <p class="text-sm font-semibold text-slate-900">I10</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">92%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Essential hypertension, controlled
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">No adjustment</span>
+            <span class="text-slate-500">📄 Discharge</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation($event, 'I8000-htn', 'I10 - Essential hypertension', false, 5)
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Self-Care - Eating -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0130A', 'visit-doc')"
+          data-form-id="GG0130A-select"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0130A. Eating</p>
+              <p class="text-sm font-semibold text-slate-900">06 - Independent</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">85%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Patient able to feed self without assistance
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Self-Care</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="acceptGGRecommendation($event, 'GG0130A', '06')"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Self-Care (OASIS-E1) - Bathing -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0130E', 'visit-doc')"
+          data-form-id="form-GG0130E-answer"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0130E. Shower/Bathe Self</p>
+              <p class="text-sm font-semibold text-slate-900">03 - Partial assistance</p>
+            </div>
+            <span class="text-xs font-medium text-yellow-600">72%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Requires hands-on assistance to wash back and lower extremities
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Self-Care</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'GG0130E',
+                  '03 - Partial/moderate assistance',
+                  false,
+                  10
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Self-Care - Upper Body Dressing -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0130F', 'visit-doc')"
+          data-form-id="GG0130F-select"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0130F. Upper Body Dressing</p>
+              <p class="text-sm font-semibold text-slate-900">06 - Independent</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">78%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Patient able to dress upper body without assistance
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Self-Care</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="acceptGGRecommendation($event, 'GG0130F', '06')"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Self-Care - Lower Body Dressing -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0130G', 'visit-doc')"
+          data-form-id="GG0130G-select"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0130G. Lower Body Dressing</p>
+              <p class="text-sm font-semibold text-slate-900">04 - Supervision</p>
+            </div>
+            <span class="text-xs font-medium text-yellow-600">75%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Requires supervision for balance when dressing
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Self-Care</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="acceptGGRecommendation($event, 'GG0130G', '04')"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Mobility (OASIS-E1) - Walk 10 feet -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0170C', 'visit-doc')"
+          data-form-id="form-GG0170C-answer"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0170C. Walk 10 Feet</p>
+              <p class="text-sm font-semibold text-slate-900">04 - Supervision</p>
+            </div>
+            <span class="text-xs font-medium text-emerald-600">88%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Uses rolling walker, requires contact guard assistance
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Mobility</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'GG0170C',
+                  '04 - Supervision or touching assistance',
+                  false,
+                  10
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- GG Mobility - Walk 50 feet -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'GG0170D', 'visit-doc')"
+          data-form-id="GG0170D-select"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-xs font-medium text-slate-500 mb-1">GG0170D. Walk 50 Feet</p>
+              <p class="text-sm font-semibold text-slate-900">03 - Partial assistance</p>
+            </div>
+            <span class="text-xs font-medium text-yellow-600">68%</span>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Patient fatigues with longer distances, needs physical support
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">Mobility</span>
+            <span class="text-slate-500">📋 Visit Note</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="acceptGGRecommendation($event, 'GG0170D', '03')"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
             >
               Reject
             </button>
@@ -351,7 +693,7 @@
         </div>
         <h2 class="text-lg font-semibold text-slate-900">Eligibility Verified</h2>
       </div>
-      <button onclick="hideModal('eligibility-modal')" class="text-slate-400 hover:text-slate-600">
+      <button (click)="hideModal('eligibility-modal')" class="text-slate-400 hover:text-slate-600">
         <ion-icon name="close" class="text-2xl"></ion-icon>
       </button>
     </div>
@@ -437,13 +779,13 @@
 
     <div class="flex space-x-3">
       <button
-        onclick="hideModal('eligibility-modal')"
+        (click)="hideModal('eligibility-modal')"
         class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors"
       >
         Continue with Assessment
       </button>
       <button
-        onclick="recheckEligibility(event)"
+        (click)="recheckEligibility($event)"
         class="px-4 text-emerald-600 hover:text-emerald-700 border border-emerald-600 hover:border-emerald-700 font-medium rounded-lg transition-colors flex items-center"
       >
         <ion-icon name="refresh-outline" class="mr-1"></ion-icon>

@@ -1,4 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-and-list',
@@ -7,6 +8,8 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
   styleUrls: ['./login-and-list.css'],
 })
 export class LanceLoginAndListComponent implements OnInit {
+  public router = inject(Router);
+
   // mirrors your original JS vars
   itemsAccepted = 0;
   totalItems = 89;
@@ -19,8 +22,8 @@ export class LanceLoginAndListComponent implements OnInit {
 
   // ======= page switching =======
 
-  showPage(pageId: 'login-page' | 'dashboard-page' | 'copilot-page'): void {
-    const pages = ['login-page', 'dashboard-page', 'copilot-page'];
+  showPage(pageId: string): void {
+    const pages = ['login-page', 'dashboard-page'];
     pages.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -82,7 +85,7 @@ export class LanceLoginAndListComponent implements OnInit {
     setTimeout(() => {
       processingOverlay.classList.add('hidden');
       processingOverlay.classList.remove('flex');
-      this.showPage('copilot-page');
+      this.router.navigate(['/oasis']);
     }, 3500);
   }
 
@@ -169,6 +172,54 @@ export class LanceLoginAndListComponent implements OnInit {
     }
 
     this.updateProgress();
+  }
+
+  recheckEligibility(e: Event): void {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    // Find the button that triggered the action
+    const recheckBtn = target.closest('button') as HTMLButtonElement | null;
+    if (!recheckBtn) return;
+
+    const originalHTML = recheckBtn.innerHTML;
+
+    // Set loading state
+    recheckBtn.innerHTML =
+      '<ion-icon name="hourglass-outline" class="animate-spin"></ion-icon><span>Checking...</span>';
+    recheckBtn.disabled = true;
+
+    // Simulated API call
+    setTimeout(() => {
+      // Restore button
+      recheckBtn.innerHTML = originalHTML;
+      recheckBtn.disabled = false;
+
+      // Update timestamp
+      this.updateEligibilityTimestamp();
+
+      // Highlight feedback
+      const timestamp = document.querySelector(
+        '#eligibility-modal .text-xs.text-slate-500.text-center'
+      ) as HTMLElement | null;
+
+      if (timestamp) {
+        timestamp.classList.add('text-emerald-600', 'font-semibold');
+        setTimeout(() => {
+          timestamp.classList.remove('text-emerald-600', 'font-semibold');
+        }, 1500);
+      }
+    }, 1500);
+  }
+
+  updateEligibilityTimestamp(): void {
+    const timestamp = document.querySelector(
+      '#eligibility-modal .text-xs.text-slate-500.text-center p'
+    ) as HTMLElement | null;
+
+    if (timestamp) {
+      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
+    }
   }
 
   acceptGGRecommendation(event: Event, ggId: string, code: string): void {
