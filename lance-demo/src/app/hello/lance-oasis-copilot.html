@@ -1,0 +1,351 @@
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="min-h-screen flex items-center justify-center bg-slate-50">
+    <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-slate-900">LANCE AI</h1>
+        <p class="text-slate-600 text-sm mt-1">OASIS Co-Pilot</p>
+        <p class="text-slate-500 mt-2">Welcome back. Please sign in.</p>
+      </div>
+
+      <form>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-slate-700">Email Address</label>
+          <input
+            type="email"
+            value="nurse.jackie@homehealth.com"
+            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-slate-700">Password</label>
+          <input
+            type="password"
+            value="••••••••"
+            class="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md text-sm shadow-sm"
+          />
+        </div>
+
+        <div>
+          <button
+            type="button"
+            (click)="showPage('dashboard-page')"
+            class="w-full py-2 px-4 rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Sign In
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dashboard-page" class="hidden min-h-screen">
+  <header class="bg-white border-b px-8 py-4 sticky top-0">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+          LANCE AI
+        </div>
+        <div class="w-px h-8 bg-slate-200"></div>
+        <h1 class="text-base font-semibold">Patient Assessments</h1>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
+          <option>All Status</option>
+          <option>AI Draft Ready</option>
+          <option>In Review</option>
+          <option>Completed</option>
+        </select>
+
+        <div class="relative">
+          <input
+            type="search"
+            placeholder="Search patients..."
+            class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+          />
+          <ion-icon
+            name="search-outline"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          ></ion-icon>
+        </div>
+
+        <button
+          (click)="showModal('upload-modal')"
+          class="flex items-center space-x-2 bg-indigo-600 text-white py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700"
+        >
+          <ion-icon name="add-circle-outline"></ion-icon>
+          <span>New Assessment</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="p-8 overflow-y-auto">
+    <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
+      <thead class="bg-slate-100 text-xs text-slate-600">
+        <tr>
+          <th class="px-6 py-3 text-left font-medium">Patient</th>
+          <th class="px-6 py-3 text-left font-medium">MRN</th>
+          <th class="px-6 py-3 text-left font-medium">Assessment</th>
+          <th class="px-6 py-3 text-left font-medium">AI Status</th>
+          <th class="px-6 py-3 text-left font-medium">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="text-sm">
+        <tr class="border-t">
+          <td class="px-6 py-4">Maria Garcia</td>
+          <td class="px-6 py-4">98765</td>
+          <td class="px-6 py-4">Start of Care</td>
+          <td class="px-6 py-4 text-indigo-600 font-medium">AI Draft Ready</td>
+          <td class="px-6 py-4">
+            <button (click)="showPage('copilot-page')" class="text-indigo-600 hover:underline">
+              Review
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COPILOT PAGE -->
+<div id="copilot-page" class="hidden">
+  <header class="bg-white border-b px-8 py-4 sticky top-0">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-6">
+        <button (click)="showPage('dashboard-page')" class="text-slate-400 hover:text-slate-600">
+          <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
+        </button>
+
+        <div class="flex items-center space-x-3">
+          <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+            LANCE AI
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-base font-semibold text-slate-900">Maria Garcia</h1>
+              <button
+                (click)="quickEligibilityCheck($event)"
+                class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded"
+              >
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                Check Eligibility
+              </button>
+            </div>
+            <p class="text-xs text-slate-500">MRN-98765 • Start of Care</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <span id="progress-text" class="text-sm font-medium text-slate-700">0%</span>
+
+        <div class="w-40 h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-indigo-600"></div>
+        </div>
+
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-600 text-sm">PDGM:</span>
+          <span id="pdgm-value" class="font-bold text-slate-900">$2875.50</span>
+        </div>
+
+        <button
+          (click)="showModal('export-modal')"
+          class="p-2 bg-white border rounded-lg shadow-sm hover:bg-indigo-50"
+        >
+          <ion-icon name="download-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid grid-cols-12 h-[calc(100vh-73px)]">
+    <!-- LEFT COLUMN (AI Recommendations) -->
+    <aside class="col-span-3 border-r bg-white overflow-y-auto p-6 space-y-6">
+      <h2 class="text-base font-semibold text-slate-900">AI Recommendations</h2>
+
+      <div class="space-y-4">
+        <!-- Example Recommendation -->
+        <div
+          class="recommendation-card border p-4 rounded-lg hover:bg-slate-50 cursor-pointer"
+          (click)="selectRecommendation($any($event.target), 'I8000', 'discharge-doc')"
+        >
+          <p class="font-medium text-sm">I8000 – Diagnosis</p>
+          <p class="text-xs text-slate-600 mt-1">
+            Suggest adding: <strong>N17.9 – Acute Kidney Injury</strong>
+          </p>
+
+          <div class="mt-3 flex space-x-2">
+            <button
+              (click)="acceptRecommendation($event, 'I8000', 'N17.9', true, 100)"
+              class="text-xs bg-emerald-600 text-white px-3 py-1 rounded"
+            >
+              Accept
+            </button>
+
+            <button
+              (click)="rejectRecommendation($event)"
+              class="text-xs bg-red-50 text-red-600 px-3 py-1 rounded"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER COLUMN (Document Viewer) -->
+    <section class="col-span-6 border-r bg-white">
+      <div class="border-b px-6 py-3 flex space-x-4">
+        <button
+          class="doc-tab active"
+          data-doc-id="discharge-doc"
+          (click)="switchDocumentTab($any($event.target), 'discharge-doc')"
+        >
+          Discharge Summary
+        </button>
+
+        <button
+          class="doc-tab"
+          data-doc-id="progress-doc"
+          (click)="switchDocumentTab($any($event.target), 'progress-doc')"
+        >
+          Progress Note
+        </button>
+      </div>
+
+      <div id="document-viewer" class="overflow-y-auto h-[calc(100%-73px)] p-6 bg-slate-50">
+        <!-- DOC 1 -->
+        <div id="discharge-doc" class="document-content space-y-6">
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
+            <h3 class="font-bold text-xl mb-1">Community Hospital</h3>
+            <p class="text-xs text-slate-600">Discharge summary content...</p>
+
+            <p class="mt-4 text-sm">
+              Patient suffered from
+              <span data-evidence-for="I8000" class="evidence-highlight" data-category="diagnosis">
+                Acute renal failure (AKI)
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- DOC 2 -->
+        <div id="progress-doc" class="document-content hidden">
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs mb-6">Progress Note...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN (OASIS Form) -->
+    <section class="col-span-3 p-6 bg-white overflow-y-auto">
+      <h2 class="text-base font-semibold text-slate-900 mb-4">OASIS Form</h2>
+
+      <div class="space-y-4">
+        <div class="border p-4 rounded-lg">
+          <p class="text-sm font-medium">I8000 – Diagnoses</p>
+          <input
+            id="I8000-field"
+            type="text"
+            class="mt-2 w-full px-3 py-2 border rounded-md"
+            placeholder="Enter ICD-10"
+          />
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div
+  id="upload-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center"
+>
+  <div class="bg-white p-8 rounded-xl shadow-xl w-[420px]">
+    <h2 class="text-xl font-bold text-slate-900 mb-4">Upload Patient Documents</h2>
+
+    <div class="border border-dashed p-6 rounded-lg text-center">
+      <ion-icon name="cloud-upload-outline" class="text-3xl text-slate-500"></ion-icon>
+      <p class="text-sm text-slate-500 mt-2">Drop files or click to upload</p>
+    </div>
+
+    <div class="flex justify-end space-x-3 mt-6">
+      <button
+        class="px-4 py-2 text-slate-600 hover:text-slate-800"
+        (click)="hideModal('upload-modal')"
+      >
+        Cancel
+      </button>
+
+      <button class="px-4 py-2 bg-indigo-600 text-white rounded" (click)="startAIProcessing()">
+        Process
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ELIGIBILITY MODAL -->
+<div
+  id="eligibility-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center"
+>
+  <div class="bg-white p-8 rounded-xl shadow-xl w-[420px]">
+    <h2 class="text-xl font-bold mb-4">Eligibility Check</h2>
+    <p class="text-sm mb-4">Checking eligibility for <strong>Maria Garcia</strong>.</p>
+
+    <div class="flex justify-end">
+      <button class="px-4 py-2 bg-indigo-600 text-white rounded" (click)="checkEligibility()">
+        OK
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div
+  id="export-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center"
+>
+  <div class="bg-white p-8 rounded-xl shadow-xl w-[420px]">
+    <h2 class="text-xl font-bold mb-4">Export Assessment</h2>
+
+    <p class="text-sm mb-4">Export OASIS XML file?</p>
+
+    <div class="flex justify-end space-x-3">
+      <button class="px-4 py-2 text-slate-600" (click)="hideModal('export-modal')">Cancel</button>
+      <button class="px-4 py-2 bg-emerald-600 text-white rounded" (click)="exportToXML()">
+        Export
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESSING OVERLAY -->
+<div
+  id="processing-overlay"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-90 text-white flex items-center justify-center"
+>
+  <div class="text-center">
+    <div
+      class="animate-spin h-16 w-16 border-4 border-white border-t-transparent rounded-full mx-auto"
+    ></div>
+    <h2 class="text-3xl font-bold mt-8">LANCE AI is Analyzing.</h2>
+    <p class="text-slate-300 mt-2">Processing documents...</p>
+  </div>
+</div>
