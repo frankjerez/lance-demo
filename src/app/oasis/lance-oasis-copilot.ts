@@ -164,12 +164,15 @@ export class LanceOasisCopilotComponent implements OnInit {
 
   // ======= document tabs =======
 
-  switchDocumentTab(button: HTMLElement, docId: string): void {
+  switchDocumentTab(event: Event, docId: string): void {
+    const button = (event.target as HTMLElement)?.closest('.doc-tab') as HTMLElement | null;
+    if (!button) return;
+
     // toggle active classes on tabs
     const allTabs = document.querySelectorAll('.doc-tab');
     allTabs.forEach((tab) => tab.classList.remove('active'));
 
-    button.classList.add('active'); // This line is why it expects HTMLElement
+    button.classList.add('active');
 
     // show/hide doc sections
     const docs = document.querySelectorAll('.document-content');
@@ -202,7 +205,8 @@ export class LanceOasisCopilotComponent implements OnInit {
     const docTab = document.querySelector(`.doc-tab[data-doc-id="${docId}"]`) as HTMLElement | null;
 
     if (docTab) {
-      this.switchDocumentTab(docTab, docId);
+      const fakeEvent = { target: docTab } as unknown as Event;
+      this.switchDocumentTab(fakeEvent, docId);
     }
 
     // Scroll to evidence in document, if present

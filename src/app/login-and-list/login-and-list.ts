@@ -89,6 +89,20 @@ export class LanceLoginAndListComponent implements OnInit {
     }, 3500);
   }
 
+  gotoOasis() {
+    const processingOverlay = document.getElementById('loadind-analysis-overlay');
+    if (!processingOverlay) return;
+
+    processingOverlay.classList.remove('hidden');
+    processingOverlay.classList.add('flex');
+
+    setTimeout(() => {
+      processingOverlay.classList.add('hidden');
+      processingOverlay.classList.remove('flex');
+      this.router.navigate(['/oasis']);
+    }, 1500);
+  }
+
   // ======= document tabs =======
 
   switchDocumentTab(button: HTMLElement, docId: string): void {

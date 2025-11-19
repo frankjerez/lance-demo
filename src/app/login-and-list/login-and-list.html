@@ -145,10 +145,7 @@
             </div>
           </td>
           <td class="px-6 py-4 text-right">
-            <button
-              (click)="showPage('copilot-page')"
-              class="font-medium text-indigo-600 hover:underline"
-            >
+            <button (click)="gotoOasis()" class="font-medium text-indigo-600 hover:underline">
               Review Draft →
             </button>
           </td>
@@ -872,6 +869,38 @@
     <p class="text-slate-300 mt-2">
       Processing 3 documents • Extracting OASIS data • Optimizing PDGM
     </p>
+    <div class="mt-6 max-w-md mx-auto bg-slate-800 rounded-full h-2">
+      <div class="bg-indigo-500 h-2 rounded-full animate-pulse" style="width: 65%"></div>
+    </div>
+  </div>
+</div>
+
+<div
+  id="loadind-analysis-overlay"
+  class="fixed inset-0 bg-slate-900 bg-opacity-90 hidden items-center justify-center z-40 text-white text-center"
+>
+  <div>
+    <svg
+      class="animate-spin h-16 w-16 text-white mx-auto"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+    <h2 class="text-3xl font-bold mt-8">Loading Analysis...</h2>
     <div class="mt-6 max-w-md mx-auto bg-slate-800 rounded-full h-2">
       <div class="bg-indigo-500 h-2 rounded-full animate-pulse" style="width: 65%"></div>
     </div>

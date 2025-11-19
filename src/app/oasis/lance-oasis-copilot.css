@@ -20,7 +20,10 @@ html {
   border-color: #dc2626;
   color: #991b1b;
 }
-
+.overflow-hidden {
+  overflow: scroll;
+  max-height: 1050px;
+}
 .evidence-highlight[data-category='gg-self-care'] {
   background-color: #faf5ff;
   border-color: #9333ea;

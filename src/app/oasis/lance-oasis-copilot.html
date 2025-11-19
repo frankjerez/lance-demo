@@ -89,10 +89,10 @@
     </div>
   </header>
 
-  <main class="grid grid-cols-12 h-[calc(100vh-73px)]">
+  <main class="grid grid-cols-12" style="margin: 15px">
     <!-- LEFT COLUMN (AI Recommendations) -->
     <aside
-      class="col-span-4 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+      class="col-span-3 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
     >
       <div class="px-6 py-4 border-b border-slate-100">
         <h2 class="text-sm font-semibold text-slate-900">AI Recommendations</h2>
@@ -582,70 +582,1201 @@
     </aside>
 
     <!-- CENTER COLUMN (Document Viewer) -->
-    <section class="col-span-6 border-r bg-white">
-      <div class="border-b px-6 py-3 flex space-x-4">
-        <button
-          class="doc-tab active"
-          data-doc-id="discharge-doc"
-          (click)="switchDocumentTab($any($event.target), 'discharge-doc')"
-        >
-          Discharge Summary
-        </button>
-
-        <button
-          class="doc-tab"
-          data-doc-id="progress-doc"
-          (click)="switchDocumentTab($any($event.target), 'progress-doc')"
-        >
-          Progress Note
-        </button>
+    <main class="col-span-6 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
+      <!-- PDF Viewer Toolbar -->
+      <div class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h2 class="text-sm font-semibold text-slate-900">Source Documents</h2>
+          <div class="w-px h-5 bg-slate-200"></div>
+          <div class="flex space-x-1">
+            <button
+              class="doc-tab active px-3 py-1.5 text-xs font-medium rounded-lg"
+              (click)="switchDocumentTab($event, 'discharge-doc')"
+            >
+              Discharge Summary
+            </button>
+            <button
+              class="doc-tab px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-50"
+              (click)="switchDocumentTab($event, 'referral-doc')"
+            >
+              Referral/Orders
+            </button>
+            <button
+              class="doc-tab px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-50"
+              (click)="switchDocumentTab($event, 'visit-doc')"
+            >
+              Visit Note
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-xs text-slate-500"
+            >Page <span id="current-page" class="font-semibold text-slate-900">1</span> of
+            <span id="total-pages" class="font-semibold text-slate-900">2</span></span
+          >
+          <div class="w-px h-5 bg-slate-200"></div>
+          <div class="flex items-center space-x-1 bg-slate-50 rounded-lg p-1">
+            <button
+              class="p-1 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors"
+              title="Zoom Out"
+            >
+              <ion-icon name="remove-outline" class="text-base"></ion-icon>
+            </button>
+            <span class="px-2 text-xs text-slate-600 font-medium">100%</span>
+            <button
+              class="p-1 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors"
+              title="Zoom In"
+            >
+              <ion-icon name="add-outline" class="text-base"></ion-icon>
+            </button>
+          </div>
+          <button
+            class="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+            title="Download"
+          >
+            <ion-icon name="download-outline" class="text-lg"></ion-icon>
+          </button>
+        </div>
       </div>
 
       <div id="document-viewer" class="overflow-y-auto h-[calc(100%-73px)] p-6 bg-slate-50">
-        <!-- DOC 1 -->
+        <!-- Discharge Summary - Page 1 -->
         <div id="discharge-doc" class="document-content space-y-6">
+          <!-- PDF Page 1 -->
           <div
             class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
             style="width: 8.5in; min-height: 11in"
           >
             <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
-            <h3 class="font-bold text-xl mb-1">Community Hospital</h3>
-            <p class="text-xs text-slate-600">Discharge summary content...</p>
+            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
+              <div>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Community Hospital</h3>
+                <p class="text-xs text-slate-600">
+                  123 Medical Center Dr. • City, State 12345 • (555) 123-4567
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-sm text-slate-900">DISCHARGE SUMMARY</p>
+                <p class="text-xs text-slate-600">Medical Record</p>
+              </div>
+            </div>
 
-            <p class="mt-4 text-sm">
-              Patient suffered from
-              <span data-evidence-for="I8000" class="evidence-highlight" data-category="diagnosis">
-                Acute renal failure (AKI)
-              </span>
-            </p>
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
+                <div><strong>Patient:</strong> Maria Garcia</div>
+                <div><strong>DOB:</strong> 05/12/1948 (Age 76)</div>
+                <div><strong>MRN:</strong> 98765</div>
+                <div><strong>Account:</strong> 2024-98765-01</div>
+                <div><strong>Admission Date:</strong> 11/10/2024</div>
+                <div><strong>Discharge Date:</strong> 11/15/2024</div>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Final Diagnoses
+                </p>
+                <ul class="list-decimal pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-primary"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Right femoral neck fracture, status post open reduction and internal fixation
+                      (ORIF)</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-comorbidity"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Chronic obstructive pulmonary disease (COPD) with acute exacerbation, now
+                      resolved</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Type 2 diabetes mellitus without complications</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Hypertension, controlled</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Hospital Course
+                </p>
+                <p class="mb-3">
+                  76-year-old female admitted following mechanical fall at home resulting in
+                  <span
+                    data-evidence-for="I8000-primary"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >right hip fracture. Patient underwent successful ORIF on 11/11/2024 without
+                    complications</span
+                  >. Post-operative recovery complicated by
+                  <span
+                    data-evidence-for="I8000-comorbidity"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >COPD exacerbation requiring supplemental oxygen at 2L/min via nasal
+                    cannula</span
+                  >.
+                </p>
+                <p>
+                  <span
+                    data-evidence-for="I8000-diabetes"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >Patient's diabetes remained well-controlled throughout hospital stay with oral
+                    medication</span
+                  >.
+                  <span data-evidence-for="I8000-htn" class="hover:bg-yellow-100 transition-colors"
+                    >Blood pressure stable on home medications</span
+                  >. Patient worked with physical therapy and occupational therapy during hospital
+                  stay. Deemed appropriate for home health services with skilled nursing and
+                  therapy.
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Medications
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>Oxycodone 5mg PO q4-6h PRN pain</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Metformin 1000mg PO BID</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Lisinopril 10mg PO daily</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-comorbidity"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Albuterol inhaler 2 puffs q4h PRN</span
+                    >
+                  </li>
+                  <li>Enoxaparin 40mg subcutaneous daily x14 days (DVT prophylaxis)</li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- DOC 2 -->
-        <div id="progress-doc" class="document-content hidden">
+          <!-- PDF Page 2 -->
           <div
             class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
             style="width: 8.5in; min-height: 11in"
           >
-            <div class="text-xs mb-6">Progress Note...</div>
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 2 of 2</div>
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Instructions
+                </p>
+                <p class="mb-3">
+                  Patient discharged to home with home health services. Weight-bearing as tolerated
+                  on right lower extremity. Continue walker use for ambulation.
+                </p>
+                <p class="mb-3">
+                  Follow up with orthopedic surgeon Dr. Williams in 2 weeks. Continue oxygen therapy
+                  at 2L/min as needed to maintain oxygen saturation >92%.
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Disposition
+                </p>
+                <p>Home with home health services</p>
+              </div>
+
+              <div class="mt-12 pt-6 border-t border-slate-300">
+                <p class="text-xs text-slate-600 italic">
+                  Discharge Planner: J. Martinez, RN<br />
+                  Attending Physician: Dr. Sarah Johnson, MD<br />
+                  Electronically signed on 11/15/2024 at 14:32
+                </p>
+              </div>
+
+              <div class="text-center text-xs text-slate-400 italic mt-8">
+                -- End of Document --
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referral/Orders (Hidden initially) -->
+        <div id="referral-doc" class="document-content hidden space-y-6">
+          <!-- PDF Page 1 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 1</div>
+            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
+              <div>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Community Hospital</h3>
+                <p class="text-xs text-slate-600">
+                  123 Medical Center Dr. • City, State 12345 • (555) 123-4567
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-sm text-slate-900">HOME HEALTH REFERRAL</p>
+                <p class="text-xs text-slate-600">Physician Orders</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
+                <div><strong>Patient:</strong> Maria Garcia</div>
+                <div><strong>DOB:</strong> 05/12/1948</div>
+                <div><strong>Ordering Physician:</strong> Dr. Sarah Johnson, MD</div>
+                <div><strong>Date:</strong> 11/15/2024</div>
+                <div><strong>NPI:</strong> 1234567890</div>
+                <div><strong>Phone:</strong> (555) 123-4567</div>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Reason for Home Health Referral
+                </p>
+                <p class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
+                  <span
+                    data-evidence-for="I8000-primary"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >Post-operative care following ORIF of right femoral neck fracture. Patient
+                    requires skilled nursing for surgical site assessment, pain management, and
+                    medication management. Physical and occupational therapy needed for gait
+                    training, transfer training, and ADL retraining to promote safe mobility and
+                    independence.</span
+                  >
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Disciplines Ordered
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <strong>Skilled Nursing:</strong> 2x/week for 4 weeks - Wound assessment,
+                    medication management, patient education
+                  </li>
+                  <li>
+                    <strong>Physical Therapy:</strong> 3x/week for 6 weeks - Gait training,
+                    strengthening, balance activities
+                  </li>
+                  <li>
+                    <strong>Occupational Therapy:</strong> 2x/week for 4 weeks - ADL training, home
+                    safety assessment, adaptive equipment
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Active Problems Requiring Management
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-primary"
+                      class="hover:bg-yellow-100 transition-colors"
+                      ><strong>S/P hip fracture repair</strong> - Wound care, pain management,
+                      mobility assessment</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-comorbidity"
+                      class="hover:bg-yellow-100 transition-colors"
+                      ><strong>COPD on home oxygen</strong> - Respiratory assessment, oxygen
+                      management education, breathing exercises</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                      ><strong>Diabetes management</strong> - Blood glucose monitoring, medication
+                      adherence</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                      ><strong>Hypertension</strong> - Blood pressure monitoring, medication
+                      compliance</span
+                    >
+                  </li>
+                  <li>
+                    <strong>Fall risk</strong> - Safety assessment, education on fall prevention
+                    strategies
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Equipment Needs
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>Rolling walker (patient already has)</li>
+                  <li>Shower chair (to be provided)</li>
+                  <li>Portable oxygen concentrator (patient already has)</li>
+                  <li>Raised toilet seat (recommended)</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Frequency & Duration
+                </p>
+                <p>60 days</p>
+              </div>
+
+              <div class="mt-12 pt-6 border-t border-slate-300">
+                <p class="text-xs text-slate-600 italic">
+                  Physician Signature: Dr. Sarah Johnson, MD<br />
+                  NPI: 1234567890<br />
+                  Electronically signed on 11/15/2024 at 15:45
+                </p>
+              </div>
+
+              <div class="text-center text-xs text-slate-400 italic mt-8">
+                -- End of Document --
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- First Visit Note (Hidden initially) -->
+        <div id="visit-doc" class="document-content hidden space-y-6">
+          <!-- PDF Page 1 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
+            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
+              <div>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Home Health Services</h3>
+                <p class="text-xs text-slate-600">Skilled Nursing Visit Note</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-sm text-slate-900">INITIAL ASSESSMENT</p>
+                <p class="text-xs text-slate-600">Start of Care Visit</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
+                <div><strong>Patient:</strong> Maria Garcia</div>
+                <div><strong>DOB:</strong> 05/12/1948</div>
+                <div><strong>Visit Date:</strong> 11/16/2024</div>
+                <div><strong>Time:</strong> 10:30 AM</div>
+                <div><strong>Nurse:</strong> Jackie Perez, RN</div>
+                <div><strong>Duration:</strong> 90 minutes</div>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Chief Complaint
+                </p>
+                <p>
+                  <span
+                    data-evidence-for="I8000-primary"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >Patient is 6 days post-ORIF of right hip fracture following mechanical fall at
+                    home. Reports pain 4/10 at rest, 6/10 with movement. Incision site clean, dry,
+                    intact with steri-strips in place. No signs of infection.</span
+                  >
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Vital Signs
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >BP: 138/82 mmHg (elevated, within patient's normal range per discharge
+                      paperwork)</span
+                    >
+                  </li>
+                  <li>HR: 78 bpm, regular</li>
+                  <li>RR: 18/min</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-comorbidity"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >O2 Sat: 94% on 2L O2 via nasal cannula (91% on room air)</span
+                    >
+                  </li>
+                  <li>Temp: 98.2°F oral</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Functional Assessment - Self-Care
+                </p>
+                <ul class="list-disc pl-5 space-y-2 text-sm">
+                  <li>
+                    <strong>Eating:</strong>
+                    <span data-evidence-for="GG0130A" class="hover:bg-yellow-100 transition-colors"
+                      >Patient able to feed herself independently. Uses regular utensils without
+                      difficulty. No adaptive equipment needed. Completed meal without assistance
+                      during visit.</span
+                    >
+                  </li>
+
+                  <li>
+                    <strong>Bathing/Showering:</strong>
+                    <span data-evidence-for="GG0130E" class="hover:bg-yellow-100 transition-colors"
+                      >Patient is unable to use the shower due to mobility limitations. She is able
+                      to wash her face, arms, chest, and abdomen while seated on a shower chair.
+                      However, caregiver (daughter) must be present throughout the bath to provide
+                      hands-on assistance washing her back and lower extremities. Patient also
+                      requires supervision for safety due to balance issues and recent hip surgery.
+                      Unable to safely step into tub.</span
+                    >
+                  </li>
+
+                  <li>
+                    <strong>Upper Body Dressing:</strong>
+                    <span data-evidence-for="GG0130F" class="hover:bg-yellow-100 transition-colors"
+                      >Patient able to don/doff shirt and bra independently. Reaches overhead
+                      without difficulty. No assistance required once clothing is within
+                      reach.</span
+                    >
+                  </li>
+
+                  <li>
+                    <strong>Lower Body Dressing:</strong>
+                    <span data-evidence-for="GG0130G" class="hover:bg-yellow-100 transition-colors"
+                      >Patient attempts to pull up pants but requires daughter's presence for
+                      balance and touching assistance at hips. Cannot bend to pull up from below
+                      knees due to hip precautions. Needs contact guard when standing to
+                      dress.</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Mobility Assessment
+                </p>
+                <ul class="list-disc pl-5 space-y-2 text-sm">
+                  <li>
+                    <strong>Assistive Device:</strong>
+                    <span data-evidence-for="GG0170C" class="hover:bg-yellow-100 transition-colors"
+                      >Patient utilizes a rolling walker for all mobility as prescribed by hospital
+                      PT. Walker is appropriate size and in good working condition.</span
+                    >
+                  </li>
+
+                  <li>
+                    <strong>Walk 10 Feet:</strong>
+                    <span data-evidence-for="GG0170C" class="hover:bg-yellow-100 transition-colors"
+                      >Patient demonstrated ambulation with walker in the hallway. When asked to
+                      walk approximately 10 feet to the bathroom door, patient was able to advance
+                      the walker and take steps independently. However, she demonstrated unsteady
+                      gait with lurching to the right side. This nurse provided contact guard
+                      assistance (touching/steadying at shoulder and gait belt) to prevent loss of
+                      balance. Patient completed the task but required this physical support for
+                      safety throughout. Reports pain 6/10 with weight-bearing on right hip.</span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- PDF Page 2 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 2 of 2</div>
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Mobility Assessment (Continued)
+                </p>
+                <ul class="list-disc pl-5 space-y-2 text-sm">
+                  <li>
+                    <strong>Walk 50 Feet with Turns:</strong>
+                    <span data-evidence-for="GG0170D" class="hover:bg-yellow-100 transition-colors"
+                      >Patient ambulated from bedroom to living room (approximately 50 feet with 2
+                      turns). She fatigued visibly halfway through and required rest break. Helper
+                      (this nurse) provided partial physical support during the turns, steadying her
+                      hips and providing approximately 30% of effort to prevent falls. Patient able
+                      to complete activity but needed this moderate assistance.</span
+                    >
+                  </li>
+
+                  <li>
+                    <strong>Transfers:</strong> Patient transfers sit-to-stand from standard-height
+                    chair with supervision. Uses walker for support.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Respiratory Status
+                </p>
+                <p>
+                  <span
+                    data-evidence-for="I8000-comorbidity"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >Patient remains on continuous oxygen at 2L via nasal cannula due to baseline
+                    COPD. Oxygen saturation 94% on 2L O2 at rest, drops to 89% with activity
+                    (ambulation). Portable oxygen concentrator in use and functioning properly.
+                    Patient reports occasional dyspnea with exertion, denies dyspnea at rest. Breath
+                    sounds diminished bilaterally, no wheezes or crackles noted. Uses albuterol
+                    inhaler 2-3x daily as needed. Patient and daughter require education on oxygen
+                    safety, proper inhaler technique, and COPD management strategies.</span
+                  >
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Medication Review
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Metformin 1000mg PO BID - Patient taking as prescribed. Blood glucose
+                      monitoring shows readings 110-140 mg/dL fasting.</span
+                    >
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                      >Lisinopril 10mg PO daily - Taking as prescribed. BP slightly elevated today
+                      but patient states this is typical for her.</span
+                    >
+                  </li>
+                  <li>Oxycodone 5mg - Taking q6h for pain, reports adequate pain relief</li>
+                  <li>
+                    Enoxaparin injections - Daughter administering daily, proper technique observed
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Cognitive Status
+                </p>
+                <p>Alert and oriented x4. Follows multi-step commands. Memory intact.</p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Living Situation
+                </p>
+                <p>
+                  Patient lives in single-story home with daughter who is primary caregiver. Bedroom
+                  and bathroom on main floor. No stairs required for ADLs. Daughter works part-time
+                  from home and is available for assistance. Patient has strong family support.
+                </p>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Safety Concerns
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>High fall risk due to hip fracture, gait instability, and COPD</li>
+                  <li>Scatter rugs removed by daughter</li>
+                  <li>Walker being used consistently</li>
+                  <li>Recommend raised toilet seat and shower chair (ordered)</li>
+                </ul>
+              </div>
+
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Assessment & Plan
+                </p>
+                <p>
+                  76-year-old female s/p right hip ORIF, doing well overall. Requires skilled
+                  nursing for wound monitoring, pain management, medication management, and
+                  patient/caregiver education. Requires PT/OT for functional mobility and ADL
+                  training. Patient motivated and cooperative with plan of care.
+                </p>
+              </div>
+
+              <div class="mt-12 pt-6 border-t border-slate-300">
+                <p class="text-xs text-slate-600 italic">
+                  Next Visit: 11/19/2024<br />
+                  Nurse: J. Perez, RN<br />
+                  Electronically signed on 11/16/2024 at 14:45
+                </p>
+              </div>
+
+              <div class="text-center text-xs text-slate-400 italic mt-8">
+                -- End of Document --
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </main>
 
     <!-- RIGHT COLUMN (OASIS Form) -->
-    <section class="col-span-3 p-6 bg-white overflow-y-auto">
-      <h2 class="text-base font-semibold text-slate-900 mb-4">OASIS Form</h2>
+    <section class="col-span-3 bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div class="p-4 border-b bg-indigo-600">
+        <h2 class="text-lg font-bold text-white">OASIS-E1 Assessment Form</h2>
+        <p class="text-xs text-indigo-100 mt-1">Centers for Medicare & Medicaid Services</p>
+      </div>
+      <div class="overflow-y-auto h-[calc(100%-80px)] p-4 bg-slate-50">
+        <!-- Patient Information Header -->
+        <div class="bg-white border-2 border-slate-300 rounded-lg p-4 mb-4">
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">Patient Name</label>
+              <p class="font-bold text-slate-900">Garcia, Maria</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">MRN</label>
+              <p class="font-bold text-slate-900">98765</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">DOB</label>
+              <p class="font-bold text-slate-900">05/12/1948</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">Assessment Type</label>
+              <p class="font-bold text-slate-900">01 - Start of Care</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="space-y-4">
-        <div class="border p-4 rounded-lg">
-          <p class="text-sm font-medium">I8000 – Diagnoses</p>
-          <input
-            id="I8000-field"
-            type="text"
-            class="mt-2 w-full px-3 py-2 border rounded-md"
-            placeholder="Enter ICD-10"
-          />
+        <!-- ADMINISTRATIVE INFORMATION -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-blue-900 text-xs uppercase tracking-wider">
+            Administrative Information
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >M0010. CMS Certification Number</label
+            >
+            <input
+              type="text"
+              value="55-9876"
+              readonly
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs font-mono"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">M0030. Start of Care Date</label>
+            <input
+              type="date"
+              value="2024-11-16"
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >M0090. Date Assessment Completed</label
+            >
+            <input
+              type="date"
+              value="2024-11-16"
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">M0100. Reason for Assessment</label>
+            <select
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            >
+              <option selected>01 - Start of care - further visits planned</option>
+              <option>03 - Resumption of care</option>
+              <option>04 - Recertification</option>
+              <option>05 - Other follow-up</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- DEMOGRAPHICS -->
+        <div class="bg-green-50 border-l-4 border-green-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-green-900 text-xs uppercase tracking-wider">
+            Patient Demographics
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">A1005. Ethnicity</label>
+            <select
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            >
+              <option>0 - Hispanic or Latino</option>
+              <option selected>1 - Not Hispanic or Latino</option>
+              <option>9 - Patient declines to respond</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >A1010. Race (Check all that apply)</label
+            >
+            <div class="mt-1 space-y-1">
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 01 - American Indian or Alaska Native
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 02 - Asian
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 03 - Black or African American
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 04 - Native Hawaiian/Pacific Islander
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" checked class="mr-2" /> 05 - White
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIAGNOSES (AI-Populated) -->
+        <div class="bg-red-50 border-l-4 border-red-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-red-900 text-xs uppercase tracking-wider">
+            Health Conditions - Diagnoses
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Primary Diagnosis (ICD-10-CM)
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-primary-answer"
+              data-required="true"
+              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+            >
+              <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+              LANCE AI has recommendations - Click "Accept" to apply
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Other Diagnoses
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-other-diagnoses-container"
+              data-required="true"
+              class="mt-1 space-y-2"
+            >
+              <!-- Other diagnoses will be added here dynamically -->
+              <div
+                class="p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center text-slate-600 text-xs"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI has recommendations - Click "Accept" to apply
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
+        <div class="bg-purple-50 border-l-4 border-purple-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-purple-900 text-xs uppercase tracking-wider">
+            GG0130. Self-Care (Admission Performance)
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <p class="text-[10px] text-slate-600 mb-3 italic bg-purple-50 p-2 rounded">
+            <strong>Coding:</strong> Code the patient's usual performance at admission. Use 6-point
+            scale: 06=Independent, 05=Setup help, 04=Supervision, 03=Partial assist, 02=Substantial
+            assist, 01=Dependent
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130A. Eating</label>
+              <select
+                id="GG0130A-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130B. Oral Hygiene</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130C. Toileting Hygiene</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div class="border-t border-slate-200 pt-3">
+              <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
+                GG0130E. Shower/Bathe Self (AI-Populated)
+              </label>
+              <div
+                id="form-GG0130E-answer"
+                class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI has recommendations - Click "Accept" to apply
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130F. Upper Body Dressing</label
+              >
+              <select
+                id="GG0130F-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130G. Lower Body Dressing</label
+              >
+              <select
+                id="GG0130G-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130H. Putting on/Taking off Footwear</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNCTIONAL ABILITIES: MOBILITY (GG Section) -->
+        <div class="bg-indigo-50 border-l-4 border-indigo-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-indigo-900 text-xs uppercase tracking-wider">
+            GG0170. Mobility (Admission Performance)
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <p class="text-[10px] text-slate-600 mb-3 italic bg-indigo-50 p-2 rounded">
+            <strong>Coding:</strong> Code the patient's usual performance at admission. Same 6-point
+            scale as Self-Care section.
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170A. Roll Left and Right</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170B. Sit to Lying</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div class="border-t border-slate-200 pt-3">
+              <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
+                GG0170C. Walk 10 Feet (AI-Populated)
+              </label>
+              <div
+                id="form-GG0170C-answer"
+                class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI has recommendations - Click "Accept" to apply
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170D. Walk 50 Feet with Two Turns</label
+              >
+              <select
+                id="GG0170D-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170I. Walk 150 Feet</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170J. Walking 10 Feet on Uneven Surfaces</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170K. 1 Step (Curb)</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170L. 4 Steps</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170M. 12 Steps</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div
+          class="bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-300 rounded-lg p-4 mb-4"
+        >
+          <h3 class="font-bold text-emerald-900 text-sm mb-3 flex items-center">
+            <ion-icon name="analytics-outline" class="mr-2"></ion-icon>
+            Assessment Summary
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Items Completed:</span>
+              <span id="summary-items-completed" class="font-bold text-slate-900">0 / 89</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">PDGM Clinical Group:</span>
+              <span id="summary-pdgm-group" class="font-bold text-emerald-700">MS-Rehab</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Comorbidity Tier:</span>
+              <span id="summary-comorbidity-tier" class="font-bold text-slate-900">None</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Functional Level:</span>
+              <span class="font-bold text-slate-900">Low</span>
+            </div>
+            <div class="flex justify-between pt-2 mt-2 border-t-2 border-emerald-400">
+              <span class="text-slate-700 font-bold">30-Day Payment Estimate:</span>
+              <span id="payment-estimate" class="font-bold text-xl text-emerald-600"
+                >$2,875.50</span
+              >
+            </div>
+            <p class="text-[10px] text-slate-500 italic mt-2">
+              *Payment estimates are based on current PDGM grouping and may change with additional
+              coding
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Footer -->
+        <div class="bg-slate-100 border border-slate-300 rounded p-3 text-[10px] text-slate-600">
+          <p class="mb-1"><strong>CMS OASIS-E1 Version</strong> - Effective 01/01/2025</p>
+          <p>
+            This form must be completed by a qualified clinician and reviewed for accuracy before
+            submission to CMS.
+          </p>
         </div>
       </div>
     </section>
@@ -798,17 +1929,46 @@
 <!-- EXPORT MODAL -->
 <div
   id="export-modal"
-  class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 items-center justify-center"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
 >
-  <div class="bg-white p-8 rounded-xl shadow-xl w-[420px]">
-    <h2 class="text-xl font-bold mb-4">Export Assessment</h2>
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-slate-900">Export OASIS Assessment</h2>
+      <button (click)="hideModal('export-modal')" class="text-slate-400 hover:text-slate-600">
+        <ion-icon name="close" class="text-2xl"></ion-icon>
+      </button>
+    </div>
 
-    <p class="text-sm mb-4">Export OASIS XML file?</p>
+    <div class="space-y-4 mb-6">
+      <div class="bg-slate-50 rounded-lg p-4">
+        <p class="text-sm font-medium text-slate-700 mb-1">Patient: Maria Garcia</p>
+        <p class="text-xs text-slate-500">MRN-98765 • Start of Care</p>
+      </div>
 
-    <div class="flex justify-end space-x-3">
-      <button class="px-4 py-2 text-slate-600" (click)="hideModal('export-modal')">Cancel</button>
-      <button class="px-4 py-2 bg-emerald-600 text-white rounded" (click)="exportToXML()">
-        Export
+      <div class="border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 mb-1">Est. Payment</p>
+        <p class="text-2xl font-bold text-slate-900">$3,162.50</p>
+        <p class="text-xs text-slate-500 mt-1">MS-Rehab • High Comorbidity</p>
+      </div>
+
+      <div class="text-sm text-slate-600">
+        <p class="mb-2"><strong>Export Format:</strong> OASIS XML (v2025.1)</p>
+        <p class="text-xs text-slate-500">Ready for submission to CMS via your OASIS system</p>
+      </div>
+    </div>
+
+    <div class="flex space-x-3">
+      <button
+        (click)="exportToXML()"
+        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
+      >
+        Download XML
+      </button>
+      <button
+        (click)="hideModal('export-modal')"
+        class="px-6 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+      >
+        Cancel
       </button>
     </div>
   </div>
