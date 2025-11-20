@@ -56,555 +56,126 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="bg-white border-b hover:bg-slate-50">
+        <tr *ngFor="let patient of patients" class="bg-white border-b hover:bg-slate-50">
+          <!-- Patient Name -->
           <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Maria Garcia
+            {{ patient.name }}
           </th>
-          <td class="px-6 py-4 text-slate-600">MRN-98765</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
+
+          <!-- MRN -->
+          <td class="px-6 py-4 text-slate-600">
+            {{ patient.mrn }}
+          </td>
+
+          <!-- Assessment Type -->
+          <td class="px-6 py-4">
+            {{ patient.assessmentType }}
+          </td>
+
+          <!-- Documents -->
           <td class="px-6 py-4">
             <div class="flex items-center space-x-1">
+              <!-- DS -->
               <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
+                class="px-1.5 py-0.5 text-xs font-medium rounded"
+                [ngClass]="
+                  patient.docs.ds === 'present'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-slate-200 text-slate-500'
+                "
                 title="Discharge Summary"
-                >DS</span
               >
+                DS
+              </span>
+
+              <!-- RO -->
               <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
+                class="px-1.5 py-0.5 text-xs font-medium rounded"
+                [ngClass]="
+                  patient.docs.ro === 'present'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-slate-200 text-slate-500'
+                "
                 title="Referral/Orders"
-                >RO</span
               >
+                RO
+              </span>
+
+              <!-- VN -->
               <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
+                class="px-1.5 py-0.5 text-xs font-medium rounded"
+                [ngClass]="
+                  patient.docs.vn === 'present'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-slate-200 text-slate-500'
+                "
                 title="Visit Note"
-                >VN</span
               >
+                VN
+              </span>
+
+              <!-- Upload button when something missing -->
+              <button
+                *ngIf="
+                  patient.docs.ds === 'missing' ||
+                  patient.docs.ro === 'missing' ||
+                  patient.docs.vn === 'missing'
+                "
+                (click)="openUpload(patient)"
+                class="text-xs text-indigo-600 hover:text-indigo-800"
+                title="Upload documents"
+              >
+                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
+              </button>
             </div>
           </td>
+
+          <!-- Status -->
           <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-              >AI Draft Ready</span
+            <span
+              class="px-2 py-1 text-xs font-medium rounded-full"
+              [ngClass]="patient.status.badgeClass"
             >
+              {{ patient.status.label }}
+            </span>
           </td>
-          <td class="px-6 py-4 text-slate-600">Today, 5:00 PM</td>
+
+          <!-- Deadline -->
+          <td class="px-6 py-4 text-slate-600">
+            {{ patient.deadlineLabel }}
+          </td>
+
+          <!-- Eligibility -->
           <td class="px-6 py-4">
             <div class="flex items-center space-x-2">
               <span
-                class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-                >✓ Eligible</span
+                class="px-2 py-1 text-xs font-medium rounded-full"
+                [ngClass]="patient.eligibility.badgeClass"
               >
+                {{ patient.eligibility.label }}
+              </span>
+
               <button
-                (click)="showModal('eligibility-modal')"
+                *ngIf="patient.eligibility.canRecheck"
+                (click)="openEligibility(patient)"
                 class="text-xs font-medium text-indigo-600 hover:underline"
               >
                 Re-Check
               </button>
             </div>
           </td>
+
+          <!-- Actions -->
           <td class="px-6 py-4 text-right">
-            <button (click)="gotoOasis()" class="font-medium text-indigo-600 hover:underline">
-              Review Draft →
+            <button
+              (click)="goToAssessment(patient)"
+              class="font-medium text-indigo-600 hover:underline"
+              [ngClass]="{
+                'text-slate-400 hover:underline': patient.primaryActionType === 'view'
+              }"
+            >
+              {{ patient.primaryActionLabel }}
             </button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            John Smith
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-87654</td>
-          <td class="px-6 py-4">Recertification (ROC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Visit Note - Missing"
-                >VN</span
-              >
-              <button
-                (click)="showModal('upload-modal')"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
-              >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-              >In Review</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Tomorrow, 3:00 PM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Continue Review →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Robert Johnson
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-76543</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"
-              >Completed</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 15, 2:30 PM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-slate-400">View Assessment</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Patricia Williams
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-65432</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-              >AI Draft Ready</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Today, 7:00 PM</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-2">
-              <span
-                class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-                >✓ Eligible</span
-              >
-              <button
-                (click)="showModal('eligibility-modal')"
-                class="text-xs font-medium text-indigo-600 hover:underline"
-              >
-                Re-Check
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Review Draft →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Michael Brown
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-54321</td>
-          <td class="px-6 py-4">Discharge (DC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Discharge Summary - Missing"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Referral/Orders - Missing"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Visit Note - Missing"
-                >VN</span
-              >
-              <button
-                (click)="showModal('upload-modal')"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
-              >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800"
-              >Pending Upload</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 20, 10:00 AM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Upload Documents →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Linda Davis
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-43210</td>
-          <td class="px-6 py-4">Recertification (ROC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-              >AI Draft Ready</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Tomorrow, 11:00 AM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Review Draft →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            James Wilson
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-32109</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Referral/Orders - Missing"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-              <button
-                (click)="showModal('upload-modal')"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
-              >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-              >In Review</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Today, 4:00 PM</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-                >⚠ Pending</span
-              >
-              <button
-                (click)="showModal('eligibility-modal')"
-                class="text-xs font-medium text-indigo-600 hover:underline"
-              >
-                Check Now
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Continue Review →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Barbara Martinez
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-21098</td>
-          <td class="px-6 py-4">Transfer (TRN)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"
-              >Completed</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 14, 9:00 AM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-slate-400">View Assessment</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            David Anderson
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-10987</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-              >AI Draft Ready</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Tomorrow, 9:00 AM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Review Draft →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Susan Taylor
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-09876</td>
-          <td class="px-6 py-4">Recertification (ROC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Visit Note - Missing"
-                >VN</span
-              >
-              <button
-                (click)="showModal('upload-modal')"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
-              >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800"
-              >In Review</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 21, 1:00 PM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Continue Review →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Charles Thomas
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-98701</td>
-          <td class="px-6 py-4">Start of Care (SOC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Referral/Orders - Missing"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-200 text-slate-500"
-                title="Visit Note - Missing"
-                >VN</span
-              >
-              <button
-                (click)="showModal('upload-modal')"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
-              >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800"
-              >Pending Upload</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 22, 2:00 PM</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"
-                >⚠ Pending</span
-              >
-              <button
-                (click)="showModal('eligibility-modal')"
-                class="text-xs font-medium text-indigo-600 hover:underline"
-              >
-                Check Now
-              </button>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-indigo-600 hover:underline">Upload Documents →</button>
-          </td>
-        </tr>
-        <tr class="bg-white border-b hover:bg-slate-50">
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            Jennifer Moore
-          </th>
-          <td class="px-6 py-4 text-slate-600">MRN-87012</td>
-          <td class="px-6 py-4">Discharge (DC)</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Discharge Summary"
-                >DS</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Referral/Orders"
-                >RO</span
-              >
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded bg-emerald-100 text-emerald-800"
-                title="Visit Note"
-                >VN</span
-              >
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"
-              >Completed</span
-            >
-          </td>
-          <td class="px-6 py-4 text-slate-600">Nov 13, 4:30 PM</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800"
-              >✓ Eligible</span
-            >
-          </td>
-          <td class="px-6 py-4 text-right">
-            <button class="font-medium text-slate-400">View Assessment</button>
           </td>
         </tr>
       </tbody>
@@ -755,7 +326,7 @@
 
       <!-- Verification Details -->
       <div class="text-xs text-slate-500 text-center pt-2">
-        <p>Last verified: Just now • Source: CMS Medicare Portal</p>
+        <p>Last verified: Just now ✓</p>
       </div>
     </div>
 
@@ -771,7 +342,7 @@
         class="px-4 text-emerald-600 hover:text-emerald-700 border border-emerald-600 hover:border-emerald-700 font-medium rounded-lg transition-colors flex items-center"
       >
         <ion-icon name="refresh-outline" class="mr-1"></ion-icon>
-        Double-check
+        Refresh
       </button>
     </div>
   </div>

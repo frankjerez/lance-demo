@@ -1,14 +1,20 @@
+import { CommonModule } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
+
 import { Router } from '@angular/router';
+import { PatientListItem, myPatients } from './data/patient-list-data';
 
 @Component({
   selector: 'app-patient-list',
   templateUrl: './patient-list.html',
+  imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   styleUrls: ['./patient-list.css'],
 })
 export class PatientListComponent implements OnInit {
   public router = inject(Router);
+
+  patients: PatientListItem[] = myPatients;
 
   // mirrors your original JS vars
   itemsAccepted = 0;
@@ -35,6 +41,14 @@ export class PatientListComponent implements OnInit {
     });
   }
 
+  openUpload(patient: PatientListItem): void {
+    this.showModal('upload-modal');
+  }
+
+  openEligibility(patient: PatientListItem): void {
+    this.showModal('eligibility-modal');
+  }
+
   // ======= modals =======
 
   showModal(modalId: string): void {
@@ -50,6 +64,25 @@ export class PatientListComponent implements OnInit {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
   }
+
+  goToAssessment(patient: PatientListItem): void {
+    // later: route to patient summary / OASIS screen
+    // this.router.navigate(['/patients', patient.id]);
+    if (patient.id === 'p1') {
+      this.router.navigate(['/oasis']);
+    } else if (patient.id === 'p2') {
+      this.router.navigate(['/patients', patient.id, 'summary']);
+    } else {
+      return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
+    }
+    {
+      return; //alert('Routing to OASIS for ' + patient.name + ' (demo only)');
+    }
+  }
+
+  // goToPatientSummary(patient: PatientListItem): void {
+
+  // }
 
   // ======= eligibility =======
 
@@ -232,7 +265,7 @@ export class PatientListComponent implements OnInit {
     ) as HTMLElement | null;
 
     if (timestamp) {
-      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
+      timestamp.innerHTML = 'Last verified: Just now ✓';
     }
   }
 

@@ -236,7 +236,7 @@ export class LoginComponent implements OnInit {
     ) as HTMLElement | null;
 
     if (timestamp) {
-      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
+      timestamp.innerHTML = 'Last verified: Just now ✓';
     }
   }
 
