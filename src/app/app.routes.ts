@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { LanceOasisCopilotComponent } from './oasis/lance-oasis-copilot';
 import { AboutComponent } from './about/about.component';
-import { LanceLoginAndListComponent } from './login-and-list/login-and-list';
+import { PatientListComponent } from './patient-list/patient-list';
+import { LoginComponent } from './login/login';
 
 export const routes: Routes = [
   { path: 'oasis', component: LanceOasisCopilotComponent },
-  { path: '', component: LanceLoginAndListComponent },
+  { path: '', component: LoginComponent },
+  { path: 'patients', component: PatientListComponent },
   { path: 'about', component: AboutComponent },
   {
     path: '**',

@@ -36,7 +36,7 @@ export class LanceOasisCopilotComponent implements OnInit {
   }
 
   showDashboard(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/patients']);
   }
   // ======= modals =======
 

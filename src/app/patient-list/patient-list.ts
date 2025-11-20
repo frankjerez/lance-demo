@@ -2,12 +2,12 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-login-and-list',
-  templateUrl: './login-and-list.html',
+  selector: 'app-patient-list',
+  templateUrl: './patient-list.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  styleUrls: ['./login-and-list.css'],
+  styleUrls: ['./patient-list.css'],
 })
-export class LanceLoginAndListComponent implements OnInit {
+export class PatientListComponent implements OnInit {
   public router = inject(Router);
 
   // mirrors your original JS vars
@@ -17,13 +17,13 @@ export class LanceLoginAndListComponent implements OnInit {
 
   ngOnInit(): void {
     // default page is login
-    this.showPage('login-page');
+    this.showPage('dashboard-page');
   }
 
   // ======= page switching =======
 
   showPage(pageId: string): void {
-    const pages = ['login-page', 'dashboard-page'];
+    const pages = ['dashboard-page'];
     pages.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
