@@ -19,7 +19,7 @@
           <div class="w-px h-8 bg-slate-200"></div>
           <div>
             <div class="flex items-center space-x-2">
-              <h1 class="text-base font-semibold text-slate-900">Maria Garcia</h1>
+              <h1 class="text-base font-semibold text-slate-900">John Smith</h1>
               <button
                 (click)="quickEligibilityCheck($event)"
                 class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"
@@ -28,7 +28,7 @@
                 <span>Check Eligibility</span>
               </button>
             </div>
-            <p class="text-xs text-slate-500">MRN-98765 • Start of Care</p>
+            <p class="text-xs text-slate-500">MRN-87654 • Start of Care</p>
           </div>
         </div>
       </div>
@@ -91,28 +91,32 @@
 
   <main class="grid grid-cols-12" style="margin: 15px">
     <!-- LEFT COLUMN (AI Recommendations) -->
+    <!-- LEFT COLUMN (AI Recommendations) -->
     <aside
       class="col-span-3 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
     >
       <div class="px-6 py-4 border-b border-slate-100">
         <h2 class="text-sm font-semibold text-slate-900">AI Recommendations</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Review and accept suggestions</p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Review stroke-related diagnoses and functional status suggestions
+        </p>
       </div>
 
-      <!-- Payment Optimization Alert Banner (Clean & Factual) -->
+      <!-- Payment Optimization Alert Banner -->
       <div class="bg-blue-50 border-b border-blue-100 px-6 py-4">
         <div class="flex items-start space-x-3">
           <div class="bg-blue-500 rounded-full p-1 flex-shrink-0 mt-0.5">
             <ion-icon name="information" class="text-white text-sm"></ion-icon>
           </div>
           <div class="flex-1">
-            <h3 class="text-xs font-semibold text-blue-900 mb-1">High-Value Comorbidity</h3>
+            <h3 class="text-xs font-semibold text-blue-900 mb-1">High-Value Stroke Comorbidity</h3>
             <p class="text-xs text-blue-700 leading-relaxed mb-2">
-              COPD (J44.1) qualifies for High Comorbidity tier.
+              Aspiration pneumonia (J69.0) and dysphagia linked to recent stroke may qualify this
+              episode for a higher comorbidity tier when accurately captured.
             </p>
             <div class="flex items-center justify-between text-xs">
               <span class="text-blue-600">Tier: None → High</span>
-              <span class="text-blue-900 font-semibold">+$287</span>
+              <span class="text-blue-900 font-semibold">+$287 (illustrative)</span>
             </div>
           </div>
         </div>
@@ -130,21 +134,31 @@
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">Primary Diagnosis</p>
-              <p class="text-sm font-semibold text-slate-900">S72.001D</p>
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Primary Diagnosis • I8000
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">
+                I63.511 – Cerebral infarction due to embolism of right middle cerebral artery
+              </h3>
             </div>
-            <span class="text-xs font-medium text-emerald-600">95%</span>
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-medium"
+            >
+              Recommended
+            </span>
           </div>
 
           <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Hip fracture aftercare, requires skilled PT/OT services
+            Documented right MCA territory infarct with persistent left-sided hemiparesis and NIHSS
+            scores described in the Discharge Summary support selection of
+            <span class="font-semibold">I63.511</span> as the primary diagnosis.
           </p>
 
           <div
             class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
-            <span class="text-slate-500">PDGM: MS-Rehab</span>
-            <span class="text-slate-500">📄 Discharge, Visit</span>
+            <span class="text-slate-500">PDGM: Neuro / Stroke</span>
+            <span class="text-slate-500">📄 Discharge Summary</span>
           </div>
 
           <div class="flex space-x-2">
@@ -153,7 +167,7 @@
                 acceptRecommendation(
                   $event,
                   'I8000-primary',
-                  'S72.001D - Fracture of neck of right femur, subsequent encounter',
+                  'I63.511 - Cerebral infarction due to embolism of right middle cerebral artery',
                   true,
                   25
                 )
@@ -171,34 +185,39 @@
           </div>
         </div>
 
-        <!-- Comorbidity - High Value! -->
+        <!-- Comorbidity - Aspiration Pneumonia (High-Value) -->
         <div
-          class="recommendation-card border border-emerald-200 bg-emerald-50 rounded-xl p-4 cursor-pointer hover:border-emerald-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-comorbidity', 'discharge-doc')"
-          data-form-id="form-I8000-other-diagnoses-container"
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-aspiration', 'discharge-doc')"
+          data-form-id="form-I8000-comorbidity-answer"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
-              <div class="flex items-center space-x-2 mb-1">
-                <p class="text-xs font-medium text-slate-500">Other Diagnosis</p>
-                <span class="px-1.5 py-0.5 text-xs bg-emerald-600 text-white rounded font-medium"
-                  >High Value</span
-                >
-              </div>
-              <p class="text-sm font-semibold text-slate-900">J44.1</p>
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Comorbidity • I8000
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">
+                J69.0 – Aspiration pneumonia, right lower lobe
+              </h3>
             </div>
-            <span class="text-xs font-medium text-emerald-600">100%</span>
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[0.65rem] font-medium"
+            >
+              High impact
+            </span>
           </div>
 
           <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            COPD with exacerbation, patient on oxygen therapy at home
+            Hospital course describes hypoxemia, fever, and right lower lobe infiltrate treated as
+            <span class="font-semibold">aspiration pneumonia</span>, now resolved at discharge. This
+            supports adding J69.0 as a comorbidity.
           </p>
 
           <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-emerald-200"
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
-            <span class="text-emerald-700">High Comorbidity</span>
-            <span class="text-slate-500">📄 Discharge</span>
+            <span class="text-slate-500">Comorbidity adjustment</span>
+            <span class="text-slate-500">📄 Discharge Summary</span>
           </div>
 
           <div class="flex space-x-2">
@@ -207,9 +226,9 @@
                 acceptRecommendation(
                   $event,
                   'I8000-comorbidity',
-                  'J44.1 - COPD with acute exacerbation',
+                  'J69.0 - Aspiration pneumonia, right lower lobe',
                   true,
-                  30
+                  20
                 )
               "
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
@@ -225,29 +244,38 @@
           </div>
         </div>
 
-        <!-- Additional Comorbidity - Diabetes -->
+        <!-- Additional Comorbidity - Dysphagia -->
         <div
           class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-diabetes', 'discharge-doc')"
+          (click)="selectRecommendation($event, 'I8000-dysphagia', 'discharge-doc')"
           data-form-id="form-I8000-other-diagnoses-container"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">Other Diagnosis</p>
-              <p class="text-sm font-semibold text-slate-900">E11.9</p>
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Additional Comorbidity • I8000
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">R13.19 – Other dysphagia</h3>
             </div>
-            <span class="text-xs font-medium text-emerald-600">98%</span>
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-medium"
+            >
+              Swallow risk
+            </span>
           </div>
 
           <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Type 2 diabetes without complications
+            VFSS shows moderate-to-severe oropharyngeal
+            <span class="font-semibold">dysphagia</span>
+            with silent aspiration of thin liquids, requiring pureed solids and nectar-thick liquids
+            with supervision. This supports adding R13.19 as an additional diagnosis.
           </p>
 
           <div
             class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
-            <span class="text-slate-500">Low Comorbidity</span>
-            <span class="text-slate-500">📄 Discharge</span>
+            <span class="text-slate-500">No direct tier change</span>
+            <span class="text-slate-500">📄 Discharge Summary</span>
           </div>
 
           <div class="flex space-x-2">
@@ -255,8 +283,8 @@
               (click)="
                 acceptRecommendation(
                   $event,
-                  'I8000-diabetes',
-                  'E11.9 - Type 2 diabetes mellitus',
+                  'I8000-dysphagia',
+                  'R13.19 - Other dysphagia',
                   false,
                   5
                 )
@@ -274,7 +302,61 @@
           </div>
         </div>
 
-        <!-- Additional Diagnosis - HTN -->
+        <!-- Additional Comorbidity - Diabetes with Neuropathy -->
+        <div
+          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
+          (click)="selectRecommendation($event, 'I8000-diabetes', 'discharge-doc')"
+          data-form-id="form-I8000-other-diagnoses-container"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex-1">
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Additional Comorbidity • I8000
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">
+                E11.40 – Type 2 diabetes mellitus with diabetic neuropathy
+              </h3>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            Past medical history lists type 2 diabetes with neuropathy and new basal-bolus insulin
+            regimen with BG checks before meals and at bedtime. This supports capturing
+            <span class="font-semibold">E11.40</span> as an additional comorbidity.
+          </p>
+
+          <div
+            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
+          >
+            <span class="text-slate-500">No direct tier change</span>
+            <span class="text-slate-500">📄 Discharge, Referral</span>
+          </div>
+
+          <div class="flex space-x-2">
+            <button
+              (click)="
+                acceptRecommendation(
+                  $event,
+                  'I8000-diabetes',
+                  'E11.40 - Type 2 diabetes mellitus with diabetic neuropathy',
+                  false,
+                  5
+                )
+              "
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
+            >
+              Accept
+            </button>
+            <button
+              (click)="rejectRecommendation($event)"
+              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+
+        <!-- Additional Comorbidity - Hypertension -->
         <div
           class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
           (click)="selectRecommendation($event, 'I8000-htn', 'discharge-doc')"
@@ -282,21 +364,24 @@
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">Other Diagnosis</p>
-              <p class="text-sm font-semibold text-slate-900">I10</p>
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Additional Comorbidity • I8000
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">I10 – Essential hypertension</h3>
             </div>
-            <span class="text-xs font-medium text-emerald-600">92%</span>
           </div>
 
           <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Essential hypertension, controlled
+            Uncontrolled hypertension is repeatedly referenced as a key stroke risk factor requiring
+            strict BP control with Amlodipine and Lisinopril, supporting capture of
+            <span class="font-semibold">I10</span>.
           </p>
 
           <div
             class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
-            <span class="text-slate-500">No adjustment</span>
-            <span class="text-slate-500">📄 Discharge</span>
+            <span class="text-slate-500">No direct tier change</span>
+            <span class="text-slate-500">📄 Discharge, Referral</span>
           </div>
 
           <div class="flex space-x-2">
@@ -317,255 +402,40 @@
           </div>
         </div>
 
-        <!-- GG Self-Care - Eating -->
+        <!-- GG Mobility - Walk / Transfers -->
         <div
           class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0130A', 'visit-doc')"
-          data-form-id="GG0130A-select"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0130A. Eating</p>
-              <p class="text-sm font-semibold text-slate-900">06 - Independent</p>
-            </div>
-            <span class="text-xs font-medium text-emerald-600">85%</span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Patient able to feed self without assistance
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Self-Care</span>
-            <span class="text-slate-500">📋 Visit Note</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="acceptGGRecommendation($event, 'GG0130A', '06')"
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Self-Care (OASIS-E1) - Bathing -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0130E', 'visit-doc')"
-          data-form-id="form-GG0130E-answer"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0130E. Shower/Bathe Self</p>
-              <p class="text-sm font-semibold text-slate-900">03 - Partial assistance</p>
-            </div>
-            <span class="text-xs font-medium text-yellow-600">72%</span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Requires hands-on assistance to wash back and lower extremities
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Self-Care</span>
-            <span class="text-slate-500">📋 Visit Note</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="
-                acceptRecommendation(
-                  $event,
-                  'GG0130E',
-                  '03 - Partial/moderate assistance',
-                  false,
-                  10
-                )
-              "
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Self-Care - Upper Body Dressing -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0130F', 'visit-doc')"
-          data-form-id="GG0130F-select"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0130F. Upper Body Dressing</p>
-              <p class="text-sm font-semibold text-slate-900">06 - Independent</p>
-            </div>
-            <span class="text-xs font-medium text-emerald-600">78%</span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Patient able to dress upper body without assistance
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Self-Care</span>
-            <span class="text-slate-500">📋 Visit Note</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="acceptGGRecommendation($event, 'GG0130F', '06')"
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Self-Care - Lower Body Dressing -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0130G', 'visit-doc')"
-          data-form-id="GG0130G-select"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0130G. Lower Body Dressing</p>
-              <p class="text-sm font-semibold text-slate-900">04 - Supervision</p>
-            </div>
-            <span class="text-xs font-medium text-yellow-600">75%</span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Requires supervision for balance when dressing
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Self-Care</span>
-            <span class="text-slate-500">📋 Visit Note</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="acceptGGRecommendation($event, 'GG0130G', '04')"
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Mobility (OASIS-E1) - Walk 10 feet -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0170C', 'visit-doc')"
+          (click)="selectRecommendation($event, 'GG0170-mobility', 'referral-doc')"
           data-form-id="form-GG0170C-answer"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0170C. Walk 10 Feet</p>
-              <p class="text-sm font-semibold text-slate-900">04 - Supervision</p>
+              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
+                Functional Mobility • GG0170
+              </p>
+              <h3 class="text-xs font-semibold text-slate-900">
+                03 – Partial/moderate assistance for short-distance ambulation and transfers
+              </h3>
             </div>
-            <span class="text-xs font-medium text-emerald-600">88%</span>
           </div>
 
           <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Uses rolling walker, requires contact guard assistance
+            PT/OT document left hemiparesis with need for moderate to maximal assistance for
+            transfers and short-distance ambulation (25–50 ft) with a rolling walker, wheelchair
+            dependent for community mobility. This supports coding GG0170 items at a
+            partial/moderate assistance level.
           </p>
 
           <div
             class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
             <span class="text-slate-500">Mobility</span>
-            <span class="text-slate-500">📋 Visit Note</span>
+            <span class="text-slate-500">📄 Referral / Therapy notes</span>
           </div>
 
           <div class="flex space-x-2">
             <button
-              (click)="
-                acceptRecommendation(
-                  $event,
-                  'GG0170C',
-                  '04 - Supervision or touching assistance',
-                  false,
-                  10
-                )
-              "
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Mobility - Walk 50 feet -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0170D', 'visit-doc')"
-          data-form-id="GG0170D-select"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-xs font-medium text-slate-500 mb-1">GG0170D. Walk 50 Feet</p>
-              <p class="text-sm font-semibold text-slate-900">03 - Partial assistance</p>
-            </div>
-            <span class="text-xs font-medium text-yellow-600">68%</span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Patient fatigues with longer distances, needs physical support
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Mobility</span>
-            <span class="text-slate-500">📋 Visit Note</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="acceptGGRecommendation($event, 'GG0170D', '03')"
+              (click)="acceptGGRecommendation($event, 'GG0170C', '03')"
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
             >
               Accept
@@ -648,11 +518,13 @@
             style="width: 8.5in; min-height: 11in"
           >
             <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
+
+            <!-- Header -->
             <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
               <div>
-                <h3 class="font-bold text-xl mb-1 text-slate-900">Community Hospital</h3>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Jackson Memorial Hospital</h3>
                 <p class="text-xs text-slate-600">
-                  123 Medical Center Dr. • City, State 12345 • (555) 123-4567
+                  1611 NW 12th Avenue • Miami, FL 33136 • (305) 585-1111
                 </p>
               </div>
               <div class="text-right">
@@ -661,117 +533,130 @@
               </div>
             </div>
 
+            <!-- Patient Info -->
             <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
               <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
-                <div><strong>Patient:</strong> Maria Garcia</div>
-                <div><strong>DOB:</strong> 05/12/1948 (Age 76)</div>
-                <div><strong>MRN:</strong> 98765</div>
-                <div><strong>Account:</strong> 2024-98765-01</div>
-                <div><strong>Admission Date:</strong> 11/10/2024</div>
-                <div><strong>Discharge Date:</strong> 11/15/2024</div>
+                <div><strong>Patient Name:</strong> John Robert Smith</div>
+                <div><strong>MRN:</strong> MRN-87654</div>
+                <div><strong>Date of Birth:</strong> 09/03/1958 (Age: 66)</div>
+                <div><strong>Gender:</strong> Male</div>
+                <div><strong>Admission Date:</strong> 09/24/2024</div>
+                <div><strong>Discharge Date:</strong> 10/01/2024</div>
+                <div><strong>Length of Stay:</strong> 7 days</div>
+                <div><strong>Attending Physician:</strong> Dr. James Rodriguez, MD</div>
+                <div><strong>Primary Care Physician:</strong> Dr. Michael Thompson, DO</div>
+                <div><strong>Insurance:</strong> Medicare Advantage (MCR-876543210)</div>
               </div>
 
+              <!-- Primary Diagnosis -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Final Diagnoses
+                  Primary Diagnosis
                 </p>
                 <ul class="list-decimal pl-5 space-y-1 text-sm">
                   <li>
                     <span
                       data-evidence-for="I8000-primary"
                       class="hover:bg-yellow-100 transition-colors"
-                      >Right femoral neck fracture, status post open reduction and internal fixation
-                      (ORIF)</span
                     >
+                      Acute cerebrovascular accident (CVA), right middle cerebral artery
+                      distribution with left-sided hemiparesis (ICD-10: I63.511)
+                    </span>
                   </li>
                   <li>
                     <span
-                      data-evidence-for="I8000-comorbidity"
+                      data-evidence-for="I8000-respiratory"
                       class="hover:bg-yellow-100 transition-colors"
-                      >Chronic obstructive pulmonary disease (COPD) with acute exacerbation, now
-                      resolved</span
                     >
+                      Acute respiratory failure, hypoxemic (ICD-10: J96.01)
+                    </span>
                   </li>
                   <li>
                     <span
-                      data-evidence-for="I8000-diabetes"
+                      data-evidence-for="I8000-aspiration"
                       class="hover:bg-yellow-100 transition-colors"
-                      >Type 2 diabetes mellitus without complications</span
                     >
-                  </li>
-                  <li>
-                    <span
-                      data-evidence-for="I8000-htn"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >Hypertension, controlled</span
-                    >
+                      Aspiration pneumonia, right lower lobe (ICD-10: J69.0)
+                    </span>
                   </li>
                 </ul>
               </div>
 
+              <!-- Secondary Diagnoses -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Hospital Course
-                </p>
-                <p class="mb-3">
-                  76-year-old female admitted following mechanical fall at home resulting in
-                  <span
-                    data-evidence-for="I8000-primary"
-                    class="hover:bg-yellow-100 transition-colors"
-                    >right hip fracture. Patient underwent successful ORIF on 11/11/2024 without
-                    complications</span
-                  >. Post-operative recovery complicated by
-                  <span
-                    data-evidence-for="I8000-comorbidity"
-                    class="hover:bg-yellow-100 transition-colors"
-                    >COPD exacerbation requiring supplemental oxygen at 2L/min via nasal
-                    cannula</span
-                  >.
-                </p>
-                <p>
-                  <span
-                    data-evidence-for="I8000-diabetes"
-                    class="hover:bg-yellow-100 transition-colors"
-                    >Patient's diabetes remained well-controlled throughout hospital stay with oral
-                    medication</span
-                  >.
-                  <span data-evidence-for="I8000-htn" class="hover:bg-yellow-100 transition-colors"
-                    >Blood pressure stable on home medications</span
-                  >. Patient worked with physical therapy and occupational therapy during hospital
-                  stay. Deemed appropriate for home health services with skilled nursing and
-                  therapy.
-                </p>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Discharge Medications
+                  Secondary Diagnoses
                 </p>
                 <ul class="list-disc pl-5 space-y-1 text-sm">
-                  <li>Oxycodone 5mg PO q4-6h PRN pain</li>
-                  <li>
-                    <span
-                      data-evidence-for="I8000-diabetes"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >Metformin 1000mg PO BID</span
-                    >
-                  </li>
                   <li>
                     <span
                       data-evidence-for="I8000-htn"
                       class="hover:bg-yellow-100 transition-colors"
-                      >Lisinopril 10mg PO daily</span
                     >
+                      Hypertension, uncontrolled (ICD-10: I10)
+                    </span>
                   </li>
                   <li>
                     <span
-                      data-evidence-for="I8000-comorbidity"
+                      data-evidence-for="I8000-diabetes"
                       class="hover:bg-yellow-100 transition-colors"
-                      >Albuterol inhaler 2 puffs q4h PRN</span
                     >
+                      Type 2 Diabetes Mellitus with diabetic neuropathy (ICD-10: E11.40)
+                    </span>
                   </li>
-                  <li>Enoxaparin 40mg subcutaneous daily x14 days (DVT prophylaxis)</li>
+                  <li>Hyperlipidemia (ICD-10: E78.5)</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-cad"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Coronary artery disease, stable (ICD-10: I25.10)
+                    </span>
+                  </li>
+                  <li>History of tobacco use disorder (ICD-10: Z87.891)</li>
+                  <li>Chronic kidney disease, Stage 2 (ICD-10: N18.2)</li>
+                  <li>Benign prostatic hyperplasia (ICD-10: N40.0)</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-dysphagia"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Dysphagia secondary to stroke (ICD-10: R13.19)
+                    </span>
+                  </li>
                 </ul>
+              </div>
+
+              <!-- Chief Complaint -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Chief Complaint
+                </p>
+                <p>
+                  Patient was brought to the Emergency Department by EMS after being found by his
+                  wife with sudden onset left-sided weakness, facial droop, and slurred speech at
+                  approximately 7:15 AM. Last known well was approximately 11:00 PM the night prior.
+                </p>
+              </div>
+
+              <!-- History of Present Illness -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  History of Present Illness
+                </p>
+                <p>
+                  Mr. Smith is a 66-year-old male with past medical history of uncontrolled
+                  hypertension, type 2 diabetes, hyperlipidemia, coronary artery disease, and former
+                  tobacco use who presented on 09/24/2024 with acute neurological deficits. On EMS
+                  arrival, he had left facial droop, dysarthria, left arm drift, and left leg
+                  weakness with NIHSS score of 12.
+                </p>
+                <p>
+                  In the ED, NIHSS was 14. CT head showed no hemorrhage. CTA revealed occlusion of
+                  the right M1 segment of the MCA. He was not a candidate for tPA due to unknown
+                  onset time but underwent mechanical thrombectomy with successful recanalization
+                  (TICI 2b).
+                </p>
               </div>
             </div>
           </div>
@@ -783,37 +668,95 @@
           >
             <div class="text-xs text-slate-400 mb-6 text-right">Page 2 of 2</div>
             <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <!-- Hospital Course -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Discharge Instructions
+                  Hospital Course
                 </p>
-                <p class="mb-3">
-                  Patient discharged to home with home health services. Weight-bearing as tolerated
-                  on right lower extremity. Continue walker use for ambulation.
+                <p>
+                  <strong>Neurological:</strong>
+                  Following thrombectomy, MRI confirmed a right MCA territory infarct (~35cc). NIHSS
+                  improved from 14 on admission to 8 at discharge. Patient has persistent left-sided
+                  weakness with upper extremity strength approximately 3/5 and lower extremity 4-/5
+                  and mild left-sided neglect.
                 </p>
-                <p class="mb-3">
-                  Follow up with orthopedic surgeon Dr. Williams in 2 weeks. Continue oxygen therapy
-                  at 2L/min as needed to maintain oxygen saturation >92%.
+                <p>
+                  <strong>Pulmonary:</strong>
+                  On hospital day 2, patient developed hypoxemia and fever. Chest X-ray showed right
+                  lower lobe infiltrate consistent with
+                  <span
+                    data-evidence-for="I8000-aspiration"
+                    class="hover:bg-yellow-100 transition-colors"
+                  >
+                    aspiration pneumonia
+                  </span>
+                  . He completed 7 days of IV antibiotics with clinical improvement and is now on
+                  room air.
+                </p>
+                <p>
+                  <strong>Swallowing/Nutrition:</strong>
+                  VFSS showed moderate-to-severe oropharyngeal
+                  <span
+                    data-evidence-for="I8000-dysphagia"
+                    class="hover:bg-yellow-100 transition-colors"
+                  >
+                    dysphagia with silent aspiration of thin liquids
+                  </span>
+                  . Patient was placed on a modified diet: pureed solids and nectar-thick liquids
+                  only with aspiration precautions. He requires assistance and supervision for all
+                  meals.
+                </p>
+                <p>
+                  <strong>Functional Status:</strong>
+                  Physical and occupational therapy documented significant left hemiparesis. Patient
+                  requires moderate to maximal assistance for transfers, ambulation, dressing,
+                  bathing, and toileting. He can ambulate only short distances (25–50 feet) with a
+                  rolling walker and moderate assistance and is wheelchair dependent for community
+                  mobility.
                 </p>
               </div>
 
+              <!-- Discharge Vital Signs -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Vital Signs
+                </p>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded">
+                  <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><strong>Blood Pressure:</strong> 134/82 mmHg</div>
+                    <div><strong>Heart Rate:</strong> 78 bpm</div>
+                    <div><strong>Respiratory Rate:</strong> 16 breaths/min</div>
+                    <div><strong>Oxygen Saturation:</strong> 96% on room air</div>
+                    <div><strong>Temperature:</strong> 98.2°F</div>
+                    <div><strong>Weight:</strong> 192 lbs</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Discharge Disposition -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
                   Discharge Disposition
                 </p>
-                <p>Home with home health services</p>
+                <p><strong>Discharged to:</strong> Home with Home Health Services</p>
+                <p>
+                  <strong>Condition at Discharge:</strong>
+                  Alert and oriented, hemodynamically stable, breathing comfortably on room air.
+                  Persistent left hemiparesis (UE 3/5, LE 4-/5), moderate assistance required for
+                  most ADLs, high risk for falls, and ongoing dysphagia requiring modified diet and
+                  strict aspiration precautions.
+                </p>
               </div>
 
-              <div class="mt-12 pt-6 border-t border-slate-300">
-                <p class="text-xs text-slate-600 italic">
-                  Discharge Planner: J. Martinez, RN<br />
-                  Attending Physician: Dr. Sarah Johnson, MD<br />
-                  Electronically signed on 11/15/2024 at 14:32
+              <div class="text-xs text-slate-500 mt-6">
+                <p>
+                  <strong>Prepared by:</strong> Dr. James Rodriguez, MD (Hospitalist) •
+                  Electronically signed 10/01/2024 16:45
                 </p>
               </div>
 
               <div class="text-center text-xs text-slate-400 italic mt-8">
-                -- End of Document --
+                -- End of Discharge Summary --
               </div>
             </div>
           </div>
@@ -827,11 +770,13 @@
             style="width: 8.5in; min-height: 11in"
           >
             <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 1</div>
+
+            <!-- Header -->
             <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
               <div>
-                <h3 class="font-bold text-xl mb-1 text-slate-900">Community Hospital</h3>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Jackson Memorial Hospital</h3>
                 <p class="text-xs text-slate-600">
-                  123 Medical Center Dr. • City, State 12345 • (555) 123-4567
+                  1611 NW 12th Avenue • Miami, FL 33136 • (305) 585-1111
                 </p>
               </div>
               <div class="text-right">
@@ -841,15 +786,19 @@
             </div>
 
             <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <!-- Patient / Ordering Info -->
               <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
-                <div><strong>Patient:</strong> Maria Garcia</div>
-                <div><strong>DOB:</strong> 05/12/1948</div>
-                <div><strong>Ordering Physician:</strong> Dr. Sarah Johnson, MD</div>
-                <div><strong>Date:</strong> 11/15/2024</div>
-                <div><strong>NPI:</strong> 1234567890</div>
-                <div><strong>Phone:</strong> (555) 123-4567</div>
+                <div><strong>Patient:</strong> John Robert Smith</div>
+                <div><strong>MRN:</strong> MRN-87654</div>
+                <div><strong>DOB:</strong> 09/03/1958</div>
+                <div><strong>Ordering Physician:</strong> Dr. James Rodriguez, MD</div>
+                <div><strong>Primary Care Physician:</strong> Dr. Michael Thompson, DO</div>
+                <div><strong>Date of Referral:</strong> 10/01/2024</div>
+                <div><strong>Agency:</strong> Sunrise Home Health Agency</div>
+                <div><strong>Start of Care:</strong> 10/02/2024</div>
               </div>
 
+              <!-- Reason for Home Health -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
                   Reason for Home Health Referral
@@ -858,35 +807,55 @@
                   <span
                     data-evidence-for="I8000-primary"
                     class="hover:bg-yellow-100 transition-colors"
-                    >Post-operative care following ORIF of right femoral neck fracture. Patient
-                    requires skilled nursing for surgical site assessment, pain management, and
-                    medication management. Physical and occupational therapy needed for gait
-                    training, transfer training, and ADL retraining to promote safe mobility and
-                    independence.</span
                   >
+                    Recent acute ischemic stroke in right MCA territory with left hemiparesis and
+                    dysphagia
+                  </span>
+                  requiring intensive rehabilitation, medication management, and strict aspiration
+                  and fall precautions in the home setting.
                 </p>
               </div>
 
+              <!-- Disciplines Ordered -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
                   Disciplines Ordered
                 </p>
                 <ul class="list-disc pl-5 space-y-1 text-sm">
                   <li>
-                    <strong>Skilled Nursing:</strong> 2x/week for 4 weeks - Wound assessment,
-                    medication management, patient education
+                    <strong>Skilled Nursing:</strong>
+                    3x/week for 4 weeks, then 2x/week — neurological assessment, stroke education,
+                    blood pressure and blood glucose monitoring, medication reconciliation,
+                    monitoring for bleeding on dual antiplatelet therapy, aspiration precautions,
+                    skin integrity, and caregiver training.
                   </li>
                   <li>
-                    <strong>Physical Therapy:</strong> 3x/week for 6 weeks - Gait training,
-                    strengthening, balance activities
+                    <strong>Physical Therapy:</strong>
+                    3x/week for 8 weeks — gait training, strengthening of left upper and lower
+                    extremities, balance training, fall prevention, transfer training, and
+                    wheelchair mobility.
                   </li>
                   <li>
-                    <strong>Occupational Therapy:</strong> 2x/week for 4 weeks - ADL training, home
-                    safety assessment, adaptive equipment
+                    <strong>Occupational Therapy:</strong>
+                    2–3x/week for 8 weeks — ADL retraining, left-sided neglect strategies,
+                    one-handed techniques for dressing/grooming/eating, home safety assessment, and
+                    adaptive equipment training.
+                  </li>
+                  <li>
+                    <strong>Speech Therapy:</strong>
+                    2–3x/week for 6 weeks — swallow therapy, diet advancement as appropriate, safe
+                    swallowing strategies, aspiration precautions, and cognitive-communication
+                    therapy.
+                  </li>
+                  <li>
+                    <strong>Home Health Aide:</strong>
+                    5x/week — bathing, grooming, dressing, transfers, meal preparation, feeding
+                    supervision, and light housekeeping related to patient care.
                   </li>
                 </ul>
               </div>
 
+              <!-- Key Clinical Problems -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
                   Active Problems Requiring Management
@@ -894,72 +863,94 @@
                 <ul class="list-disc pl-5 space-y-1 text-sm">
                   <li>
                     <span
-                      data-evidence-for="I8000-primary"
+                      data-evidence-for="GG0170-mobility"
                       class="hover:bg-yellow-100 transition-colors"
-                      ><strong>S/P hip fracture repair</strong> - Wound care, pain management,
-                      mobility assessment</span
                     >
+                      Left hemiparesis with impaired balance and high fall risk — requires moderate
+                      to maximal assistance for transfers and ambulation; wheelchair dependent for
+                      community distances.
+                    </span>
                   </li>
                   <li>
                     <span
-                      data-evidence-for="I8000-comorbidity"
+                      data-evidence-for="I8000-dysphagia"
                       class="hover:bg-yellow-100 transition-colors"
-                      ><strong>COPD on home oxygen</strong> - Respiratory assessment, oxygen
-                      management education, breathing exercises</span
                     >
+                      Moderate-to-severe oropharyngeal dysphagia with silent aspiration of thin
+                      liquids — requires pureed solids and nectar-thick liquids only with full
+                      supervision and aspiration precautions.
+                    </span>
                   </li>
                   <li>
                     <span
                       data-evidence-for="I8000-diabetes"
                       class="hover:bg-yellow-100 transition-colors"
-                      ><strong>Diabetes management</strong> - Blood glucose monitoring, medication
-                      adherence</span
                     >
+                      Type 2 diabetes now managed on basal-bolus insulin regimen — requires blood
+                      glucose monitoring before meals and at bedtime and ongoing insulin teaching.
+                    </span>
                   </li>
                   <li>
                     <span
                       data-evidence-for="I8000-htn"
                       class="hover:bg-yellow-100 transition-colors"
-                      ><strong>Hypertension</strong> - Blood pressure monitoring, medication
-                      compliance</span
                     >
+                      Hypertension requiring strict BP control with Amlodipine and Lisinopril — goal
+                      BP &lt;140/90.
+                    </span>
                   </li>
                   <li>
-                    <strong>Fall risk</strong> - Safety assessment, education on fall prevention
-                    strategies
+                    Ongoing stroke prevention on dual antiplatelet therapy (Aspirin 325mg and
+                    Clopidogrel 75mg for 21 days) with bleeding precautions.
                   </li>
                 </ul>
               </div>
 
+              <!-- Durable Medical Equipment -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Equipment Needs
+                  Durable Medical Equipment (DME)
                 </p>
                 <ul class="list-disc pl-5 space-y-1 text-sm">
-                  <li>Rolling walker (patient already has)</li>
-                  <li>Shower chair (to be provided)</li>
-                  <li>Portable oxygen concentrator (patient already has)</li>
-                  <li>Raised toilet seat (recommended)</li>
+                  <li>Hospital bed (full electric with side rails)</li>
+                  <li>Standard wheelchair with elevating legrests</li>
+                  <li>Rolling walker with hand brakes</li>
+                  <li>Bedside commode and shower chair/transfer bench</li>
+                  <li>Raised toilet seat and recommended bathroom grab bars</li>
+                  <li>Blood glucose monitor and supplies</li>
+                  <li>Blood pressure monitor (automatic upper arm cuff)</li>
+                  <li>Thickener powder for liquid consistency modification</li>
                 </ul>
               </div>
 
+              <!-- Follow-up Appointments -->
               <div>
                 <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Frequency & Duration
+                  Follow-up Appointments
                 </p>
-                <p>60 days</p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    PCP — Dr. Michael Thompson on 10/08/2024 at 2:00 PM for post-discharge follow-up
+                    and medication review.
+                  </li>
+                  <li>
+                    Neurology — Dr. Patricia Lee on 10/15/2024 at 10:30 AM for post-stroke follow-up
+                    and antiplatelet management.
+                  </li>
+                  <li>
+                    Endocrinology — Dr. Maria Gonzalez on 10/22/2024 at 9:00 AM for diabetes and
+                    insulin management.
+                  </li>
+                </ul>
               </div>
 
-              <div class="mt-12 pt-6 border-t border-slate-300">
-                <p class="text-xs text-slate-600 italic">
-                  Physician Signature: Dr. Sarah Johnson, MD<br />
-                  NPI: 1234567890<br />
-                  Electronically signed on 11/15/2024 at 15:45
-                </p>
+              <div class="mt-8 pt-4 border-t border-slate-300 text-xs text-slate-600 italic">
+                Physician Signature: Dr. James Rodriguez, MD<br />
+                Electronically signed on 10/01/2024 at 16:45
               </div>
 
-              <div class="text-center text-xs text-slate-400 italic mt-8">
-                -- End of Document --
+              <div class="text-center text-xs text-slate-400 italic mt-6">
+                -- End of Referral/Orders --
               </div>
             </div>
           </div>
@@ -967,281 +958,16 @@
 
         <!-- First Visit Note (Hidden initially) -->
         <div id="visit-doc" class="document-content hidden space-y-6">
-          <!-- PDF Page 1 -->
           <div
-            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300 flex items-center justify-center"
             style="width: 8.5in; min-height: 11in"
           >
-            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
-            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
-              <div>
-                <h3 class="font-bold text-xl mb-1 text-slate-900">Home Health Services</h3>
-                <p class="text-xs text-slate-600">Skilled Nursing Visit Note</p>
-              </div>
-              <div class="text-right">
-                <p class="font-bold text-sm text-slate-900">INITIAL ASSESSMENT</p>
-                <p class="text-xs text-slate-600">Start of Care Visit</p>
-              </div>
-            </div>
-
-            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
-              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
-                <div><strong>Patient:</strong> Maria Garcia</div>
-                <div><strong>DOB:</strong> 05/12/1948</div>
-                <div><strong>Visit Date:</strong> 11/16/2024</div>
-                <div><strong>Time:</strong> 10:30 AM</div>
-                <div><strong>Nurse:</strong> Jackie Perez, RN</div>
-                <div><strong>Duration:</strong> 90 minutes</div>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Chief Complaint
-                </p>
-                <p>
-                  <span
-                    data-evidence-for="I8000-primary"
-                    class="hover:bg-yellow-100 transition-colors"
-                    >Patient is 6 days post-ORIF of right hip fracture following mechanical fall at
-                    home. Reports pain 4/10 at rest, 6/10 with movement. Incision site clean, dry,
-                    intact with steri-strips in place. No signs of infection.</span
-                  >
-                </p>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Vital Signs
-                </p>
-                <ul class="list-disc pl-5 space-y-1 text-sm">
-                  <li>
-                    <span
-                      data-evidence-for="I8000-htn"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >BP: 138/82 mmHg (elevated, within patient's normal range per discharge
-                      paperwork)</span
-                    >
-                  </li>
-                  <li>HR: 78 bpm, regular</li>
-                  <li>RR: 18/min</li>
-                  <li>
-                    <span
-                      data-evidence-for="I8000-comorbidity"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >O2 Sat: 94% on 2L O2 via nasal cannula (91% on room air)</span
-                    >
-                  </li>
-                  <li>Temp: 98.2°F oral</li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Functional Assessment - Self-Care
-                </p>
-                <ul class="list-disc pl-5 space-y-2 text-sm">
-                  <li>
-                    <strong>Eating:</strong>
-                    <span data-evidence-for="GG0130A" class="hover:bg-yellow-100 transition-colors"
-                      >Patient able to feed herself independently. Uses regular utensils without
-                      difficulty. No adaptive equipment needed. Completed meal without assistance
-                      during visit.</span
-                    >
-                  </li>
-
-                  <li>
-                    <strong>Bathing/Showering:</strong>
-                    <span data-evidence-for="GG0130E" class="hover:bg-yellow-100 transition-colors"
-                      >Patient is unable to use the shower due to mobility limitations. She is able
-                      to wash her face, arms, chest, and abdomen while seated on a shower chair.
-                      However, caregiver (daughter) must be present throughout the bath to provide
-                      hands-on assistance washing her back and lower extremities. Patient also
-                      requires supervision for safety due to balance issues and recent hip surgery.
-                      Unable to safely step into tub.</span
-                    >
-                  </li>
-
-                  <li>
-                    <strong>Upper Body Dressing:</strong>
-                    <span data-evidence-for="GG0130F" class="hover:bg-yellow-100 transition-colors"
-                      >Patient able to don/doff shirt and bra independently. Reaches overhead
-                      without difficulty. No assistance required once clothing is within
-                      reach.</span
-                    >
-                  </li>
-
-                  <li>
-                    <strong>Lower Body Dressing:</strong>
-                    <span data-evidence-for="GG0130G" class="hover:bg-yellow-100 transition-colors"
-                      >Patient attempts to pull up pants but requires daughter's presence for
-                      balance and touching assistance at hips. Cannot bend to pull up from below
-                      knees due to hip precautions. Needs contact guard when standing to
-                      dress.</span
-                    >
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Mobility Assessment
-                </p>
-                <ul class="list-disc pl-5 space-y-2 text-sm">
-                  <li>
-                    <strong>Assistive Device:</strong>
-                    <span data-evidence-for="GG0170C" class="hover:bg-yellow-100 transition-colors"
-                      >Patient utilizes a rolling walker for all mobility as prescribed by hospital
-                      PT. Walker is appropriate size and in good working condition.</span
-                    >
-                  </li>
-
-                  <li>
-                    <strong>Walk 10 Feet:</strong>
-                    <span data-evidence-for="GG0170C" class="hover:bg-yellow-100 transition-colors"
-                      >Patient demonstrated ambulation with walker in the hallway. When asked to
-                      walk approximately 10 feet to the bathroom door, patient was able to advance
-                      the walker and take steps independently. However, she demonstrated unsteady
-                      gait with lurching to the right side. This nurse provided contact guard
-                      assistance (touching/steadying at shoulder and gait belt) to prevent loss of
-                      balance. Patient completed the task but required this physical support for
-                      safety throughout. Reports pain 6/10 with weight-bearing on right hip.</span
-                    >
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- PDF Page 2 -->
-          <div
-            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
-            style="width: 8.5in; min-height: 11in"
-          >
-            <div class="text-xs text-slate-400 mb-6 text-right">Page 2 of 2</div>
-            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Mobility Assessment (Continued)
-                </p>
-                <ul class="list-disc pl-5 space-y-2 text-sm">
-                  <li>
-                    <strong>Walk 50 Feet with Turns:</strong>
-                    <span data-evidence-for="GG0170D" class="hover:bg-yellow-100 transition-colors"
-                      >Patient ambulated from bedroom to living room (approximately 50 feet with 2
-                      turns). She fatigued visibly halfway through and required rest break. Helper
-                      (this nurse) provided partial physical support during the turns, steadying her
-                      hips and providing approximately 30% of effort to prevent falls. Patient able
-                      to complete activity but needed this moderate assistance.</span
-                    >
-                  </li>
-
-                  <li>
-                    <strong>Transfers:</strong> Patient transfers sit-to-stand from standard-height
-                    chair with supervision. Uses walker for support.
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Respiratory Status
-                </p>
-                <p>
-                  <span
-                    data-evidence-for="I8000-comorbidity"
-                    class="hover:bg-yellow-100 transition-colors"
-                    >Patient remains on continuous oxygen at 2L via nasal cannula due to baseline
-                    COPD. Oxygen saturation 94% on 2L O2 at rest, drops to 89% with activity
-                    (ambulation). Portable oxygen concentrator in use and functioning properly.
-                    Patient reports occasional dyspnea with exertion, denies dyspnea at rest. Breath
-                    sounds diminished bilaterally, no wheezes or crackles noted. Uses albuterol
-                    inhaler 2-3x daily as needed. Patient and daughter require education on oxygen
-                    safety, proper inhaler technique, and COPD management strategies.</span
-                  >
-                </p>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Medication Review
-                </p>
-                <ul class="list-disc pl-5 space-y-1 text-sm">
-                  <li>
-                    <span
-                      data-evidence-for="I8000-diabetes"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >Metformin 1000mg PO BID - Patient taking as prescribed. Blood glucose
-                      monitoring shows readings 110-140 mg/dL fasting.</span
-                    >
-                  </li>
-                  <li>
-                    <span
-                      data-evidence-for="I8000-htn"
-                      class="hover:bg-yellow-100 transition-colors"
-                      >Lisinopril 10mg PO daily - Taking as prescribed. BP slightly elevated today
-                      but patient states this is typical for her.</span
-                    >
-                  </li>
-                  <li>Oxycodone 5mg - Taking q6h for pain, reports adequate pain relief</li>
-                  <li>
-                    Enoxaparin injections - Daughter administering daily, proper technique observed
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Cognitive Status
-                </p>
-                <p>Alert and oriented x4. Follows multi-step commands. Memory intact.</p>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Living Situation
-                </p>
-                <p>
-                  Patient lives in single-story home with daughter who is primary caregiver. Bedroom
-                  and bathroom on main floor. No stairs required for ADLs. Daughter works part-time
-                  from home and is available for assistance. Patient has strong family support.
-                </p>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Safety Concerns
-                </p>
-                <ul class="list-disc pl-5 space-y-1 text-sm">
-                  <li>High fall risk due to hip fracture, gait instability, and COPD</li>
-                  <li>Scatter rugs removed by daughter</li>
-                  <li>Walker being used consistently</li>
-                  <li>Recommend raised toilet seat and shower chair (ordered)</li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
-                  Assessment & Plan
-                </p>
-                <p>
-                  76-year-old female s/p right hip ORIF, doing well overall. Requires skilled
-                  nursing for wound monitoring, pain management, medication management, and
-                  patient/caregiver education. Requires PT/OT for functional mobility and ADL
-                  training. Patient motivated and cooperative with plan of care.
-                </p>
-              </div>
-
-              <div class="mt-12 pt-6 border-t border-slate-300">
-                <p class="text-xs text-slate-600 italic">
-                  Next Visit: 11/19/2024<br />
-                  Nurse: J. Perez, RN<br />
-                  Electronically signed on 11/16/2024 at 14:45
-                </p>
-              </div>
-
-              <div class="text-center text-xs text-slate-400 italic mt-8">
-                -- End of Document --
-              </div>
+            <div class="text-center text-sm text-slate-500 space-y-2">
+              <p class="font-semibold text-slate-700">Visit Note Not Available</p>
+              <p class="text-xs">
+                <!-- No visit note has been provided for this episode. Home health team will document
+                findings in subsequent visit notes. -->
+              </p>
             </div>
           </div>
         </div>
@@ -1260,15 +986,15 @@
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
               <label class="text-slate-500 text-[10px] uppercase">Patient Name</label>
-              <p class="font-bold text-slate-900">Garcia, Maria</p>
+              <p class="font-bold text-slate-900">Smith, John</p>
             </div>
             <div>
               <label class="text-slate-500 text-[10px] uppercase">MRN</label>
-              <p class="font-bold text-slate-900">98765</p>
+              <p class="font-bold text-slate-900">87654</p>
             </div>
             <div>
               <label class="text-slate-500 text-[10px] uppercase">DOB</label>
-              <p class="font-bold text-slate-900">05/12/1948</p>
+              <p class="font-bold text-slate-900">09/03/1958</p>
             </div>
             <div>
               <label class="text-slate-500 text-[10px] uppercase">Assessment Type</label>
@@ -1381,6 +1107,7 @@
         </div>
 
         <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <!-- I8000 Primary Diagnosis -->
           <div>
             <label class="text-[11px] font-bold text-slate-700">
               I8000. Primary Diagnosis (ICD-10-CM)
@@ -1389,13 +1116,32 @@
             <div
               id="form-I8000-primary-answer"
               data-required="true"
-              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
             >
               <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
-              LANCE AI has recommendations - Click "Accept" to apply
+              LANCE AI will populate the primary stroke diagnosis (I63.511) when you click "Accept"
+              on a recommendation card.
             </div>
           </div>
 
+          <!-- I8000 Comorbidity (High-Impact) -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Comorbidity (PDGM-Relevant)
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-comorbidity-answer"
+              data-required="true"
+              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
+            >
+              <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+              Aspiration pneumonia (J69.0) will be added here when accepted from the AI
+              recommendations panel.
+            </div>
+          </div>
+
+          <!-- I8000 Other Diagnoses -->
           <div>
             <label class="text-[11px] font-bold text-slate-700">
               I8000. Other Diagnoses
@@ -1408,15 +1154,17 @@
             >
               <!-- Other diagnoses will be added here dynamically -->
               <div
-                class="p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center text-slate-600 text-xs"
+                class="p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
               >
                 <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
-                LANCE AI has recommendations - Click "Accept" to apply
+                LANCE AI will append additional diagnoses (e.g., dysphagia R13.19, diabetes E11.40,
+                hypertension I10) when you click "Accept" on those recommendation cards.
               </div>
             </div>
           </div>
         </div>
 
+        <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
         <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
         <div class="bg-purple-50 border-l-4 border-purple-600 px-3 py-2 mb-3">
           <h3 class="font-bold text-purple-900 text-xs uppercase tracking-wider">
@@ -1952,8 +1700,8 @@
 
     <div class="space-y-4 mb-6">
       <div class="bg-slate-50 rounded-lg p-4">
-        <p class="text-sm font-medium text-slate-700 mb-1">Patient: Maria Garcia</p>
-        <p class="text-xs text-slate-500">MRN-98765 • Start of Care</p>
+        <p class="text-sm font-medium text-slate-700 mb-1">Patient: John Smith</p>
+        <p class="text-xs text-slate-500">MRN-87654 • Start of Care</p>
       </div>
 
       <div class="border border-slate-200 rounded-lg p-4">

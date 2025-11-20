@@ -4,9 +4,11 @@ import { AboutComponent } from './about/about.component';
 import { PatientListComponent } from './patient-list/patient-list';
 import { LoginComponent } from './login/login';
 import { PatientSummaryComponent } from './patient-summary/patient-summary';
+import { OasisJohnComponent } from './oasis-john/oasis-john';
 
 export const routes: Routes = [
   { path: 'oasis', component: LanceOasisCopilotComponent },
+  { path: 'oasisnew', component: OasisJohnComponent },
   { path: '', component: LoginComponent },
   { path: 'patients', component: PatientListComponent },
   { path: 'patients/:id/summary', component: PatientSummaryComponent },
