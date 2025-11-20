@@ -236,7 +236,7 @@ export class PatientSummaryComponent implements OnInit {
           type: 'DS',
           displayLabel: 'Discharge Summary',
           uploaded: false,
-          missingReason: 'Pending upload from clinician',
+          missingReason: 'Pending upload',
           fileName: 'discharge_summary.pdf',
         },
         {

@@ -20,7 +20,8 @@
 
         <div class="w-px h-8 bg-slate-200"></div>
 
-        <div>
+        <!-- PATIENT + PRIMARY PAYER -->
+        <div class="flex flex-col space-y-1">
           <div class="flex items-center space-x-2">
             <h1 class="text-base font-semibold text-slate-900">
               {{ patientSummary.demographics.name }}
@@ -33,80 +34,47 @@
               <span>Check Eligibility</span>
             </button>
           </div>
-          <p class="text-xs text-slate-500">
-            {{ patientSummary.mrn }} • {{ patientSummary.demographics.agencyName }}
-          </p>
-        </div>
 
-        <!-- NAME + MRN + AGENCY -->
-        <!-- <div class="flex flex-col leading-tight">
-          <h1 class="text-base font-semibold text-slate-900">
-            {{ patientSummary.demographics.name }}
-          </h1>
+          <!-- Primary payer badge -->
+          <div class="flex items-center flex-wrap gap-2">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-semibold"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
+              Primary Payer:
+              <span class="ml-1">
+                {{ patientSummary.demographics.insurance }}
+              </span>
+            </span>
 
-          <div class="text-left mt-0.5">
-            <p class="text-xs text-slate-500">
-              <span class="font-medium">{</span>
-            </p>
             <p class="text-[0.7rem] text-slate-500">
+              MRN {{ patientSummary.mrn }} •
               {{ patientSummary.demographics.agencyName }}
             </p>
           </div>
-        </div> -->
+        </div>
       </div>
 
-      <!-- RIGHT SIDE HIPPS / PAYMENT -->
-      <div class="hidden lg:flex items-center space-x-8">
-        <!-- HIPPS CODE -->
-        <div class="border border-indigo-200 bg-indigo-50 rounded-lg px-4 py-2">
-          <p class="text-[0.65rem] text-slate-500">HIPPS Code</p>
-          <p class="text-lg font-semibold text-slate-900 tracking-wide">
+      <!-- RIGHT SIDE HIPPS / PAYMENT – PROMINENT PDGM SUMMARY -->
+      <div class="hidden lg:flex items-center space-x-6">
+        <div class="border border-indigo-200 bg-indigo-50 rounded-xl px-4 py-3 shadow-sm">
+          <p class="text-[0.65rem] text-slate-500 tracking-wide uppercase">HIPPS Code</p>
+          <p class="text-2xl font-semibold text-slate-900 tracking-wide leading-tight">
             {{ patientSummary.payment.hippsCode }}
           </p>
-        </div>
-
-        <!-- TOTAL PAYMENT -->
-        <div class="border border-emerald-200 bg-emerald-50 rounded-lg px-4 py-2">
-          <p class="text-[0.65rem] text-slate-500">Total Payment</p>
-          <p class="text-lg font-semibold text-emerald-700">
-            {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
+          <p class="text-[0.7rem] text-slate-500 mt-1">
+            PDGM grouping &amp; clinical/comorbidity factors
           </p>
         </div>
 
-        <!-- INLINE BREAKDOWN (BIGGER NUMBERS) -->
-        <div class="flex items-center space-x-8">
-          <div class="flex flex-col items-start">
-            <span class="text-[0.65rem] text-slate-500">Base</span>
-            <span class="text-base font-semibold text-slate-800">
-              {{ patientSummary.payment.baseRate | currency : 'USD' : 'symbol' : '1.0-2' }}
-            </span>
-          </div>
-
-          <div class="flex flex-col items-start">
-            <span class="text-[0.65rem] text-slate-500">Comorb.</span>
-            <span class="text-base font-semibold text-emerald-700">
-              +{{
-                patientSummary.payment.comorbidityAdjustment | currency : 'USD' : 'symbol' : '1.0-2'
-              }}
-            </span>
-          </div>
-
-          <div class="flex flex-col items-start">
-            <span class="text-[0.65rem] text-slate-500">Functional</span>
-            <span class="text-base font-semibold text-emerald-700">
-              +{{
-                patientSummary.payment.functionalLevelAdjustment
-                  | currency : 'USD' : 'symbol' : '1.0-2'
-              }}
-            </span>
-          </div>
-
-          <div class="flex flex-col items-start">
-            <span class="text-[0.65rem] text-slate-500">LUPA/LUTS</span>
-            <span class="text-base font-semibold text-emerald-700">
-              +{{ patientSummary.payment.lutsAdjustment | currency : 'USD' : 'symbol' : '1.0-2' }}
-            </span>
-          </div>
+        <div class="border border-emerald-200 bg-emerald-50 rounded-xl px-4 py-3 shadow-sm">
+          <p class="text-[0.65rem] text-slate-500 tracking-wide uppercase">Estimated Payment</p>
+          <p class="text-2xl font-semibold text-emerald-700 leading-tight">
+            {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
+          </p>
+          <p class="text-[0.7rem] text-slate-500 mt-1">
+            Includes base, comorbidity, functional &amp; LUPA/LUTS adjustments
+          </p>
         </div>
       </div>
     </div>
@@ -117,6 +85,7 @@
     <div class="max-w-8xl mx-auto px-8 py-6 space-y-6 text-sm">
       <!-- Top summary row -->
       <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Patient card -->
         <div class="border border-slate-200 rounded-lg p-3 bg-white">
           <p class="text-xs text-slate-500">Patient</p>
           <p class="text-sm font-semibold text-slate-900">
@@ -129,34 +98,68 @@
           <p class="text-[0.7rem] text-slate-500">DOB: {{ patientSummary.demographics.dob }}</p>
         </div>
 
+        <!-- Care team / coverage card with clearer primary payer -->
         <div class="border border-slate-200 rounded-lg p-3 bg-white">
           <p class="text-xs text-slate-500">Care Team / Coverage</p>
           <p class="text-sm font-semibold text-slate-900">
             PCP: {{ patientSummary.demographics.pcp }}
           </p>
           <p class="text-[0.7rem] text-slate-500 mt-1">
-            Insurance: {{ patientSummary.demographics.insurance }}
+            Primary Payer:
+            <span class="font-medium text-slate-800">
+              {{ patientSummary.demographics.insurance }}
+            </span>
           </p>
           <p class="text-[0.7rem] text-slate-500">
             Member ID: {{ patientSummary.demographics.memberId }}
           </p>
         </div>
 
+        <!-- PDGM breakdown -->
         <div class="border border-indigo-100 bg-indigo-50 rounded-lg p-3">
-          <p class="text-xs text-slate-500 mb-1">HIPPS / Estimated Payment</p>
-          <p class="text-sm font-semibold text-slate-900 tracking-wide">
-            {{ patientSummary.payment.hippsCode }}
-          </p>
-          <p class="text-sm font-semibold text-emerald-700">
-            {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
-          </p>
-          <p class="text-[0.7rem] text-slate-500 mt-1">
-            Includes comorbidity & functional level adjustments
+          <p class="text-xs text-slate-500 mb-1">PDGM Breakdown</p>
+          <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[0.75rem]">
+            <div class="flex flex-col">
+              <span class="text-slate-500">Base Rate</span>
+              <span class="font-semibold text-slate-900">
+                {{ patientSummary.payment.baseRate | currency : 'USD' : 'symbol' : '1.0-2' }}
+              </span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-slate-500">Comorbidity</span>
+              <span class="font-semibold text-emerald-700">
+                +{{
+                  patientSummary.payment.comorbidityAdjustment
+                    | currency : 'USD' : 'symbol' : '1.0-2'
+                }}
+              </span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-slate-500">Functional Level</span>
+              <span class="font-semibold text-emerald-700">
+                +{{
+                  patientSummary.payment.functionalLevelAdjustment
+                    | currency : 'USD' : 'symbol' : '1.0-2'
+                }}
+              </span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-slate-500">LUPA / LUTS</span>
+              <span class="font-semibold text-emerald-700">
+                +{{ patientSummary.payment.lutsAdjustment | currency : 'USD' : 'symbol' : '1.0-2' }}
+              </span>
+            </div>
+          </div>
+          <p class="text-[0.7rem] text-slate-500 mt-2">
+            HIPPS {{ patientSummary.payment.hippsCode }} → Estimated total:
+            <span class="font-semibold text-emerald-700">
+              {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
+            </span>
           </p>
         </div>
       </section>
 
-      <!-- Demographics -->
+      <!-- Demographics (leaner, no duplicate Insurance line) -->
       <section class="border border-slate-200 rounded-lg p-4 space-y-3 bg-white">
         <header class="flex items-center justify-between mb-1">
           <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">Demographics</h2>
@@ -182,12 +185,6 @@
             </p>
           </div>
           <div>
-            <p class="text-xs text-slate-500">Insurance</p>
-            <p class="font-medium text-slate-800">
-              {{ patientSummary.demographics.insurance }}
-            </p>
-          </div>
-          <div>
             <p class="text-xs text-slate-500">Member ID</p>
             <p class="font-medium text-slate-800">
               {{ patientSummary.demographics.memberId }}
@@ -203,8 +200,6 @@
             <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">
               Documents (Medical Records)
             </h2>
-            <!-- triggerFileUpload()" -->
-            <!-- Upload new document button -->
             <div class="flex items-center space-x-2">
               <input
                 #fileInput
@@ -216,7 +211,7 @@
               <button
                 type="button"
                 (click)="showModal('upload-modal')"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm flex items-center space-x-1"
               >
                 <ion-icon name="cloud-upload-outline" class="text-sm"></ion-icon>
                 <span>Upload</span>
@@ -322,6 +317,7 @@
   </main>
 </div>
 
+<!-- ELIGIBILITY MODAL -->
 <div
   id="eligibility-modal"
   class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
@@ -486,12 +482,6 @@
       </div>
     </div>
     <div class="mt-8 flex justify-between items-center">
-      <!-- <button
-        (click)="startAIProcessing()"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm"
-      >
-        Start LANCE AI Analysis
-      </button> -->
       <button (click)="hideModal('upload-modal')" class="text-sm font-medium text-slate-600">
         Cancel
       </button>
