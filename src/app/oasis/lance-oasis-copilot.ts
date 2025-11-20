@@ -188,36 +188,85 @@ export class LanceOasisCopilotComponent implements OnInit {
 
   // ======= recommendations =======
 
-  selectRecommendation(event: Event, oasisId: string, docId: string): void {
+  selectRecommendation(event: Event, oasisId: string, targetDocId?: string): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
 
-    // Find the card element (in case click is on a child)
-    const cardEl = target.closest('.recommendation-card') as HTMLElement | null;
-    if (!cardEl) return;
+    // The clicked recommendation card (supports clicking child elements)
+    const cardElement = target.closest('.recommendation-card') as HTMLElement | null;
+    if (!cardElement) return;
 
+    // -----------------------------
     // Highlight selected card
-    const cards = document.querySelectorAll('.recommendation-card') as NodeListOf<HTMLElement>;
-    cards.forEach((c) => c.classList.remove('selected'));
-    cardEl.classList.add('selected');
+    // -----------------------------
+    const allCards = document.querySelectorAll('.recommendation-card') as NodeListOf<HTMLElement>;
+    allCards.forEach((card) => card.classList.remove('selected'));
 
-    // Ensure correct document tab is visible
-    const docTab = document.querySelector(`.doc-tab[data-doc-id="${docId}"]`) as HTMLElement | null;
+    cardElement.classList.add('selected');
 
-    if (docTab) {
-      const fakeEvent = { target: docTab } as unknown as Event;
-      this.switchDocumentTab(fakeEvent, docId);
+    // -----------------------------
+    // Switch document tab
+    // -----------------------------
+    if (targetDocId) {
+      const targetTab = document.querySelector(
+        `.doc-tab[data-doc-id="${targetDocId}"]`
+      ) as HTMLElement | null;
+
+      if (targetTab) {
+        // Create a fake event for switchDocumentTab
+        const fakeEvent = { target: targetTab } as unknown as Event;
+        this.switchDocumentTab(fakeEvent, targetDocId);
+      }
     }
 
-    // Scroll to evidence in document, if present
-    const targetEvidence = document.querySelector(
-      `[data-evidence-for="${oasisId}"]`
-    ) as HTMLElement | null;
+    // -----------------------------
+    // Clear previous highlights
+    // -----------------------------
+    const viewer = document.getElementById('document-viewer') as HTMLElement | null;
+    if (!viewer) return;
 
-    if (targetEvidence) {
-      targetEvidence.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      targetEvidence.classList.add('form-field-highlight');
-      setTimeout(() => targetEvidence.classList.remove('form-field-highlight'), 1500);
+    const highlighted = viewer.querySelectorAll('.evidence-highlight') as NodeListOf<HTMLElement>;
+    highlighted.forEach((el) => {
+      // Remove highlight wrapper but preserve original content
+      el.outerHTML = el.innerHTML;
+    });
+
+    // -----------------------------
+    // Determine evidence category
+    // -----------------------------
+    let category = 'default';
+
+    if (oasisId.startsWith('I8000')) {
+      category = 'diagnosis';
+    } else if (oasisId.startsWith('GG0130')) {
+      category = 'gg-self-care';
+    } else if (oasisId.startsWith('GG0170')) {
+      category = 'gg-mobility';
+    }
+
+    // -----------------------------
+    // Highlight evidence in document
+    // -----------------------------
+    const evidenceElements = viewer.querySelectorAll(
+      `[data-evidence-for="${oasisId}"]`
+    ) as NodeListOf<HTMLElement>;
+
+    evidenceElements.forEach((evidenceEl) => {
+      evidenceEl.innerHTML = `
+      <mark class="evidence-highlight" data-category="${category}">
+        ${evidenceEl.innerHTML}
+      </mark>
+    `;
+    });
+
+    // -----------------------------
+    // Scroll to first evidence
+    // -----------------------------
+    if (evidenceElements.length > 0) {
+      evidenceElements[0].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
     }
   }
 

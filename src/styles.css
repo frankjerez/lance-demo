@@ -1,1 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
+.evidence-highlight {
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 2px solid;
+  font-weight: 500;
+}
+
+.evidence-highlight[data-category='diagnosis'] {
+  background-color: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+.overflow-hidden {
+  overflow: scroll;
+  max-height: 1050px;
+}
+.evidence-highlight[data-category='gg-self-care'] {
+  background-color: #faf5ff;
+  border-color: #9333ea;
+  color: #6b21a8;
+}
+
+.evidence-highlight[data-category='gg-mobility'] {
+  background-color: #eef2ff;
+  border-color: #6366f1;
+  color: #4338ca;
+}
