@@ -70,13 +70,21 @@ export class PatientListComponent implements OnInit {
     // this.router.navigate(['/patients', patient.id]);
     if (patient.id === 'p1') {
       this.router.navigate(['/oasis']);
-    } else if (patient.id === 'p2') {
-      this.router.navigate(['/patients', patient.id, 'summary']);
     } else {
       return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
     }
-    {
-      return; //alert('Routing to OASIS for ' + patient.name + ' (demo only)');
+    // } else if (patient.id === 'p2') {
+    //   this.router.navigate(['/patients', patient.id, 'summary']);
+    // } else {
+    //   return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
+    // }
+  }
+
+  gotoPatientDetails(_t36: PatientListItem) {
+    if (_t36.id === 'p2') {
+      this.router.navigate(['/patients', _t36.id, 'summary']);
+    } else {
+      return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
     }
   }
 

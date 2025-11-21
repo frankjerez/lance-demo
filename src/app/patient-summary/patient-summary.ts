@@ -512,7 +512,9 @@ export class PatientSummaryComponent implements OnInit {
         pcp: 'Dr. Michael Thompson, DO',
         agencyName: 'Sunrise Home Health Agency',
       },
-      history: this.buildJohnSmithHistory(),
+      history: this.buildJohnSmithHistory().sort(
+        (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      ),
       docs: [
         {
           id: 'doc1',

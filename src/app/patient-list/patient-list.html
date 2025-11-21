@@ -59,7 +59,14 @@
         <tr *ngFor="let patient of patients" class="bg-white border-b hover:bg-slate-50">
           <!-- Patient Name -->
           <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            {{ patient.name }}
+            <span (click)="gotoPatientDetails(patient)"> </span>
+
+            <button
+              (click)="gotoPatientDetails(patient)"
+              class="font-medium text-indigo-600 hover:underline"
+            >
+              {{ patient.name }}
+            </button>
           </th>
 
           <!-- MRN -->
