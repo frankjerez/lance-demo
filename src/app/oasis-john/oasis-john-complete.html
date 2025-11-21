@@ -1,0 +1,1272 @@
+<!-- COPILOT PAGE -->
+<div id="copilot-page" class="hidden">
+  <!-- Header Component -->
+  <app-oasis-header
+    [patientName]="'John Smith'"
+    [patientMrn]="'MRN-87654'"
+    [assessmentType]="'Start of Care'"
+    [currentPayment]="currentPayment()"
+    [itemsAccepted]="itemsAccepted()"
+    [totalItems]="totalItems()"
+    [hasAnalyzerAlerts]="hasAnalyzerAlerts"
+    [newAnalyzerAlertCount]="newAnalyzerAlertCount"
+    [showAnalyzer]="showAnalyzer()"
+    [isSavingAssessment]="isSavingAssessment()"
+    (onBackToDashboard)="handleBackToDashboard()"
+    (onQuickEligibilityCheck)="handleQuickEligibilityCheck($event)"
+    (onToggleAnalyzer)="handleToggleAnalyzer()"
+    (onSaveAssessment)="handleSaveAssessment()"
+    (onReset)="handleReset()"
+    (onExport)="handleExport()"
+  ></app-oasis-header>
+
+  <main class="grid grid-cols-12" style="margin: 15px">
+    <!-- LEFT COLUMN - Recommendations Component -->
+    <app-oasis-recommendations
+      [recommendations]="aiRecommendations()"
+      [analyzerAlerts]="analyzerAlerts()"
+      [showAnalyzer]="showAnalyzer()"
+      [selectedAlertId]="selectedAlertId()"
+      (onRecommendationSelect)="handleRecommendationSelect($event)"
+      (onRecommendationAccept)="handleRecommendationAccept($event)"
+      (onRecommendationReject)="handleRecommendationReject($event)"
+      (onAlertClick)="handleAlertClick($event)"
+      (onAlertStatusChange)="handleAlertStatusChange($event)"
+    ></app-oasis-recommendations>
+
+    <!-- CENTER COLUMN - Document Viewer Component -->
+    <app-oasis-document-viewer
+      [activeDocId]="activeDocId()"
+      [highlightEvidence]="highlightEvidence()"
+    >
+      <!--
+        NOTE: Insert the document content here from the original oasis-john.html
+        Lines approximately 406-1427 containing:
+        - <div id="discharge-doc" class="document-content space-y-6">...</div>
+        - <div id="referral-doc" class="document-content hidden space-y-6">...</div>
+        - <div id="visit-doc" class="document-content hidden space-y-6">...</div>
+
+        These large document sections should be copied from the original template
+        into this ng-content slot to keep this file manageable.
+      -->
+        <div id="discharge-doc" class="document-content space-y-6">
+          <!-- PDF Page 1 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 2</div>
+
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
+              <div>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Jackson Memorial Hospital</h3>
+                <p class="text-xs text-slate-600">
+                  1611 NW 12th Avenue • Miami, FL 33136 • (305) 585-1111
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-sm text-slate-900">DISCHARGE SUMMARY</p>
+                <p class="text-xs text-slate-600">Medical Record</p>
+              </div>
+            </div>
+
+            <!-- Patient Info -->
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
+                <div><strong>Patient Name:</strong> John Robert Smith</div>
+                <div><strong>MRN:</strong> MRN-87654</div>
+                <div><strong>Date of Birth:</strong> 09/03/1958 (Age: 66)</div>
+                <div><strong>Gender:</strong> Male</div>
+                <div><strong>Admission Date:</strong> 09/24/2024</div>
+                <div><strong>Discharge Date:</strong> 10/01/2024</div>
+                <div><strong>Length of Stay:</strong> 7 days</div>
+                <div><strong>Attending Physician:</strong> Dr. James Rodriguez, MD</div>
+                <div><strong>Primary Care Physician:</strong> Dr. Michael Thompson, DO</div>
+                <div><strong>Insurance:</strong> Medicare Advantage (MCR-876543210)</div>
+              </div>
+
+              <!-- Primary Diagnosis -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Primary Diagnosis
+                </p>
+                <ul class="list-decimal pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-primary"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Acute cerebrovascular accident (CVA), right middle cerebral artery
+                      distribution with left-sided hemiparesis (ICD-10: I63.511)
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-respiratory"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Acute respiratory failure, hypoxemic (ICD-10: J96.01)
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-aspiration"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Aspiration pneumonia, right lower lobe (ICD-10: J69.0)
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Secondary Diagnoses -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Secondary Diagnoses
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Hypertension, uncontrolled (ICD-10: I10)
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Type 2 Diabetes Mellitus with diabetic neuropathy (ICD-10: E11.40)
+                    </span>
+                  </li>
+                  <li>Hyperlipidemia (ICD-10: E78.5)</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-cad"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Coronary artery disease, stable (ICD-10: I25.10)
+                    </span>
+                  </li>
+                  <li>History of tobacco use disorder (ICD-10: Z87.891)</li>
+                  <li>Chronic kidney disease, Stage 2 (ICD-10: N18.2)</li>
+                  <li>Benign prostatic hyperplasia (ICD-10: N40.0)</li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-dysphagia"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Dysphagia secondary to stroke (ICD-10: R13.19)
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Chief Complaint -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Chief Complaint
+                </p>
+                <p>
+                  Patient was brought to the Emergency Department by EMS after being found by his
+                  wife with sudden onset left-sided weakness, facial droop, and slurred speech at
+                  approximately 7:15 AM. Last known well was approximately 11:00 PM the night prior.
+                </p>
+              </div>
+
+              <!-- History of Present Illness -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  History of Present Illness
+                </p>
+                <p>
+                  Mr. Smith is a 66-year-old male with past medical history of uncontrolled
+                  hypertension, type 2 diabetes, hyperlipidemia, coronary artery disease, and former
+                  tobacco use who presented on 09/24/2024 with acute neurological deficits. On EMS
+                  arrival, he had left facial droop, dysarthria, left arm drift, and left leg
+                  weakness with NIHSS score of 12.
+                </p>
+                <p>
+                  In the ED, NIHSS was 14. CT head showed no hemorrhage. CTA revealed occlusion of
+                  the right M1 segment of the MCA. He was not a candidate for tPA due to unknown
+                  onset time but underwent mechanical thrombectomy with successful recanalization
+                  (TICI 2b).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PDF Page 2 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 2 of 2</div>
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <!-- Hospital Course -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Hospital Course
+                </p>
+                <p>
+                  <strong>Neurological:</strong>
+                  Following thrombectomy, MRI confirmed a right MCA territory infarct (~35cc). NIHSS
+                  improved from 14 on admission to 8 at discharge. Patient has persistent left-sided
+                  weakness with upper extremity strength approximately 3/5 and lower extremity 4-/5
+                  and mild left-sided neglect.
+                </p>
+                <p>
+                  <strong>Pulmonary:</strong>
+                  On hospital day 2, patient developed hypoxemia and fever. Chest X-ray showed right
+                  lower lobe infiltrate consistent with
+                  <span
+                    data-evidence-for="I8000-aspiration"
+                    class="hover:bg-yellow-100 transition-colors"
+                  >
+                    aspiration pneumonia
+                  </span>
+                  . He completed 7 days of IV antibiotics with clinical improvement and is now on
+                  room air.
+                </p>
+                <p>
+                  <strong>Swallowing/Nutrition:</strong>
+                  VFSS showed moderate-to-severe oropharyngeal
+                  <span
+                    data-evidence-for="I8000-dysphagia"
+                    class="hover:bg-yellow-100 transition-colors"
+                  >
+                    dysphagia with silent aspiration of thin liquids
+                  </span>
+                  . Patient was placed on a modified diet: pureed solids and nectar-thick liquids
+                  only with aspiration precautions. He requires assistance and supervision for all
+                  meals.
+                </p>
+                <p>
+                  <strong>Functional Status:</strong>
+                  Physical and occupational therapy documented significant left hemiparesis. Patient
+                  requires moderate to maximal assistance for transfers, ambulation, dressing,
+                  bathing, and toileting. He can ambulate only short distances (25–50 feet) with a
+                  rolling walker and moderate assistance and is wheelchair dependent for community
+                  mobility.
+                </p>
+              </div>
+
+              <!-- Discharge Vital Signs -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Vital Signs
+                </p>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded">
+                  <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><strong>Blood Pressure:</strong> 134/82 mmHg</div>
+                    <div><strong>Heart Rate:</strong> 78 bpm</div>
+                    <div><strong>Respiratory Rate:</strong> 16 breaths/min</div>
+                    <div><strong>Oxygen Saturation:</strong> 96% on room air</div>
+                    <div><strong>Temperature:</strong> 98.2°F</div>
+                    <div><strong>Weight:</strong> 192 lbs</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Discharge Disposition -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Discharge Disposition
+                </p>
+                <p><strong>Discharged to:</strong> Home with Home Health Services</p>
+                <p>
+                  <strong>Condition at Discharge:</strong>
+                  Alert and oriented, hemodynamically stable, breathing comfortably on room air.
+                  Persistent left hemiparesis (UE 3/5, LE 4-/5), moderate assistance required for
+                  most ADLs, high risk for falls, and ongoing dysphagia requiring modified diet and
+                  strict aspiration precautions.
+                </p>
+              </div>
+
+              <div class="text-xs text-slate-500 mt-6">
+                <p>
+                  <strong>Prepared by:</strong> Dr. James Rodriguez, MD (Hospitalist) •
+                  Electronically signed 10/01/2024 16:45
+                </p>
+              </div>
+
+              <div class="text-center text-xs text-slate-400 italic mt-8">
+                -- End of Discharge Summary --
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Referral/Orders (Hidden initially) -->
+        <div id="referral-doc" class="document-content hidden space-y-6">
+          <!-- PDF Page 1 -->
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-xs text-slate-400 mb-6 text-right">Page 1 of 1</div>
+
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-800">
+              <div>
+                <h3 class="font-bold text-xl mb-1 text-slate-900">Jackson Memorial Hospital</h3>
+                <p class="text-xs text-slate-600">
+                  1611 NW 12th Avenue • Miami, FL 33136 • (305) 585-1111
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-sm text-slate-900">HOME HEALTH REFERRAL</p>
+                <p class="text-xs text-slate-600">Physician Orders</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-800 leading-relaxed">
+              <!-- Patient / Ordering Info -->
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded">
+                <div><strong>Patient:</strong> John Robert Smith</div>
+                <div><strong>MRN:</strong> MRN-87654</div>
+                <div><strong>DOB:</strong> 09/03/1958</div>
+                <div><strong>Ordering Physician:</strong> Dr. James Rodriguez, MD</div>
+                <div><strong>Primary Care Physician:</strong> Dr. Michael Thompson, DO</div>
+                <div><strong>Date of Referral:</strong> 10/01/2024</div>
+                <div><strong>Agency:</strong> Sunrise Home Health Agency</div>
+                <div><strong>Start of Care:</strong> 10/02/2024</div>
+              </div>
+
+              <!-- Reason for Home Health -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Reason for Home Health Referral
+                </p>
+                <p class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
+                  <span
+                    data-evidence-for="I8000-primary"
+                    class="hover:bg-yellow-100 transition-colors"
+                  >
+                    Recent acute ischemic stroke in right MCA territory with left hemiparesis and
+                    dysphagia
+                  </span>
+                  requiring intensive rehabilitation, medication management, and strict aspiration
+                  and fall precautions in the home setting.
+                </p>
+              </div>
+
+              <!-- Disciplines Ordered -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Disciplines Ordered
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <strong>Skilled Nursing:</strong>
+                    3x/week for 4 weeks, then 2x/week — neurological assessment, stroke education,
+                    blood pressure and blood glucose monitoring, medication reconciliation,
+                    monitoring for bleeding on dual antiplatelet therapy, aspiration precautions,
+                    skin integrity, and caregiver training.
+                  </li>
+                  <li>
+                    <strong>Physical Therapy:</strong>
+                    3x/week for 8 weeks — gait training, strengthening of left upper and lower
+                    extremities, balance training, fall prevention, transfer training, and
+                    wheelchair mobility.
+                  </li>
+                  <li>
+                    <strong>Occupational Therapy:</strong>
+                    2–3x/week for 8 weeks — ADL retraining, left-sided neglect strategies,
+                    one-handed techniques for dressing/grooming/eating, home safety assessment, and
+                    adaptive equipment training.
+                  </li>
+                  <li>
+                    <strong>Speech Therapy:</strong>
+                    2–3x/week for 6 weeks — swallow therapy, diet advancement as appropriate, safe
+                    swallowing strategies, aspiration precautions, and cognitive-communication
+                    therapy.
+                  </li>
+                  <li>
+                    <strong>Home Health Aide:</strong>
+                    5x/week — bathing, grooming, dressing, transfers, meal preparation, feeding
+                    supervision, and light housekeeping related to patient care.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Key Clinical Problems -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Active Problems Requiring Management
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    <span
+                      data-evidence-for="GG0170-mobility"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Left hemiparesis with impaired balance and high fall risk — requires moderate
+                      to maximal assistance for transfers and ambulation; wheelchair dependent for
+                      community distances.
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-dysphagia"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Moderate-to-severe oropharyngeal dysphagia with silent aspiration of thin
+                      liquids — requires pureed solids and nectar-thick liquids only with full
+                      supervision and aspiration precautions.
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-diabetes"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Type 2 diabetes now managed on basal-bolus insulin regimen — requires blood
+                      glucose monitoring before meals and at bedtime and ongoing insulin teaching.
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      data-evidence-for="I8000-htn"
+                      class="hover:bg-yellow-100 transition-colors"
+                    >
+                      Hypertension requiring strict BP control with Amlodipine and Lisinopril — goal
+                      BP &lt;140/90.
+                    </span>
+                  </li>
+                  <li>
+                    Ongoing stroke prevention on dual antiplatelet therapy (Aspirin 325mg and
+                    Clopidogrel 75mg for 21 days) with bleeding precautions.
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Durable Medical Equipment -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Durable Medical Equipment (DME)
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>Hospital bed (full electric with side rails)</li>
+                  <li>Standard wheelchair with elevating legrests</li>
+                  <li>Rolling walker with hand brakes</li>
+                  <li>Bedside commode and shower chair/transfer bench</li>
+                  <li>Raised toilet seat and recommended bathroom grab bars</li>
+                  <li>Blood glucose monitor and supplies</li>
+                  <li>Blood pressure monitor (automatic upper arm cuff)</li>
+                  <li>Thickener powder for liquid consistency modification</li>
+                </ul>
+              </div>
+
+              <!-- Follow-up Appointments -->
+              <div>
+                <p class="font-bold text-slate-900 mb-2 uppercase text-xs tracking-wide">
+                  Follow-up Appointments
+                </p>
+                <ul class="list-disc pl-5 space-y-1 text-sm">
+                  <li>
+                    PCP — Dr. Michael Thompson on 10/08/2024 at 2:00 PM for post-discharge follow-up
+                    and medication review.
+                  </li>
+                  <li>
+                    Neurology — Dr. Patricia Lee on 10/15/2024 at 10:30 AM for post-stroke follow-up
+                    and antiplatelet management.
+                  </li>
+                  <li>
+                    Endocrinology — Dr. Maria Gonzalez on 10/22/2024 at 9:00 AM for diabetes and
+                    insulin management.
+                  </li>
+                </ul>
+              </div>
+
+              <div class="mt-8 pt-4 border-t border-slate-300 text-xs text-slate-600 italic">
+                Physician Signature: Dr. James Rodriguez, MD<br />
+                Electronically signed on 10/01/2024 at 16:45
+              </div>
+
+              <div class="text-center text-xs text-slate-400 italic mt-6">
+                -- End of Referral/Orders --
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- First Visit Note (Hidden initially) -->
+        <div id="visit-doc" class="document-content hidden space-y-6">
+          <div
+            class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300 flex items-center justify-center"
+            style="width: 8.5in; min-height: 11in"
+          >
+            <div class="text-center text-sm text-slate-500 space-y-2">
+              <p class="font-semibold text-slate-700">Visit Note Not Available</p>
+              <p class="text-xs">
+                <!-- No visit note has been provided for this episode. Home health team will document
+                findings in subsequent visit notes. -->
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    </app-oasis-document-viewer>
+
+    <!-- RIGHT COLUMN - OASIS Form Component -->
+    <app-oasis-form
+      [patientName]="'John Smith'"
+      [itemsAccepted]="itemsAccepted()"
+      [totalItems]="totalItems()"
+      [currentPayment]="currentPayment()"
+    >
+      <!--
+        NOTE: Insert the form content here from the original oasis-john.html
+        Lines approximately after the document viewer containing the OASIS form fields.
+
+        This includes all the form sections like:
+        - M0080 Discipline of Person Completing Assessment
+        - M1005 Inpatient Discharge Date
+        - M1011 Inpatient Diagnoses
+        - I8000 Primary/Secondary Diagnosis sections
+        - GG sections for functional assessments
+        - etc.
+
+        These form sections should be copied from the original template
+        into this ng-content slot.
+      -->
+    <section class="col-span-3 bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div class="p-4 border-b bg-indigo-600">
+        <h2 class="text-lg font-bold text-white">OASIS-E1 Assessment Form</h2>
+        <p class="text-xs text-indigo-100 mt-1">Centers for Medicare & Medicaid Services</p>
+      </div>
+      <div class="overflow-y-auto h-[calc(100%-80px)] p-4 bg-slate-50">
+        <!-- Patient Information Header -->
+        <div class="bg-white border-2 border-slate-300 rounded-lg p-4 mb-4">
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">Patient Name</label>
+              <p class="font-bold text-slate-900">Smith, John</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">MRN</label>
+              <p class="font-bold text-slate-900">87654</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">DOB</label>
+              <p class="font-bold text-slate-900">09/03/1958</p>
+            </div>
+            <div>
+              <label class="text-slate-500 text-[10px] uppercase">Assessment Type</label>
+              <p class="font-bold text-slate-900">01 - Start of Care</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMINISTRATIVE INFORMATION -->
+        <div class="bg-blue-50 border-l-4 border-blue-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-blue-900 text-xs uppercase tracking-wider">
+            Administrative Information
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >M0010. CMS Certification Number</label
+            >
+            <input
+              type="text"
+              value="55-9876"
+              readonly
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs font-mono"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">M0030. Start of Care Date</label>
+            <input
+              type="date"
+              value="2024-11-16"
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >M0090. Date Assessment Completed</label
+            >
+            <input
+              type="date"
+              value="2024-11-16"
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">M0100. Reason for Assessment</label>
+            <select
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            >
+              <option selected>01 - Start of care - further visits planned</option>
+              <option>03 - Resumption of care</option>
+              <option>04 - Recertification</option>
+              <option>05 - Other follow-up</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- DEMOGRAPHICS -->
+        <div class="bg-green-50 border-l-4 border-green-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-green-900 text-xs uppercase tracking-wider">
+            Patient Demographics
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">A1005. Ethnicity</label>
+            <select
+              class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+            >
+              <option>0 - Hispanic or Latino</option>
+              <option selected>1 - Not Hispanic or Latino</option>
+              <option>9 - Patient declines to respond</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-[11px] font-bold text-slate-700"
+              >A1010. Race (Check all that apply)</label
+            >
+            <div class="mt-1 space-y-1">
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 01 - American Indian or Alaska Native
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 02 - Asian
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 03 - Black or African American
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" class="mr-2" /> 04 - Native Hawaiian/Pacific Islander
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" checked class="mr-2" /> 05 - White
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIAGNOSES (AI-Populated) -->
+        <div class="bg-red-50 border-l-4 border-red-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-red-900 text-xs uppercase tracking-wider">
+            Health Conditions - Diagnoses
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <!-- I8000 Primary Diagnosis -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Primary Diagnosis (ICD-10-CM)
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-primary-answer"
+              data-required="true"
+              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
+            >
+              <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+              LANCE AI will populate the primary stroke diagnosis (I63.511) when you click "Accept"
+              on a recommendation card.
+            </div>
+          </div>
+
+          <!-- I8000 Comorbidity (High-Impact) -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Comorbidity (PDGM-Relevant)
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-comorbidity-answer"
+              data-required="true"
+              class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
+            >
+              <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+              Aspiration pneumonia (J69.0) will be added here when accepted from the AI
+              recommendations panel.
+            </div>
+          </div>
+
+          <!-- I8000 Other Diagnoses -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700">
+              I8000. Other Diagnoses
+              <span class="text-red-600 ml-1">*</span>
+            </label>
+            <div
+              id="form-I8000-other-diagnoses-container"
+              data-required="true"
+              class="mt-1 space-y-2"
+            >
+              <!-- Other diagnoses will be added here dynamically -->
+              <div
+                class="p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs form-field-placeholder"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI will append additional diagnoses (e.g., dysphagia R13.19, diabetes E11.40,
+                hypertension I10) when you click "Accept" on those recommendation cards.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
+        <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
+        <div class="bg-purple-50 border-l-4 border-purple-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-purple-900 text-xs uppercase tracking-wider">
+            GG0130. Self-Care (Admission Performance)
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <p class="text-[10px] text-slate-600 mb-3 italic bg-purple-50 p-2 rounded">
+            <strong>Coding:</strong> Code the patient's usual performance at admission. Use 6-point
+            scale: 06=Independent, 05=Setup help, 04=Supervision, 03=Partial assist, 02=Substantial
+            assist, 01=Dependent
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130A. Eating</label>
+              <select
+                id="GG0130A-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130B. Oral Hygiene</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0130C. Toileting Hygiene</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div class="border-t border-slate-200 pt-3">
+              <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
+                GG0130E. Shower/Bathe Self (AI-Populated)
+              </label>
+              <div
+                id="form-GG0130E-answer"
+                class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI has recommendations - Click "Accept" to apply
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130F. Upper Body Dressing</label
+              >
+              <select
+                id="GG0130F-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130G. Lower Body Dressing</label
+              >
+              <select
+                id="GG0130G-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0130H. Putting on/Taking off Footwear</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNCTIONAL ABILITIES: MOBILITY (GG Section) -->
+        <div class="bg-indigo-50 border-l-4 border-indigo-600 px-3 py-2 mb-3">
+          <h3 class="font-bold text-indigo-900 text-xs uppercase tracking-wider">
+            GG0170. Mobility (Admission Performance)
+          </h3>
+        </div>
+
+        <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <p class="text-[10px] text-slate-600 mb-3 italic bg-indigo-50 p-2 rounded">
+            <strong>Coding:</strong> Code the patient's usual performance at admission. Same 6-point
+            scale as Self-Care section.
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170A. Roll Left and Right</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170B. Sit to Lying</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div class="border-t border-slate-200 pt-3">
+              <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
+                GG0170C. Walk 10 Feet (AI-Populated)
+              </label>
+              <div
+                id="form-GG0170C-answer"
+                class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+              >
+                <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                LANCE AI has recommendations - Click "Accept" to apply
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170D. Walk 50 Feet with Two Turns</label
+              >
+              <select
+                id="GG0170D-select"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170I. Walk 150 Feet</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >GG0170J. Walking 10 Feet on Uneven Surfaces</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170K. 1 Step (Curb)</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170L. 4 Steps</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">GG0170M. 12 Steps</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>06 - Independent</option>
+                <option>05 - Setup or clean-up assistance</option>
+                <option>04 - Supervision or touching assistance</option>
+                <option>03 - Partial/moderate assistance</option>
+                <option>02 - Substantial/maximal assistance</option>
+                <option>01 - Dependent</option>
+                <option>07 - Patient refused</option>
+                <option>09 - Not applicable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div
+          class="bg-gradient-to-r from-emerald-50 to-blue-50 border-2 border-emerald-300 rounded-lg p-4 mb-4"
+        >
+          <h3 class="font-bold text-emerald-900 text-sm mb-3 flex items-center">
+            <ion-icon name="analytics-outline" class="mr-2"></ion-icon>
+            Assessment Summary
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Items Completed:</span>
+              <span id="summary-items-completed" class="font-bold text-slate-900">0 / 89</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">PDGM Clinical Group:</span>
+              <span id="summary-pdgm-group" class="font-bold text-emerald-700">MS-Rehab</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Comorbidity Tier:</span>
+              <span id="summary-comorbidity-tier" class="font-bold text-slate-900">None</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-emerald-200">
+              <span class="text-slate-700">Functional Level:</span>
+              <span class="font-bold text-slate-900">Low</span>
+            </div>
+            <div class="flex justify-between pt-2 mt-2 border-t-2 border-emerald-400">
+              <span class="text-slate-700 font-bold">30-Day Payment Estimate:</span>
+              <span id="payment-estimate" class="font-bold text-xl text-emerald-600"
+                >$2,875.50</span
+              >
+            </div>
+            <p class="text-[10px] text-slate-500 italic mt-2">
+              *Payment estimates are based on current PDGM grouping and may change with additional
+              coding
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Footer -->
+        <div class="bg-slate-100 border border-slate-300 rounded p-3 text-[10px] text-slate-600">
+          <p class="mb-1"><strong>CMS OASIS-E1 Version</strong> - Effective 01/01/2025</p>
+          <p>
+            This form must be completed by a qualified clinician and reviewed for accuracy before
+            submission to CMS.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- UPLOAD MODAL -->
+    </app-oasis-form>
+  </main>
+</div>
+
+<!-- ========================= MODALS ========================= -->
+
+<!-- ELIGIBILITY MODAL -->
+<div
+  id="eligibility-modal"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
+>
+  <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+          <ion-icon name="shield-checkmark" class="text-2xl text-emerald-600"></ion-icon>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-900">Eligibility Verified</h2>
+      </div>
+      <button (click)="hideModal('eligibility-modal')" class="text-slate-400 hover:text-slate-600">
+        <ion-icon name="close" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <div class="space-y-4 mb-6">
+      <!-- Patient Info -->
+      <div class="bg-slate-50 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Patient Information</p>
+
+        <div class="mb-4">
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-600 mr-2"></span>
+            Primary Payer: Medicare
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-xs text-slate-500">Name</p>
+            <p class="font-semibold text-slate-900">John Smith</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">MRN</p>
+            <p class="font-semibold text-slate-900">87654</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">DOB</p>
+            <p class="font-semibold text-slate-900">05/12/1948</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500">Age</p>
+            <p class="font-semibold text-slate-900">76 years</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medicare Status -->
+      <div class="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-500">
+        <p class="text-xs text-emerald-700 uppercase tracking-wide mb-2 font-semibold">
+          Medicare Status: Active
+        </p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-700">Part A (Hospital Insurance)</span>
+            <span class="flex items-center text-emerald-700 font-medium">
+              <ion-icon name="checkmark-circle" class="mr-1"></ion-icon>
+              Active
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-700">Part B (Medical Insurance)</span>
+            <span class="flex items-center text-emerald-700 font-medium">
+              <ion-icon name="checkmark-circle" class="mr-1"></ion-icon>
+              Active
+            </span>
+          </div>
+          <div class="text-xs text-slate-600 mt-2 pt-2 border-t border-emerald-200">
+            Effective: 01/01/2025 - 12/31/2025
+          </div>
+        </div>
+      </div>
+
+      <!-- Home Health Benefit -->
+      <div class="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+        <p class="text-xs text-blue-700 uppercase tracking-wide mb-2 font-semibold">
+          Home Health Benefit
+        </p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700">Available</span>
+          </div>
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700">No prior authorization required</span>
+          </div>
+          <div class="flex items-center">
+            <ion-icon name="checkmark-circle" class="text-emerald-600 mr-2"></ion-icon>
+            <span class="text-slate-700"
+              >Estimated remaining benefit days: <strong>60</strong></span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Details -->
+      <div class="text-xs text-slate-500 text-center pt-2">
+        <p>Last verified: Just now • Source: CMS Medicare Portal</p>
+      </div>
+    </div>
+
+    <div class="flex space-x-3">
+      <button
+        (click)="hideModal('eligibility-modal')"
+        class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+      >
+        Continue with Assessment
+      </button>
+      <button
+        (click)="recheckEligibility($event)"
+        class="px-4 text-emerald-600 hover:text-emerald-700 border border-emerald-600 hover:border-emerald-700 font-medium rounded-lg transition-colors flex items-center"
+      >
+        <ion-icon name="refresh-outline" class="mr-1"></ion-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div
+  id="export-modal"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
+>
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-slate-900">Export OASIS Assessment</h2>
+      <button (click)="hideModal('export-modal')" class="text-slate-400 hover:text-slate-600">
+        <ion-icon name="close" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <div class="space-y-4 mb-6">
+      <div class="bg-slate-50 rounded-lg p-4">
+        <p class="text-sm font-medium text-slate-700 mb-1">Patient: John Smith</p>
+        <p class="text-xs text-slate-500">MRN-87654 • Start of Care</p>
+      </div>
+
+      <div class="border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 mb-1">Est. Payment</p>
+        <p class="text-2xl font-bold text-slate-900">${{ currentPayment().toFixed(2) }}</p>
+        <p class="text-xs text-slate-500 mt-1">MS-Rehab • High Comorbidity</p>
+      </div>
+
+      <div class="text-sm text-slate-600">
+        <p class="mb-2"><strong>Export Format:</strong> OASIS XML (v2025.1)</p>
+        <p class="text-xs text-slate-500">Ready for submission to CMS via your OASIS system</p>
+      </div>
+    </div>
+
+    <div class="flex space-x-3">
+      <button
+        (click)="exportToXML()"
+        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
+      >
+        Download XML
+      </button>
+      <button
+        (click)="hideModal('export-modal')"
+        class="px-6 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

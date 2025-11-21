@@ -1,0 +1,56 @@
+<aside class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+  <!-- Form Header with Progress -->
+  <div class="px-6 py-4 border-b border-slate-100">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-slate-900">OASIS-E1 Assessment</h2>
+      <span class="text-xs text-slate-500">{{ itemsAccepted() }} / {{ totalItems() }} items</span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-slate-100 rounded-full h-2">
+      <div
+        id="progress-bar"
+        class="bg-indigo-600 h-2 rounded-full transition-all"
+        [style.width.%]="progressPercentage"
+      ></div>
+    </div>
+    <p class="text-xs text-slate-500 mt-2 text-center">{{ progressPercentage }}% Complete</p>
+  </div>
+
+  <!-- Summary Card -->
+  <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+    <h3 class="text-xs font-semibold text-slate-900 mb-2">Assessment Summary</h3>
+    <div class="space-y-2 text-xs">
+      <div class="flex justify-between">
+        <span class="text-slate-600">Patient:</span>
+        <span class="font-medium text-slate-900">{{ patientName() }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Clinical Group:</span>
+        <span class="font-medium text-slate-900">MS-Rehab (Neuro / Stroke)</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Functional Level:</span>
+        <span class="font-medium text-slate-900">Medium</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-600">Comorbidity Tier:</span>
+        <span id="summary-comorbidity-tier" class="font-medium text-slate-900 transition-all"
+          >None</span
+        >
+      </div>
+      <div class="flex justify-between pt-2 border-t border-slate-200">
+        <span class="text-slate-600">Est. Payment:</span>
+        <span id="payment-estimate" class="font-semibold text-emerald-700"
+          >${{ currentPayment().toFixed(2) }}</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Content Area -->
+  <div class="overflow-y-auto h-[calc(100%-280px)] px-6 py-4">
+    <!-- Slot for form content to be passed from parent -->
+    <ng-content></ng-content>
+  </div>
+</aside>

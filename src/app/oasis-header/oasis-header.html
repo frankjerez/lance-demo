@@ -1,0 +1,99 @@
+<header
+  class="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-20 backdrop-blur-lg bg-opacity-95"
+>
+  <div class="flex justify-between items-center">
+    <!-- Left: Back + Patient Info -->
+    <div class="flex items-center space-x-6">
+      <button
+        (click)="handleBackClick()"
+        class="text-slate-400 hover:text-slate-600 transition-colors"
+      >
+        <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
+      </button>
+      <div class="flex items-center space-x-3">
+        <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+          LANCE AI
+        </div>
+        <div class="w-px h-8 bg-slate-200"></div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base font-semibold text-slate-900">{{ patientName() }}</h1>
+            <button
+              (click)="handleEligibilityClick($event)"
+              class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"
+            >
+              <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
+              <span>Check Eligibility</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-500">{{ patientMrn() }} • {{ assessmentType() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Stats + Actions -->
+    <div class="flex items-center space-x-6">
+      <div class="w-px h-8 bg-slate-200"></div>
+
+      <!-- PDGM Payment -->
+      <div class="text-right">
+        <p class="text-xs text-slate-500">Est. Payment</p>
+        <p id="pdgm-value" class="text-sm font-semibold text-slate-900 transition-all">
+          ${{ currentPayment().toFixed(2) }}
+        </p>
+      </div>
+
+      <div class="w-px h-8 bg-slate-200"></div>
+
+      <!-- Analyzer Alert Toggle -->
+      <button
+        *ngIf="hasAnalyzerAlerts()"
+        type="button"
+        (click)="handleToggleAnalyzer()"
+        class="flex items-center space-x-1 px-3 py-1 rounded-full border border-amber-300 bg-amber-50 text-[0.7rem] text-amber-800 hover:bg-amber-100"
+      >
+        <ion-icon name="alert-circle-outline" class="text-xs"></ion-icon>
+        <span>Oasis Analyzer: {{ newAnalyzerAlertCount() }} alert(s)</span>
+        <ion-icon
+          [name]="showAnalyzer() ? 'chevron-up-outline' : 'chevron-down-outline'"
+          class="text-[0.7rem]"
+        ></ion-icon>
+      </button>
+
+      <!-- Save Button -->
+      <button
+        type="button"
+        (click)="handleSaveClick()"
+        [disabled]="isSavingAssessment()"
+        class="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 border border-emerald-700 shadow-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <ng-container *ngIf="!isSavingAssessment()">
+          <ion-icon name="save-outline" class="text-sm"></ion-icon>
+          <span>Save Assessment Changes</span>
+        </ng-container>
+
+        <ng-container *ngIf="isSavingAssessment()">
+          <ion-icon name="hourglass-outline" class="text-sm animate-spin"></ion-icon>
+          <span>Saving &amp; Running Analyzer...</span>
+        </ng-container>
+      </button>
+
+      <!-- Reset Button -->
+      <button
+        (click)="handleResetClick()"
+        class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center space-x-1"
+      >
+        <ion-icon name="refresh-outline" class="text-lg"></ion-icon>
+        <span>Reset</span>
+      </button>
+
+      <!-- Export Button -->
+      <button
+        (click)="handleExportClick()"
+        class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+      >
+        Finalize & Export
+      </button>
+    </div>
+  </div>
+</header>

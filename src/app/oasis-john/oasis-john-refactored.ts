@@ -1,12 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  inject,
-  OnInit,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { OasisHeaderComponent } from '../oasis-header/oasis-header';
 import {
@@ -24,7 +17,7 @@ import { OasisFormComponent } from '../oasis-form/oasis-form';
 
 @Component({
   selector: 'app-oasis-john',
-  templateUrl: './oasis-john.html',
+  templateUrl: './oasis-john-refactored.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     CommonModule,
@@ -324,11 +317,7 @@ export class OasisJohnComponent implements OnInit {
 
     // Mark recommendation as accepted
     this.aiRecommendations.update((recs) =>
-      recs.map((rec) =>
-        rec.id === recommendation.id
-          ? { ...rec, status: 'accepted' as AiRecommendationStatus }
-          : rec
-      )
+      recs.map((rec) => (rec.id === recommendation.id ? { ...rec, status: 'accepted' as AiRecommendationStatus } : rec))
     );
 
     // Update Summary Card comorbidity tier if needed
@@ -348,11 +337,7 @@ export class OasisJohnComponent implements OnInit {
 
     // Mark as rejected (you could show a reject modal here)
     this.aiRecommendations.update((recs) =>
-      recs.map((rec) =>
-        rec.id === recommendation.id
-          ? { ...rec, status: 'rejected' as AiRecommendationStatus }
-          : rec
-      )
+      recs.map((rec) => (rec.id === recommendation.id ? { ...rec, status: 'rejected' as AiRecommendationStatus } : rec))
     );
   }
 

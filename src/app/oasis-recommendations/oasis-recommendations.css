@@ -1,0 +1,16 @@
+.recommendation-card.selected {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px #a5b4fc;
+}
+
+.recommendation-card.accepted {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.recommendation-card.rejected {
+  opacity: 0.4;
+  pointer-events: none;
+  background: #fee;
+  border-color: #fca;
+}
