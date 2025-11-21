@@ -35,8 +35,7 @@
 
       <!-- Right: Stats + Actions -->
       <div class="flex items-center space-x-6">
-        <!-- Progress -->
-        <div class="flex items-center space-x-3">
+        <!-- <div class="flex items-center space-x-3">
           <div class="text-right">
             <p class="text-xs text-slate-500">Completion</p>
             <p id="progress-text" class="text-sm font-semibold text-slate-900">15%</p>
@@ -48,7 +47,7 @@
               style="width: 15%"
             ></div>
           </div>
-        </div>
+        </div> -->
 
         <div class="w-px h-8 bg-slate-200"></div>
 
@@ -62,13 +61,43 @@
 
         <div class="w-px h-8 bg-slate-200"></div>
 
-        <!-- Actions -->
         <button
+          *ngIf="hasAnalyzerAlerts"
+          type="button"
+          (click)="showAnalyzer = !showAnalyzer"
+          class="flex items-center space-x-1 px-3 py-1 rounded-full border border-amber-300 bg-amber-50 text-[0.7rem] text-amber-800 hover:bg-amber-100"
+        >
+          <ion-icon name="alert-circle-outline" class="text-xs"></ion-icon>
+          <span>Oasis Analyzer: {{ newAnalyzerAlertCount }} alert(s)</span>
+          <ion-icon
+            [name]="showAnalyzer ? 'chevron-up-outline' : 'chevron-down-outline'"
+            class="text-[0.7rem]"
+          ></ion-icon>
+        </button>
+
+        <!-- Actions -->
+        <!-- <button
           (click)="validateForm()"
           class="text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors flex items-center space-x-1"
         >
           <ion-icon name="alert-circle-outline" class="text-lg"></ion-icon>
           <span>Validate Form</span>
+        </button> -->
+
+        <button
+          type="button"
+          (click)="saveAssessmentAndRunAnalyzer()"
+          [disabled]="isSavingAssessment"
+          class="flex items-center space-x-2 px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <ng-container *ngIf="!isSavingAssessment">
+            <ion-icon name="save-outline" class="text-sm"></ion-icon>
+            <span>Save Assessment Changes</span>
+          </ng-container>
+          <ng-container *ngIf="isSavingAssessment">
+            <ion-icon name="hourglass-outline" class="text-sm animate-spin"></ion-icon>
+            <span>Saving &amp; Running Analyzer...</span>
+          </ng-container>
         </button>
 
         <button
@@ -91,10 +120,123 @@
 
   <main class="grid grid-cols-12" style="margin: 15px">
     <!-- LEFT COLUMN (AI Recommendations) -->
-    <!-- LEFT COLUMN (AI Recommendations) -->
     <aside
       class="col-span-3 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
     >
+      <!-- ANALYZER ALERTS ABOVE AI RECOMMENDATIONS -->
+      <section
+        *ngIf="analyzerAlerts && analyzerAlerts.length > 0"
+        class="mb-4 bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden"
+      >
+        <header class="px-3 py-2 border-b border-amber-100 flex items-center justify-between">
+          <div>
+            <h2 class="text-[0.65rem] font-semibold tracking-wide text-amber-800 uppercase">
+              Analyzer Alerts
+            </h2>
+            <p class="text-[0.65rem] text-slate-500">
+              Flags documentation vs OASIS consistency. No new diagnoses are made.
+            </p>
+          </div>
+          <span
+            class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[0.65rem] font-medium"
+          >
+            {{ newAnalyzerAlertCount }} new
+          </span>
+        </header>
+
+        <div class="max-h-64 overflow-y-auto divide-y divide-slate-100">
+          <article
+            *ngFor="let alert of analyzerAlerts"
+            (click)="onAlertClick(alert, $event)"
+            class="px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+            [ngClass]="{
+              'bg-amber-50': alert.status === 'new',
+              'opacity-60': alert.status === 'dismissed'
+            }"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1 pr-2">
+                <div class="flex items-center space-x-2 mb-1">
+                  <span
+                    class="text-[0.6rem] font-semibold uppercase tracking-wide"
+                    [ngClass]="{
+                      'text-emerald-700': alert.type === 'coding_opportunity',
+                      'text-sky-700': alert.type === 'inconsistency'
+                    }"
+                  >
+                    {{ alert.type === 'coding_opportunity' ? 'Coding Opp.' : 'Inconsistency' }}
+                  </span>
+
+                  <span
+                    class="text-[0.6rem] px-1.5 py-0.5 rounded-full"
+                    [ngClass]="{
+                      'bg-red-100 text-red-700': alert.severity === 'high',
+                      'bg-amber-100 text-amber-700': alert.severity === 'medium',
+                      'bg-slate-100 text-slate-600': alert.severity === 'low'
+                    }"
+                  >
+                    {{ alert.severity | titlecase }}
+                  </span>
+
+                  <span
+                    class="text-[0.6rem] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500"
+                    *ngIf="alert.status !== 'new'"
+                  >
+                    {{ alert.status | titlecase }}
+                  </span>
+                </div>
+
+                <h3 class="text-[0.7rem] font-semibold text-slate-900 mb-0.5">
+                  {{ alert.title }}
+                </h3>
+
+                <p class="text-[0.65rem] text-slate-600 leading-snug mb-0.5 line-clamp-3">
+                  {{ alert.description }}
+                </p>
+
+                <p class="text-[0.6rem] text-slate-500">
+                  Evidence:
+                  <span class="font-medium">{{ alert.evidenceDocId }}</span>
+                  <span *ngIf="alert.hippsImpact">
+                    • Impact:
+                    <span class="font-medium text-emerald-700">
+                      {{ alert.hippsImpact.delta | currency : 'USD' : 'symbol' : '1.0-0' }}
+                    </span>
+                  </span>
+                </p>
+              </div>
+
+              <div class="flex flex-col items-end space-y-1 text-[0.6rem]">
+                <button
+                  type="button"
+                  (click)="onAlertClick(alert, $event)"
+                  class="px-2 py-1 rounded border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center space-x-1"
+                >
+                  <ion-icon name="search-outline" class="text-[0.6rem]"></ion-icon>
+                  <span>Evidence</span>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="markAlertStatus(alert, 'reviewed'); $event.stopPropagation()"
+                  class="px-2 py-0.5 rounded text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                >
+                  Reviewed
+                </button>
+
+                <button
+                  type="button"
+                  (click)="markAlertStatus(alert, 'dismissed'); $event.stopPropagation()"
+                  class="px-2 py-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <div class="px-6 py-4 border-b border-slate-100">
         <h2 class="text-sm font-semibold text-slate-900">AI Recommendations</h2>
         <p class="text-xs text-slate-500 mt-0.5">
@@ -116,330 +258,79 @@
             </p>
             <div class="flex items-center justify-between text-xs">
               <span class="text-blue-600">Tier: None → High</span>
-              <span class="text-blue-900 font-semibold">+$287 (illustrative)</span>
+              <span class="text-blue-900 font-semibold">+$287</span>
             </div>
           </div>
         </div>
       </div>
-
       <div
         id="recommendations-list"
         class="overflow-y-auto h-[calc(100%-210px)] px-6 py-4 space-y-3"
       >
-        <!-- ICD-10 Primary Diagnosis (OASIS-E1: I8000) -->
         <div
+          *ngFor="let rec of aiRecommendations"
           class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-primary', 'discharge-doc')"
-          data-form-id="form-I8000-primary-answer"
+          (click)="selectRecommendation($event, rec.selectionOasisKey, rec.evidenceDocId)"
+          [attr.data-form-id]="rec.formFieldId"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex-1">
               <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Primary Diagnosis • I8000
+                {{ rec.headerLabel }}
               </p>
               <h3 class="text-xs font-semibold text-slate-900">
-                I63.511 – Cerebral infarction due to embolism of right middle cerebral artery
+                {{ rec.title }}
               </h3>
             </div>
+
             <span
-              class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-medium"
+              *ngIf="rec.badgeLabel"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-medium"
+              [ngClass]="rec.badgeClass"
             >
-              Recommended
+              {{ rec.badgeLabel }}
             </span>
           </div>
 
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Documented right MCA territory infarct with persistent left-sided hemiparesis and NIHSS
-            scores described in the Discharge Summary support selection of
-            <span class="font-semibold">I63.511</span> as the primary diagnosis.
-          </p>
+          <p
+            class="text-xs text-slate-600 mb-3 leading-relaxed"
+            [innerHTML]="rec.rationaleHtml"
+          ></p>
 
           <div
             class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
           >
-            <span class="text-slate-500">PDGM: Neuro / Stroke</span>
-            <span class="text-slate-500">📄 Discharge Summary</span>
+            <span class="text-slate-500">{{ rec.contextLabel }}</span>
+            <span class="text-slate-500">📄 {{ rec.evidenceDocLabel }}</span>
           </div>
 
           <div class="flex space-x-2">
+            <!-- ICD / Diagnosis-style recommendations -->
             <button
+              *ngIf="rec.kind === 'icd'"
               (click)="
                 acceptRecommendation(
                   $event,
-                  'I8000-primary',
-                  'I63.511 - Cerebral infarction due to embolism of right middle cerebral artery',
-                  true,
-                  25
+                  rec.oasisTargetId,
+                  rec.acceptValue || '',
+                  rec.triggersPdgmUpdate,
+                  rec.progressIncrement
                 )
               "
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
             >
               Accept
             </button>
+
+            <!-- GG recommendations -->
             <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- Comorbidity - Aspiration Pneumonia (High-Value) -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-aspiration', 'discharge-doc')"
-          data-form-id="form-I8000-comorbidity-answer"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Comorbidity • I8000
-              </p>
-              <h3 class="text-xs font-semibold text-slate-900">
-                J69.0 – Aspiration pneumonia, right lower lobe
-              </h3>
-            </div>
-            <span
-              class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[0.65rem] font-medium"
-            >
-              High impact
-            </span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Hospital course describes hypoxemia, fever, and right lower lobe infiltrate treated as
-            <span class="font-semibold">aspiration pneumonia</span>, now resolved at discharge. This
-            supports adding J69.0 as a comorbidity.
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Comorbidity adjustment</span>
-            <span class="text-slate-500">📄 Discharge Summary</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="
-                acceptRecommendation(
-                  $event,
-                  'I8000-comorbidity',
-                  'J69.0 - Aspiration pneumonia, right lower lobe',
-                  true,
-                  20
-                )
-              "
+              *ngIf="rec.kind === 'gg'"
+              (click)="acceptGGRecommendation($event, rec.oasisTargetId, rec.ggValue || '')"
               class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
             >
               Accept
             </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
 
-        <!-- Additional Comorbidity - Dysphagia -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-dysphagia', 'discharge-doc')"
-          data-form-id="form-I8000-other-diagnoses-container"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Additional Comorbidity • I8000
-              </p>
-              <h3 class="text-xs font-semibold text-slate-900">R13.19 – Other dysphagia</h3>
-            </div>
-            <span
-              class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[0.65rem] font-medium"
-            >
-              Swallow risk
-            </span>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            VFSS shows moderate-to-severe oropharyngeal
-            <span class="font-semibold">dysphagia</span>
-            with silent aspiration of thin liquids, requiring pureed solids and nectar-thick liquids
-            with supervision. This supports adding R13.19 as an additional diagnosis.
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">No direct tier change</span>
-            <span class="text-slate-500">📄 Discharge Summary</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="
-                acceptRecommendation(
-                  $event,
-                  'I8000-dysphagia',
-                  'R13.19 - Other dysphagia',
-                  false,
-                  5
-                )
-              "
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- Additional Comorbidity - Diabetes with Neuropathy -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-diabetes', 'discharge-doc')"
-          data-form-id="form-I8000-other-diagnoses-container"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Additional Comorbidity • I8000
-              </p>
-              <h3 class="text-xs font-semibold text-slate-900">
-                E11.40 – Type 2 diabetes mellitus with diabetic neuropathy
-              </h3>
-            </div>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Past medical history lists type 2 diabetes with neuropathy and new basal-bolus insulin
-            regimen with BG checks before meals and at bedtime. This supports capturing
-            <span class="font-semibold">E11.40</span> as an additional comorbidity.
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">No direct tier change</span>
-            <span class="text-slate-500">📄 Discharge, Referral</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="
-                acceptRecommendation(
-                  $event,
-                  'I8000-diabetes',
-                  'E11.40 - Type 2 diabetes mellitus with diabetic neuropathy',
-                  false,
-                  5
-                )
-              "
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- Additional Comorbidity - Hypertension -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'I8000-htn', 'discharge-doc')"
-          data-form-id="form-I8000-other-diagnoses-container"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Additional Comorbidity • I8000
-              </p>
-              <h3 class="text-xs font-semibold text-slate-900">I10 – Essential hypertension</h3>
-            </div>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            Uncontrolled hypertension is repeatedly referenced as a key stroke risk factor requiring
-            strict BP control with Amlodipine and Lisinopril, supporting capture of
-            <span class="font-semibold">I10</span>.
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">No direct tier change</span>
-            <span class="text-slate-500">📄 Discharge, Referral</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="
-                acceptRecommendation($event, 'I8000-htn', 'I10 - Essential hypertension', false, 5)
-              "
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
-            <button
-              (click)="rejectRecommendation($event)"
-              class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-
-        <!-- GG Mobility - Walk / Transfers -->
-        <div
-          class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"
-          (click)="selectRecommendation($event, 'GG0170-mobility', 'referral-doc')"
-          data-form-id="form-GG0170C-answer"
-        >
-          <div class="flex justify-between items-start mb-3">
-            <div class="flex-1">
-              <p class="text-[0.65rem] uppercase tracking-wide text-slate-500">
-                Functional Mobility • GG0170
-              </p>
-              <h3 class="text-xs font-semibold text-slate-900">
-                03 – Partial/moderate assistance for short-distance ambulation and transfers
-              </h3>
-            </div>
-          </div>
-
-          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-            PT/OT document left hemiparesis with need for moderate to maximal assistance for
-            transfers and short-distance ambulation (25–50 ft) with a rolling walker, wheelchair
-            dependent for community mobility. This supports coding GG0170 items at a
-            partial/moderate assistance level.
-          </p>
-
-          <div
-            class="flex items-center justify-between text-xs mb-3 pb-3 border-b border-slate-100"
-          >
-            <span class="text-slate-500">Mobility</span>
-            <span class="text-slate-500">📄 Referral / Therapy notes</span>
-          </div>
-
-          <div class="flex space-x-2">
-            <button
-              (click)="acceptGGRecommendation($event, 'GG0170C', '03')"
-              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-            >
-              Accept
-            </button>
             <button
               (click)="rejectRecommendation($event)"
               class="px-3 text-slate-400 hover:text-slate-600 text-xs font-medium transition-colors"
@@ -461,19 +352,19 @@
           <div class="flex space-x-1">
             <button
               class="doc-tab active px-3 py-1.5 text-xs font-medium rounded-lg"
-              (click)="switchDocumentTab($event, 'discharge-doc')"
+              (click)="switchDocumentTab($any($event.target), 'discharge-doc')"
             >
               Discharge Summary
             </button>
             <button
               class="doc-tab px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-50"
-              (click)="switchDocumentTab($event, 'referral-doc')"
+              (click)="switchDocumentTab($any($event.target), 'referral-doc')"
             >
               Referral/Orders
             </button>
             <button
               class="doc-tab px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-50"
-              (click)="switchDocumentTab($event, 'visit-doc')"
+              (click)="switchDocumentTab($any($event.target), 'visit-doc')"
             >
               Visit Note
             </button>

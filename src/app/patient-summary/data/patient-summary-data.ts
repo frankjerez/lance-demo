@@ -43,9 +43,30 @@ export interface PatientSummary {
   id: string;
   mrn: string;
   demographics: PatientDemographics;
-  history: EpisodeHistoryItem[];
+  history: EpisodeHistory[];
   docs: MedicalDocument[];
   payment: PDGMPaymentBreakdown;
+}
+
+export interface PlanOfCareSection {
+  title: string;
+  items: string[];
+}
+
+type EpisodeStatus = 'Active' | 'Completed';
+
+export interface EpisodeHistory {
+  type: string;
+  startDate: string;
+  endDate?: string;
+  clinician: string;
+  status: EpisodeStatus;
+
+  primaryReason: string;
+  diagnoses: string[];
+  planOfCare: PlanOfCareSection[];
+  interventions: string[];
+  outcome: string;
 }
 
 export const myPatientSummary: PatientSummary = {
@@ -64,32 +85,7 @@ export const myPatientSummary: PatientSummary = {
     agencyName: 'Sunrise Home Health Agency',
   },
 
-  history: [
-    {
-      episodeId: 'EP-20231101',
-      type: 'Start of Care (SOC)',
-      startDate: '2023-11-01',
-      endDate: '2023-12-15',
-      status: 'Completed',
-      clinician: 'Dr. Anna Thompson',
-    },
-    {
-      episodeId: 'EP-20240215',
-      type: 'Recertification (ROC)',
-      startDate: '2024-02-15',
-      endDate: '2024-03-30',
-      status: 'Completed',
-      clinician: 'RN Sarah Martinez',
-    },
-    {
-      episodeId: 'EP-20241002',
-      type: 'Start of Care (SOC)',
-      startDate: '2024-10-02',
-      status: 'In Review',
-      clinician: 'RN John Alvarez',
-    },
-  ],
-
+  history: [],
   docs: [
     {
       id: 'doc1',

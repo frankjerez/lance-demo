@@ -1,10 +1,74 @@
+import { CommonModule } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+
+export type AnalyzerAlertType = 'coding_opportunity' | 'inconsistency';
+export type AnalyzerAlertSeverity = 'low' | 'medium' | 'high';
+export type AnalyzerAlertStatus = 'new' | 'reviewed' | 'dismissed';
+
+export interface AnalyzerAlert {
+  id: string;
+  type: AnalyzerAlertType;
+  severity: AnalyzerAlertSeverity;
+  status: AnalyzerAlertStatus;
+
+  title: string;
+  description: string;
+
+  evidenceDocId: 'discharge-doc' | 'referral-doc' | 'visit-doc';
+  evidenceAnchorId?: string;
+
+  relatedOasisItem?: string;
+
+  hippsImpact?: {
+    delta: number;
+    description: string;
+  };
+
+  // 🔗 optional link to an AI recommendation
+  linkedRecommendationId?: string;
+}
+
+type AiRecommendationStatus = 'pending' | 'accepted' | 'rejected';
+type AiRecommendationKind = 'icd' | 'gg';
+
+interface AiRecommendation {
+  id: string;
+  kind: AiRecommendationKind;
+
+  // UI text
+  headerLabel: string; // e.g. "Primary Diagnosis • I8000"
+  title: string; // e.g. "I63.511 – Cerebral infarction..."
+  rationaleHtml: string; // supports <span> markup
+  contextLabel: string; // e.g. "PDGM: Neuro / Stroke"
+  evidenceDocLabel: string; // e.g. "Discharge Summary"
+
+  // Badge chip
+  badgeLabel?: string;
+  badgeClass?: string; // e.g. "bg-emerald-50 text-emerald-700"
+
+  // Behavior / wiring
+  selectionOasisKey: string; // passed to selectRecommendation
+  evidenceDocId: 'discharge-doc' | 'referral-doc' | 'visit-doc';
+  formFieldId: string; // data-form-id
+
+  // For Accept buttons
+  oasisTargetId: string; // passed to accept/acceptGG
+  acceptValue?: string; // full value to write into form (ICD text)
+  ggValue?: string; // e.g. "03" for GG0170C
+
+  triggersPdgmUpdate: boolean;
+  progressIncrement: number;
+
+  // For Analyzer / lifecycle
+  status: AiRecommendationStatus;
+}
 
 @Component({
   selector: 'app-oasis-john',
   templateUrl: './oasis-john.html',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule],
   styleUrls: ['./oasis-john.css'],
 })
 export class OasisJohnComponent implements OnInit {
@@ -18,6 +82,269 @@ export class OasisJohnComponent implements OnInit {
   ngOnInit(): void {
     // default page is login
     this.showPage('copilot-page');
+  }
+
+  aiRecommendations: AiRecommendation[] = [
+    {
+      id: 'rec-primary',
+      kind: 'icd',
+      headerLabel: 'Primary Diagnosis • I8000',
+      title: 'I63.511 – Cerebral infarction due to embolism of right middle cerebral artery',
+      rationaleHtml:
+        'Documented right MCA territory infarct with persistent left-sided hemiparesis and NIHSS scores described in the Discharge Summary support selection of <span class="font-semibold">I63.511</span> as the primary diagnosis.',
+      contextLabel: 'PDGM: Neuro / Stroke',
+      evidenceDocLabel: 'Discharge Summary',
+
+      badgeLabel: 'Recommended',
+      badgeClass: 'bg-emerald-50 text-emerald-700',
+
+      selectionOasisKey: 'I8000-primary',
+      evidenceDocId: 'discharge-doc',
+      formFieldId: 'form-I8000-primary-answer',
+
+      oasisTargetId: 'I8000-primary',
+      acceptValue: 'I63.511 - Cerebral infarction due to embolism of right middle cerebral artery',
+      triggersPdgmUpdate: true,
+      progressIncrement: 25,
+
+      status: 'pending',
+    },
+    {
+      id: 'rec-aspiration',
+      kind: 'icd',
+      headerLabel: 'Comorbidity • I8000',
+      title: 'J69.0 – Aspiration pneumonia, right lower lobe',
+      rationaleHtml:
+        'Hospital course describes hypoxemia, fever, and right lower lobe infiltrate treated as <span class="font-semibold">aspiration pneumonia</span>, now resolved at discharge. This supports adding J69.0 as a comorbidity.',
+      contextLabel: 'Comorbidity adjustment',
+      evidenceDocLabel: 'Discharge Summary',
+
+      badgeLabel: 'High impact',
+      badgeClass: 'bg-blue-50 text-blue-700',
+
+      selectionOasisKey: 'I8000-aspiration',
+      evidenceDocId: 'discharge-doc',
+      formFieldId: 'form-I8000-comorbidity-answer',
+
+      oasisTargetId: 'I8000-comorbidity',
+      acceptValue: 'J69.0 - Aspiration pneumonia, right lower lobe',
+      triggersPdgmUpdate: true,
+      progressIncrement: 20,
+
+      status: 'pending',
+    },
+    {
+      id: 'rec-dysphagia',
+      kind: 'icd',
+      headerLabel: 'Additional Comorbidity • I8000',
+      title: 'R13.19 – Other dysphagia',
+      rationaleHtml:
+        'VFSS shows moderate-to-severe oropharyngeal <span class="font-semibold">dysphagia</span> with silent aspiration of thin liquids, requiring pureed solids and nectar-thick liquids with supervision. This supports adding R13.19 as an additional diagnosis.',
+      contextLabel: 'No direct tier change',
+      evidenceDocLabel: 'Discharge Summary',
+
+      badgeLabel: 'Swallow risk',
+      badgeClass: 'bg-emerald-50 text-emerald-700',
+
+      selectionOasisKey: 'I8000-dysphagia',
+      evidenceDocId: 'discharge-doc',
+      formFieldId: 'form-I8000-other-diagnoses-container',
+
+      oasisTargetId: 'I8000-dysphagia',
+      acceptValue: 'R13.19 - Other dysphagia',
+      triggersPdgmUpdate: false,
+      progressIncrement: 5,
+
+      status: 'pending',
+    },
+    {
+      id: 'rec-diabetes',
+      kind: 'icd',
+      headerLabel: 'Additional Comorbidity • I8000',
+      title: 'E11.40 – Type 2 diabetes mellitus with diabetic neuropathy',
+      rationaleHtml:
+        'Past medical history lists type 2 diabetes with neuropathy and new basal-bolus insulin regimen with BG checks before meals and at bedtime. This supports capturing <span class="font-semibold">E11.40</span> as an additional comorbidity.',
+      contextLabel: 'No direct tier change',
+      evidenceDocLabel: 'Discharge, Referral',
+
+      selectionOasisKey: 'I8000-diabetes',
+      evidenceDocId: 'discharge-doc',
+      formFieldId: 'form-I8000-other-diagnoses-container',
+
+      oasisTargetId: 'I8000-diabetes',
+      acceptValue: 'E11.40 - Type 2 diabetes mellitus with diabetic neuropathy',
+      triggersPdgmUpdate: false,
+      progressIncrement: 5,
+
+      status: 'pending',
+    },
+    {
+      id: 'rec-htn',
+      kind: 'icd',
+      headerLabel: 'Additional Comorbidity • I8000',
+      title: 'I10 – Essential hypertension',
+      rationaleHtml:
+        'Uncontrolled hypertension is repeatedly referenced as a key stroke risk factor requiring strict BP control with Amlodipine and Lisinopril, supporting capture of <span class="font-semibold">I10</span>.',
+      contextLabel: 'No direct tier change',
+      evidenceDocLabel: 'Discharge, Referral',
+
+      selectionOasisKey: 'I8000-htn',
+      evidenceDocId: 'discharge-doc',
+      formFieldId: 'form-I8000-other-diagnoses-container',
+
+      oasisTargetId: 'I8000-htn',
+      acceptValue: 'I10 - Essential hypertension',
+      triggersPdgmUpdate: false,
+      progressIncrement: 5,
+
+      status: 'pending',
+    },
+    {
+      id: 'rec-gg-mobility',
+      kind: 'gg',
+      headerLabel: 'Functional Mobility • GG0170',
+      title: '03 – Partial/moderate assistance for short-distance ambulation and transfers',
+      rationaleHtml:
+        'PT/OT document left hemiparesis with need for moderate to maximal assistance for transfers and short-distance ambulation (25–50 ft) with a rolling walker, wheelchair dependent for community mobility. This supports coding GG0170 items at a partial/moderate assistance level.',
+      contextLabel: 'Mobility',
+      evidenceDocLabel: 'Referral / Therapy notes',
+
+      selectionOasisKey: 'GG0170-mobility',
+      evidenceDocId: 'referral-doc',
+      formFieldId: 'form-GG0170C-answer',
+
+      oasisTargetId: 'GG0170C',
+      ggValue: '03',
+      triggersPdgmUpdate: false,
+      progressIncrement: 0,
+
+      status: 'pending',
+    },
+  ];
+
+  selectedAlertId: string | null = null;
+
+  onAlertClick(alert: AnalyzerAlert, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.selectedAlertId = alert.id;
+    this.focusAnalyzerEvidence(alert);
+  }
+
+  get newAnalyzerAlertCount(): number {
+    return this.analyzerAlerts.filter((a) => a.status === 'new').length;
+  }
+  showAnalyzer = false; // or false to start collapsed
+
+  get hasAnalyzerAlerts(): boolean {
+    return this.analyzerAlerts && this.analyzerAlerts.length > 0;
+  }
+
+  private focusAnalyzerEvidence(alert: AnalyzerAlert): void {
+    // 1) Switch to the right document tab
+    if (alert.evidenceDocId) {
+      const tab = document.querySelector(
+        `.doc-tab[data-doc-id="${alert.evidenceDocId}"]`
+      ) as HTMLElement | null;
+
+      if (tab) {
+        this.switchDocumentTab(tab, alert.evidenceDocId);
+      }
+    }
+
+    // 2) Highlight the specific evidence anchor
+    if (alert.evidenceAnchorId) {
+      const viewer = document.getElementById('document-viewer');
+      if (!viewer) return;
+
+      const el = viewer.querySelector(
+        `[data-evidence-for="${alert.evidenceAnchorId}"]`
+      ) as HTMLElement | null;
+
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('form-field-highlight');
+        setTimeout(() => el.classList.remove('form-field-highlight'), 1500);
+      }
+    }
+  }
+
+  markAlertStatus(alert: AnalyzerAlert, status: AnalyzerAlertStatus): void {
+    this.analyzerAlerts = this.analyzerAlerts.map((a) =>
+      a.id === alert.id ? { ...a, status } : a
+    );
+  }
+
+  // All possible alerts the analyzer COULD raise
+  private allAnalyzerAlerts: AnalyzerAlert[] = [
+    {
+      id: 'alert-aspiration-missed',
+      type: 'coding_opportunity',
+      severity: 'high',
+      status: 'new',
+      title: 'Aspiration pneumonia documented but not present in OASIS I8000',
+      description:
+        'Discharge Summary documents aspiration pneumonia (J69.0). This diagnosis is not currently captured in I8000 comorbidity fields. Please double-check whether this was intentionally excluded.',
+      evidenceDocId: 'discharge-doc',
+      evidenceAnchorId: 'I8000-aspiration',
+      relatedOasisItem: 'I8000-comorbidity',
+      hippsImpact: {
+        delta: 287,
+        description: 'Potential comorbidity tier increase (+$287 illustrative).',
+      },
+      linkedRecommendationId: 'rec-aspiration',
+    },
+    {
+      id: 'alert-limb-findings-inconsistent',
+      type: 'inconsistency',
+      severity: 'medium',
+      status: 'new',
+      title: 'Lower extremity findings in visit note not reflected in OASIS',
+      description:
+        'Visit note documents +2 pitting edema, cool feet, faint pedal pulses, dark discoloration of the right great toe, and pain with walking relieved by rest. The current OASIS submission does not show any active wound, ulcer, or lower extremity perfusion issue. Please double-check for consistency.',
+      evidenceDocId: 'visit-doc',
+      evidenceAnchorId: 'analyzer-toe',
+      relatedOasisItem: 'Skin/ulcers or vascular status',
+      linkedRecommendationId: undefined, // not tied to an active AI rec
+    },
+  ];
+
+  // Alerts actually shown to the user (initially empty)
+  analyzerAlerts: AnalyzerAlert[] = [];
+
+  // Save/analyzer state
+  isSavingAssessment = false;
+
+  private isActiveAiRecommendation(recId?: string): boolean {
+    if (!recId) return false;
+
+    const rec = this.aiRecommendations.find((r) => r.id === recId);
+    if (!rec) return false;
+
+    return rec.status === 'pending';
+  }
+
+  private computeAnalyzerAlerts(): void {
+    this.analyzerAlerts = this.allAnalyzerAlerts.filter((alert) => {
+      // If linked to a rec that is still pending, hide it
+      if (this.isActiveAiRecommendation(alert.linkedRecommendationId)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  saveAssessmentAndRunAnalyzer(): void {
+    if (this.isSavingAssessment) return;
+
+    this.isSavingAssessment = true;
+
+    // Simulate save + analyzer processing
+    setTimeout(() => {
+      this.isSavingAssessment = false;
+      this.computeAnalyzerAlerts();
+    }, 1500); // tweak as needed
   }
 
   // ======= page switching =======
@@ -164,21 +491,16 @@ export class OasisJohnComponent implements OnInit {
 
   // ======= document tabs =======
 
-  switchDocumentTab(event: Event, docId: string): void {
-    const button = (event.target as HTMLElement)?.closest('.doc-tab') as HTMLElement | null;
-    if (!button) return;
-
-    // toggle active classes on tabs
+  switchDocumentTab(tabEl: HTMLElement, docId: string): void {
+    // toggle active classes
     const allTabs = document.querySelectorAll('.doc-tab');
     allTabs.forEach((tab) => tab.classList.remove('active'));
 
-    button.classList.add('active');
+    tabEl.classList.add('active');
 
     // show/hide doc sections
     const docs = document.querySelectorAll('.document-content');
-    docs.forEach((doc) => {
-      (doc as HTMLElement).classList.add('hidden');
-    });
+    docs.forEach((doc) => (doc as HTMLElement).classList.add('hidden'));
 
     const activeDoc = document.getElementById(docId);
     if (activeDoc) {
@@ -214,8 +536,8 @@ export class OasisJohnComponent implements OnInit {
 
       if (targetTab) {
         // Create a fake event for switchDocumentTab
-        const fakeEvent = { target: targetTab } as unknown as Event;
-        this.switchDocumentTab(fakeEvent, targetDocId);
+        //const fakeEvent = { target: targetTab } as unknown as Event;
+        this.switchDocumentTab(targetTab, targetDocId);
       }
     }
 

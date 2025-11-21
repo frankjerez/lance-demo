@@ -53,7 +53,7 @@ export const myPatients: PatientListItem[] = [
     name: 'John Smith',
     mrn: 'MRN-87654',
     assessmentType: 'Recertification (ROC)',
-    docs: { ds: 'present', ro: 'present', vn: 'missing' },
+    docs: { ds: 'missing', ro: 'present', vn: 'missing' },
     status: {
       label: 'In Review',
       badgeClass: 'bg-blue-100 text-blue-800',
