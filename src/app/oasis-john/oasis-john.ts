@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
@@ -21,6 +22,9 @@ import {
   EvidenceHighlight,
 } from '../oasis-document-viewer/oasis-document-viewer';
 import { OasisFormComponent } from '../oasis-form/oasis-form';
+import { PaymentStateService } from '../services/payment-state.service';
+import { DocumentStateService } from '../services/document-state.service';
+import { RecommendationStateService } from '../services/recommendation-state.service';
 
 @Component({
   selector: 'app-oasis-john',
@@ -35,8 +39,18 @@ import { OasisFormComponent } from '../oasis-form/oasis-form';
   ],
   styleUrls: ['./oasis-john.css'],
 })
-export class OasisJohnComponent implements OnInit {
+export class OasisJohnComponent implements OnInit, AfterViewInit {
   public router = inject(Router);
+  private paymentStateService = inject(PaymentStateService);
+  private documentStateService = inject(DocumentStateService);
+  private recommendationStateService = inject(RecommendationStateService);
+
+  // Document mapping: patient-summary doc IDs -> oasis-john doc IDs
+  private readonly DOC_MAPPING = {
+    doc1: 'discharge-doc' as const,
+    doc2: 'referral-doc' as const,
+    doc5: 'visit-doc' as const,
+  };
 
   @ViewChild(OasisFormComponent) oasisFormComponent!: OasisFormComponent;
   @ViewChild(OasisDocumentViewerComponent) documentViewerComponent!: OasisDocumentViewerComponent;
@@ -47,12 +61,16 @@ export class OasisJohnComponent implements OnInit {
   currentPayment = signal(2875.5);
   showAnalyzer = signal(false);
   isSavingAssessment = signal(false);
+  hasBeenSaved = signal(false); // Track if assessment has been saved
   selectedAlertId = signal<string | null>(null);
-  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc'>('discharge-doc');
+  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc'>('referral-doc'); // Default to referral since it's the only one uploaded initially
   highlightEvidence = signal<EvidenceHighlight | null>(null);
 
-  // AI Recommendations state
-  aiRecommendations = signal<AiRecommendation[]>([
+  // Track which documents are available (uploaded)
+  availableDocs = signal<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(new Set());
+
+  // AI Recommendations state - All recommendations (before filtering)
+  private allAiRecommendations = signal<AiRecommendation[]>([
     {
       id: 'rec-primary',
       kind: 'icd',
@@ -169,6 +187,9 @@ export class OasisJohnComponent implements OnInit {
     },
   ]);
 
+  // Filtered recommendations based on available documents
+  aiRecommendations = signal<AiRecommendation[]>([]);
+
   // Analyzer alerts state
   private allAnalyzerAlerts = signal<AnalyzerAlert[]>([
     {
@@ -206,6 +227,7 @@ export class OasisJohnComponent implements OnInit {
   analyzerAlerts = signal<AnalyzerAlert[]>([]);
 
   pendingRejectCard: HTMLElement | null = null;
+  pendingRejectRecommendation: AiRecommendation | null = null;
 
   get hasAnalyzerAlerts(): boolean {
     return this.analyzerAlerts().length > 0;
@@ -216,13 +238,138 @@ export class OasisJohnComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.initializeAvailableDocuments();
+    this.filterRecommendationsAndAlerts();
+    this.restoreSavedRecommendationStates();
+    this.handleNavigationState();
     this.showPage('copilot-page');
+  }
+
+  /**
+   * Handle navigation state to set the active document tab
+   */
+  private handleNavigationState(): void {
+    const state = window.history.state as any;
+
+    if (state && state.openDocumentId) {
+      const docId = state.openDocumentId;
+      console.log('📄 Opening document from navigation:', docId);
+
+      // Map patient-summary doc ID to oasis-john doc ID
+      const oasisDocId = this.DOC_MAPPING[docId as keyof typeof this.DOC_MAPPING];
+
+      if (oasisDocId && this.availableDocs().has(oasisDocId)) {
+        console.log('📄 Setting active document to:', oasisDocId);
+        this.activeDocId.set(oasisDocId);
+      }
+    }
+  }
+
+  /**
+   * Check which documents are available (uploaded) and update the availableDocs signal
+   */
+  private initializeAvailableDocuments(): void {
+    const available = new Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>();
+
+    // Check each document using the DocumentStateService
+    Object.entries(this.DOC_MAPPING).forEach(([patientSummaryDocId, oasisDocId]) => {
+      if (this.documentStateService.isDocumentUploaded(patientSummaryDocId)) {
+        available.add(oasisDocId);
+      }
+    });
+
+    // Referral doc (doc2) is always available by default (hardcoded in patient-summary)
+    available.add('referral-doc');
+
+    this.availableDocs.set(available);
+    console.log('📄 Available documents:', Array.from(available));
+  }
+
+  /**
+   * Filter recommendations and alerts based on available documents
+   */
+  private filterRecommendationsAndAlerts(): void {
+    const available = this.availableDocs();
+
+    // Filter recommendations to only show those with available evidence documents
+    const filteredRecs = this.allAiRecommendations().filter((rec) =>
+      available.has(rec.evidenceDocId)
+    );
+    this.aiRecommendations.set(filteredRecs);
+    console.log('📋 Filtered recommendations:', filteredRecs.length, 'of', this.allAiRecommendations().length);
+
+    // Filter analyzer alerts to only show those with available evidence documents
+    const filteredAlerts = this.allAnalyzerAlerts().filter((alert) =>
+      available.has(alert.evidenceDocId)
+    );
+    this.analyzerAlerts.set(filteredAlerts);
+    console.log('⚠️ Filtered analyzer alerts:', filteredAlerts.length, 'of', this.allAnalyzerAlerts().length);
+  }
+
+  /**
+   * Restore saved recommendation states from the service
+   */
+  private restoreSavedRecommendationStates(): void {
+    const savedStates = this.recommendationStateService.getAllRecommendationStates();
+
+    if (savedStates.size === 0) {
+      console.log('💾 No saved recommendation states found');
+      return;
+    }
+
+    // Update recommendations with saved statuses
+    this.aiRecommendations.update((recs) =>
+      recs.map((rec) => {
+        const savedState = savedStates.get(rec.id);
+        if (savedState) {
+          console.log(`💾 Restoring ${rec.id} status: ${savedState.status}`);
+          return { ...rec, status: savedState.status };
+        }
+        return rec;
+      })
+    );
+
+    // Recompute analyzer alerts after restoring states
+    this.computeAnalyzerAlerts();
+
+    console.log('💾 Recommendation states restored');
+  }
+
+  ngAfterViewInit(): void {
+    // Populate form fields for accepted recommendations after view is initialized
+    const savedStates = this.recommendationStateService.getAllRecommendationStates();
+
+    if (savedStates.size === 0) {
+      return;
+    }
+
+    this.aiRecommendations().forEach((rec) => {
+      const savedState = savedStates.get(rec.id);
+      if (savedState && savedState.status === 'accepted') {
+        console.log(`💾 Populating form field for ${rec.id}`);
+
+        const isOtherDiagnosis = rec.formFieldId === 'form-I8000-other-diagnoses-container';
+        this.oasisFormComponent.populateField(
+          rec.formFieldId,
+          rec.acceptValue || rec.ggValue || '',
+          isOtherDiagnosis
+        );
+
+        // Update items accepted count
+        this.itemsAccepted.update((v) => v + 1);
+
+        // Update payment if applicable
+        if (rec.triggersPdgmUpdate) {
+          this.updatePaymentDisplay(rec);
+        }
+      }
+    });
   }
 
   // ======= Event Handlers from Child Components =======
 
   handleBackToDashboard(): void {
-    this.router.navigate(['/patients']);
+    this.router.navigate(['/patients', 'p1', 'summary']);
   }
 
   handleQuickEligibilityCheck(event: Event): void {
@@ -255,10 +402,54 @@ export class OasisJohnComponent implements OnInit {
 
     this.isSavingAssessment.set(true);
 
+    // Show the processing overlay
+    this.showModal('save-processing-overlay');
+
+    const statusEl = document.getElementById('analysis-status');
+    const progressBar = document.getElementById('analysis-progress-bar');
+
+    // Analysis steps with messages and progress
+    const steps = [
+      { message: 'Validating OASIS data fields • Checking required items', progress: 25, delay: 0 },
+      { message: 'Running PDGM calculations • Computing payment grouping', progress: 50, delay: 800 },
+      { message: 'Analyzing diagnosis codes • Checking comorbidity tiers', progress: 75, delay: 1600 },
+      { message: 'Generating compliance alerts • Finalizing assessment', progress: 100, delay: 2400 },
+    ];
+
+    // Animate through each step
+    steps.forEach((step) => {
+      setTimeout(() => {
+        if (statusEl) {
+          statusEl.textContent = step.message;
+        }
+        if (progressBar) {
+          progressBar.style.width = `${step.progress}%`;
+        }
+      }, step.delay);
+    });
+
+    // Hide overlay and complete
     setTimeout(() => {
+      this.hideModal('save-processing-overlay');
       this.isSavingAssessment.set(false);
+
+      // Mark as saved to enable alerts
+      this.hasBeenSaved.set(true);
       this.computeAnalyzerAlerts();
-    }, 1500);
+
+      // Automatically show analyzer if there are alerts
+      if (this.analyzerAlerts().length > 0) {
+        this.showAnalyzer.set(true);
+
+        // Scroll to top to show the analyzer alerts
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Reset progress bar for next time
+      if (progressBar) {
+        progressBar.style.width = '0%';
+      }
+    }, 3200);
   }
 
   handleReset(): void {
@@ -281,6 +472,8 @@ export class OasisJohnComponent implements OnInit {
 
   handleRecommendationSelect(data: { recommendation: AiRecommendation; event: Event }): void {
     const { recommendation } = data;
+    console.log('🔵 Recommendation selected:', recommendation.title);
+    console.log('🔵 Switching to document:', recommendation.evidenceDocId);
 
     // Determine evidence category
     let category: 'diagnosis' | 'gg-self-care' | 'gg-mobility' | 'default' = 'default';
@@ -295,6 +488,14 @@ export class OasisJohnComponent implements OnInit {
 
     // Update signals to trigger changes in child components
     this.activeDocId.set(recommendation.evidenceDocId);
+    console.log('🔵 activeDocId signal set to:', this.activeDocId());
+
+    // DIRECT APPROACH: Call switchTab directly on the child component
+    if (this.documentViewerComponent) {
+      console.log('🔵 Calling documentViewerComponent.switchTab directly');
+      this.documentViewerComponent.switchTab(recommendation.evidenceDocId);
+    }
+
     this.highlightEvidence.set({
       oasisId: recommendation.selectionOasisKey,
       category,
@@ -331,6 +532,12 @@ export class OasisJohnComponent implements OnInit {
       )
     );
 
+    // Save to persistent state
+    this.recommendationStateService.updateRecommendationStatus(recommendation.id, 'accepted');
+
+    // Recompute analyzer alerts to hide any linked to this accepted recommendation
+    this.computeAnalyzerAlerts();
+
     // Update Summary Card comorbidity tier if needed
     if (recommendation.oasisTargetId === 'I8000-comorbidity') {
       const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
@@ -346,14 +553,58 @@ export class OasisJohnComponent implements OnInit {
     data.event.stopPropagation();
     const { recommendation } = data;
 
-    // Mark as rejected (you could show a reject modal here)
+    // Store the recommendation and show modal
+    this.pendingRejectRecommendation = recommendation;
+
+    // Update modal content
+    const titleEl = document.getElementById('reject-modal-title');
+    if (titleEl) {
+      titleEl.textContent = recommendation.title;
+    }
+
+    // Clear previous reason
+    const reasonEl = document.getElementById('reject-reason') as HTMLTextAreaElement | null;
+    if (reasonEl) {
+      reasonEl.value = '';
+    }
+
+    // Show the modal
+    this.showModal('reject-modal');
+  }
+
+  confirmRejectRecommendation(): void {
+    if (!this.pendingRejectRecommendation) return;
+
+    const reasonEl = document.getElementById('reject-reason') as HTMLTextAreaElement | null;
+    const reason = reasonEl?.value || '';
+
+    // Log reason if provided (you could save this to a service/backend)
+    if (reason) {
+      console.log(`Rejection reason for ${this.pendingRejectRecommendation.id}:`, reason);
+    }
+
+    // Mark as rejected
     this.aiRecommendations.update((recs) =>
       recs.map((rec) =>
-        rec.id === recommendation.id
+        rec.id === this.pendingRejectRecommendation?.id
           ? { ...rec, status: 'rejected' as AiRecommendationStatus }
           : rec
       )
     );
+
+    // Save to persistent state
+    this.recommendationStateService.updateRecommendationStatus(
+      this.pendingRejectRecommendation.id,
+      'rejected',
+      reason
+    );
+
+    // Recompute analyzer alerts to show any linked to this rejected recommendation
+    this.computeAnalyzerAlerts();
+
+    // Clear pending and hide modal
+    this.pendingRejectRecommendation = null;
+    this.hideModal('reject-modal');
   }
 
   handleAlertClick(data: { alert: AnalyzerAlert; event?: Event }): void {
@@ -365,21 +616,29 @@ export class OasisJohnComponent implements OnInit {
     // Focus evidence in document viewer
     if (data.alert.evidenceDocId) {
       this.activeDocId.set(data.alert.evidenceDocId);
+
+      // DIRECT APPROACH: Call switchTab directly on the child component
+      if (this.documentViewerComponent) {
+        this.documentViewerComponent.switchTab(data.alert.evidenceDocId);
+      }
     }
 
     if (data.alert.evidenceAnchorId) {
-      const viewer = document.getElementById('document-viewer');
-      if (!viewer) return;
+      // Wait for tab switch to complete before scrolling
+      setTimeout(() => {
+        const viewer = document.getElementById('document-viewer');
+        if (!viewer) return;
 
-      const el = viewer.querySelector(
-        `[data-evidence-for="${data.alert.evidenceAnchorId}"]`
-      ) as HTMLElement | null;
+        const el = viewer.querySelector(
+          `[data-evidence-for="${data.alert.evidenceAnchorId}"]`
+        ) as HTMLElement | null;
 
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('form-field-highlight');
-        setTimeout(() => el.classList.remove('form-field-highlight'), 1500);
-      }
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('form-field-highlight');
+          setTimeout(() => el.classList.remove('form-field-highlight'), 1500);
+        }
+      }, 100); // Small delay to allow tab switch animation to complete
     }
   }
 
@@ -416,8 +675,12 @@ export class OasisJohnComponent implements OnInit {
       // Update payment
       if (recommendation.oasisTargetId === 'I8000-comorbidity') {
         this.currentPayment.set(3162.5);
+        // Update shared payment state for patient-summary
+        this.paymentStateService.updatePayment(3162.5, 287.0);
       } else {
         this.currentPayment.update((v) => v + 287);
+        // Update shared payment state for patient-summary
+        this.paymentStateService.updatePayment(this.currentPayment(), 0);
       }
 
       pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
@@ -436,16 +699,28 @@ export class OasisJohnComponent implements OnInit {
   }
 
   private computeAnalyzerAlerts(): void {
+    // Only show alerts after assessment has been saved
+    if (!this.hasBeenSaved()) {
+      this.analyzerAlerts.set([]);
+      return;
+    }
+
+    const available = this.availableDocs();
+
     this.analyzerAlerts.set(
       this.allAnalyzerAlerts().filter((alert) => {
-        // If linked to a pending recommendation, hide it
-        if (alert.linkedRecommendationId) {
-          const rec = this.aiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
-          if (rec && rec.status === 'pending') {
-            return false;
-          }
+        // Filter 1: Only show alerts for available documents
+        if (!available.has(alert.evidenceDocId)) {
+          return false;
         }
-        return true;
+
+        // Filter 2: Only show alerts when linked recommendation is rejected
+        if (!alert.linkedRecommendationId) {
+          return false; // No linked recommendation, hide alert
+        }
+
+        const rec = this.allAiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
+        return rec?.status === 'rejected'; // Show only if recommendation exists and is rejected
       })
     );
   }

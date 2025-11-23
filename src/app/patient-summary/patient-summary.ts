@@ -1,9 +1,11 @@
 // src/app/patient-summary/patient-summary.component.ts
 
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PatientSummary, MedicalDocument, EpisodeHistory } from './data/patient-summary-data';
 import { CommonModule } from '@angular/common';
+import { PaymentStateService } from '../services/payment-state.service';
+import { DocumentStateService } from '../services/document-state.service';
 
 type SummaryTab = 'demographics' | 'history' | 'docs' | 'payment';
 
@@ -14,6 +16,9 @@ type SummaryTab = 'demographics' | 'history' | 'docs' | 'payment';
   imports: [CommonModule],
 })
 export class PatientSummaryComponent implements OnInit {
+  private paymentStateService = inject(PaymentStateService);
+  private documentStateService = inject(DocumentStateService);
+
   patientId!: string;
   activeTab: SummaryTab = 'demographics';
 
@@ -362,15 +367,24 @@ export class PatientSummaryComponent implements OnInit {
 
   onOpenDoc(doc: MedicalDocument): void {
     if (!doc.uploaded) return;
-    // Later: navigate to a doc viewer or open modal
-    console.log('Open document', doc);
+    // Navigate to oasis-john with the document ID in state
+    this.router.navigate(['/oasisnew'], {
+      state: { openDocumentId: doc.id }
+    });
   }
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('visitNoteFileInput') visitNoteFileInput!: ElementRef<HTMLInputElement>;
 
   triggerFileUpload(): void {
     if (this.fileInput) {
       this.fileInput.nativeElement.click();
+    }
+  }
+
+  triggerVisitNoteUpload(): void {
+    if (this.visitNoteFileInput) {
+      this.visitNoteFileInput.nativeElement.click();
     }
   }
 
@@ -473,21 +487,25 @@ export class PatientSummaryComponent implements OnInit {
 
     const file = input.files[0];
 
-    // For now we just mock adding it to docs; later you call your API here
-    const now = new Date();
-    const uploadedAt = now.toLocaleString(); // or your own formatter
+    // Mark the discharge summary as uploaded in the shared service
+    this.documentStateService.markDocumentAsUploaded('doc1', file.name);
 
-    const newDoc: MedicalDocument = {
-      id: `doc-${Date.now()}`,
-      type: 'Other', // or infer from file.type / ask user
-      displayLabel: 'Uploaded Medical Record',
-      uploaded: true,
-      uploadedAt,
-      fileName: file.name,
-    };
+    // Reset input so selecting same file again still triggers change
+    input.value = '';
 
-    // Only for this patient (John Smith in your case)
-    //this.patientSummary.docs = [...this.patientSummary.docs, newDoc];
+    this.startAIProcessing();
+  }
+
+  onVisitNoteFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // Mark the visit note as uploaded in the shared service
+    this.documentStateService.markDocumentAsUploaded('doc5', file.name);
 
     // Reset input so selecting same file again still triggers change
     input.value = '';
@@ -516,14 +534,28 @@ export class PatientSummaryComponent implements OnInit {
         (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       ),
       docs: [
-        {
-          id: 'doc1',
-          type: 'DS',
-          displayLabel: 'Discharge Summary',
-          uploaded: false,
-          missingReason: 'Pending upload',
-          fileName: 'discharge_summary.pdf',
-        },
+        // Check if discharge summary was uploaded
+        (() => {
+          const docStatus = this.documentStateService.getDocumentStatus('doc1');
+          if (docStatus) {
+            return {
+              id: 'doc1',
+              type: 'DS' as const,
+              displayLabel: 'Discharge Summary',
+              uploaded: true,
+              uploadedAt: docStatus.uploadedAt,
+              fileName: docStatus.fileName,
+            };
+          }
+          return {
+            id: 'doc1',
+            type: 'DS' as const,
+            displayLabel: 'Discharge Summary',
+            uploaded: false,
+            missingReason: 'Pending upload',
+            fileName: 'discharge_summary.pdf',
+          };
+        })(),
         {
           id: 'doc2',
           type: 'RO',
@@ -532,29 +564,28 @@ export class PatientSummaryComponent implements OnInit {
           uploadedAt: '2024-10-02 10:20 AM',
           fileName: 'referral.pdf',
         },
-        // {
-        //   id: 'doc3',
-        //   type: 'VN',
-        //   displayLabel: 'Visit Note',
-        //   uploaded: true,
-        //   uploadedAt: '2024-10-02 1:40 PM',
-        //   fileName: 'visit_note_1.pdf',
-        // },
-        // {
-        //   id: 'doc4',
-        //   type: 'VN',
-        //   displayLabel: 'Visit Note',
-        //   uploaded: true,
-        //   uploadedAt: '2024-10-05 2:10 PM',
-        //   fileName: 'visit_note_2.pdf',
-        // },
-        {
-          id: 'doc5',
-          type: 'VN',
-          displayLabel: 'Visit Note',
-          uploaded: false,
-          missingReason: 'Clinician did not complete documentation',
-        },
+        // Check if visit note was uploaded
+        (() => {
+          const docStatus = this.documentStateService.getDocumentStatus('doc5');
+          if (docStatus) {
+            return {
+              id: 'doc5',
+              type: 'VN' as const,
+              displayLabel: 'Visit Note',
+              uploaded: true,
+              uploadedAt: docStatus.uploadedAt,
+              fileName: docStatus.fileName,
+            };
+          }
+          return {
+            id: 'doc5',
+            type: 'VN' as const,
+            displayLabel: 'Visit Note',
+            uploaded: false,
+            missingReason: 'Pending upload',
+            fileName: 'visit_note.pdf',
+          };
+        })(),
         {
           id: 'doc6',
           type: 'H&P',
@@ -574,10 +605,10 @@ export class PatientSummaryComponent implements OnInit {
       payment: {
         hippsCode: '2CB21',
         baseRate: 2753.5,
-        comorbidityAdjustment: 287.0,
-        functionalLevelAdjustment: 125.0,
-        lutsAdjustment: 89.25,
-        totalPayment: 2753.5 + 287.0 + 125.0 + 89.25,
+        comorbidityAdjustment: this.paymentStateService.payment().comorbidityAdjustment,
+        functionalLevelAdjustment: 122.0,
+        lutsAdjustment: 0,
+        totalPayment: this.paymentStateService.payment().totalPayment,
       },
     };
   }

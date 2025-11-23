@@ -40,6 +40,7 @@
       class="block col-span-6"
       [activeDocId]="activeDocId()"
       [highlightEvidence]="highlightEvidence()"
+      [availableDocs]="availableDocs()"
     >
       <!--
         NOTE: Insert the document content here from the original oasis-john.html
@@ -51,7 +52,7 @@
         These large document sections should be copied from the original template
         into this ng-content slot to keep this file manageable.
       -->
-      <div id="discharge-doc" class="document-content space-y-6">
+      <div id="discharge-doc" class="document-content space-y-6" *ngIf="availableDocs().has('discharge-doc')">
         <!-- PDF Page 1 -->
         <div
           class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
@@ -295,7 +296,7 @@
       </div>
 
       <!-- Referral/Orders (Hidden initially) -->
-      <div id="referral-doc" class="document-content hidden space-y-6">
+      <div id="referral-doc" class="document-content hidden space-y-6" *ngIf="availableDocs().has('referral-doc')">
         <!-- PDF Page 1 -->
         <div
           class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
@@ -486,17 +487,509 @@
       </div>
 
       <!-- First Visit Note (Hidden initially) -->
-      <div id="visit-doc" class="document-content hidden space-y-6">
+      <div id="visit-doc" class="document-content hidden space-y-6" *ngIf="availableDocs().has('visit-doc')">
+        <!-- PDF Page 1 -->
         <div
-          class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300 flex items-center justify-center"
+          class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
           style="width: 8.5in; min-height: 11in"
         >
-          <div class="text-center text-sm text-slate-500 space-y-2">
-            <p class="font-semibold text-slate-700">Visit Note Not Available</p>
-            <p class="text-xs">
-              <!-- No visit note has been provided for this episode. Home health team will document
-                findings in subsequent visit notes. -->
-            </p>
+          <!-- Header -->
+          <div class="mb-6 border-b-2 border-slate-800 pb-3">
+            <h1 class="text-lg font-bold text-slate-900">HOME HEALTH VISIT NOTE</h1>
+            <div class="text-xs text-slate-700 mt-2 space-y-1">
+              <div class="flex justify-between">
+                <span><strong>Patient:</strong> JOHN SMITH</span>
+                <span><strong>DOB:</strong> 03/15/1945</span>
+                <span><strong>MRN:</strong> MCR-876543210</span>
+              </div>
+              <div class="flex justify-between">
+                <span><strong>Visit Date:</strong> January 24, 2024</span>
+                <span><strong>Visit Type:</strong> Complete Assessment</span>
+                <span><strong>Nurse:</strong> Maria Lopez, RN</span>
+              </div>
+              <div><strong>Agency:</strong> Riverside Home Care</div>
+            </div>
+          </div>
+
+          <!-- Patient Verification -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">PATIENT VERIFICATION</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p><strong>Full Name:</strong> Samuel Robert JOHN</p>
+              <p><strong>Medicare #:</strong> Ends in 3847 ✓</p>
+              <p><strong>Start of Care Date:</strong> January 10, 2024</p>
+              <p><strong>Primary Physician:</strong> Dr. Ramirez, Valley Medical Group</p>
+            </div>
+          </section>
+
+          <!-- Vital Signs -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">VITAL SIGNS</h2>
+            <div class="text-xs text-slate-700 grid grid-cols-2 gap-2">
+              <p>
+                <strong>Blood Pressure:</strong>
+                <span
+                  data-evidence-for="M1200-vitals"
+                  class="text-red-700 font-semibold hover:bg-yellow-100 transition-colors"
+                  >158/92 mmHg (Elevated)</span
+                >
+              </p>
+              <p>
+                <strong>Pulse:</strong>
+                <span data-evidence-for="M1200-vitals" class="hover:bg-yellow-100 transition-colors"
+                  >88 bpm (slightly irregular)</span
+                >
+              </p>
+              <p>
+                <strong>Temperature:</strong>
+                <span data-evidence-for="M1200-vitals" class="hover:bg-yellow-100 transition-colors"
+                  >98.2°F (Normal)</span
+                >
+              </p>
+              <p>
+                <strong>Oxygen Saturation:</strong>
+                <span
+                  data-evidence-for="M1200-vitals"
+                  class="text-orange-700 font-semibold hover:bg-yellow-100 transition-colors"
+                  >94% on room air (Borderline)</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- Current Medications -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">CURRENT MEDICATIONS</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p>
+                • <strong>Lisinopril 10mg:</strong>
+                <span
+                  data-evidence-for="M2020-medications"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Daily - Patient reports compliance issues (missed 1-2 doses this week)</span
+                >
+              </p>
+              <p>
+                • <strong>Metformin 1000mg:</strong>
+                <span
+                  data-evidence-for="M2020-medications"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >BID - Taking as prescribed</span
+                >
+              </p>
+              <p>
+                • <strong>Furosemide 40mg:</strong>
+                <span
+                  data-evidence-for="M2020-medications"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Daily - Patient reports persistent edema despite medication</span
+                >
+              </p>
+              <p class="text-orange-700 mt-2">
+                <strong>⚠ Concern:</strong>
+                <span
+                  data-evidence-for="M2020-medications"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Medication non-compliance contributing to elevated BP</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- Diagnoses -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">ACTIVE DIAGNOSES</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p>
+                1.
+                <span
+                  data-evidence-for="I8000-hypertension"
+                  class="hover:bg-yellow-100 transition-colors"
+                  ><strong>Hypertension</strong> - Poorly controlled (BP 158/92)</span
+                >
+              </p>
+              <p>
+                2.
+                <span
+                  data-evidence-for="I8000-diabetes"
+                  class="hover:bg-yellow-100 transition-colors"
+                  ><strong>Type 2 Diabetes Mellitus</strong> - Patient reports inconsistent blood
+                  glucose monitoring</span
+                >
+              </p>
+              <p>
+                3.
+                <span data-evidence-for="I8000-ckd" class="hover:bg-yellow-100 transition-colors"
+                  ><strong>Stage 3 Chronic Kidney Disease</strong></span
+                >
+              </p>
+              <p>
+                4.
+                <span data-evidence-for="I8000-pad" class="hover:bg-yellow-100 transition-colors"
+                  ><strong>Peripheral Arterial Disease</strong> - Documented during recent
+                  hospitalization</span
+                >
+              </p>
+              <p>
+                5.
+                <span data-evidence-for="I8000-wounds" class="hover:bg-yellow-100 transition-colors"
+                  ><strong>Lower Extremity Wounds</strong> - Right ankle wound worsening</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- Mobility Assessment -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">MOBILITY & FUNCTIONAL STATUS</h2>
+            <div class="text-xs text-slate-700 space-y-2">
+              <p>
+                <strong>Gait Observation:</strong>
+                <span
+                  data-evidence-for="GG0170-mobility"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Patient walked to kitchen with slow, unsteady gait. Immediately reached for wall
+                  support. Favoring right leg significantly.</span
+                >
+              </p>
+              <p>
+                <strong>Assistive Devices:</strong>
+                <span
+                  data-evidence-for="GG0170-mobility"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Walker available but patient reports inconsistent use ("sometimes I forget to use
+                  it")</span
+                >
+              </p>
+              <p>
+                <strong>Pain Level:</strong>
+                <span data-evidence-for="M1242-pain" class="hover:bg-yellow-100 transition-colors"
+                  >6-7/10 while walking, especially right leg.
+                  <span class="evidence-diagnosis">Pain relieved by rest</span> (claudication
+                  pattern)</span
+                >
+              </p>
+              <p>
+                <strong>Fall Risk:</strong>
+                <span data-evidence-for="J1800-falls" class="hover:bg-yellow-100 transition-colors"
+                  >High - Near-fall in bathroom last week, grabbed towel bar.
+                  <span class="text-red-700 font-semibold">Grab bars needed</span></span
+                >
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <!-- PDF Page 2 -->
+        <div
+          class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
+          style="width: 8.5in; min-height: 11in"
+        >
+          <!-- Lower Extremity Assessment - CRITICAL FOR ANALYZER ALERT -->
+          <section class="mb-6" id="analyzer-toe">
+            <h2
+              class="text-sm font-bold text-slate-800 mb-2 bg-amber-50 px-2 py-1 border-l-4 border-amber-500"
+            >
+              LOWER EXTREMITY ASSESSMENT ⚠ CRITICAL FINDINGS
+            </h2>
+            <div class="text-xs text-slate-700 space-y-3 evidence-diagnosis">
+              <div class="bg-amber-50 p-3 rounded border border-amber-200">
+                <p class="font-bold text-amber-900 mb-2">CIRCULATION CONCERNS:</p>
+                <p>
+                  • <strong>Bilateral Edema:</strong>
+                  <span
+                    data-evidence-for="M1200-edema"
+                    class="font-semibold text-red-700 hover:bg-yellow-100 transition-colors"
+                    >+2 pitting edema in both ankles and feet. Indentation persists several seconds
+                    after pressure.</span
+                  >
+                </p>
+                <p>
+                  • <strong>Temperature:</strong>
+                  <span
+                    data-evidence-for="M1200-circulation"
+                    class="font-semibold hover:bg-yellow-100 transition-colors"
+                    >Feet cool to touch bilaterally. Patient reports constant cold sensation, wears
+                    two pairs of socks.</span
+                  >
+                </p>
+                <p>
+                  • <strong>Pedal Pulses:</strong>
+                  <span
+                    data-evidence-for="M1200-circulation"
+                    class="font-semibold hover:bg-yellow-100 transition-colors"
+                    >Faint but present bilaterally. Diminished compared to normal.</span
+                  >
+                </p>
+                <p>
+                  • <strong>Pain Pattern:</strong>
+                  <span
+                    data-evidence-for="M1242-pain"
+                    class="font-semibold hover:bg-yellow-100 transition-colors"
+                    >Pain with walking relieved by rest - consistent with claudication secondary to
+                    PAD.</span
+                  >
+                </p>
+              </div>
+
+              <div class="bg-red-50 p-3 rounded border-2 border-red-400">
+                <p class="font-bold text-red-900 mb-2">⚠ URGENT FINDING:</p>
+                <p class="text-red-900">
+                  <strong>Right Great Toe:</strong>
+                  <span
+                    data-evidence-for="I8000-toe"
+                    class="font-bold hover:bg-yellow-100 transition-colors"
+                    >Dark discoloration noted, patient reports onset ~1 week ago. Area appears
+                    dusky/cyanotic. Patient reports intermittent throbbing pain, especially at
+                    night.</span
+                  >
+                </p>
+                <p class="text-red-700 mt-2 font-semibold">
+                  <span data-evidence-for="I8000-toe" class="hover:bg-yellow-100 transition-colors"
+                    >CLINICAL SIGNIFICANCE: Concerning for ischemia given PAD + diabetes. Risk for
+                    tissue necrosis/amputation if not addressed promptly.</span
+                  >
+                </p>
+              </div>
+
+              <div class="bg-yellow-50 p-3 rounded border border-yellow-300">
+                <p class="font-bold text-yellow-900 mb-2">WOUND STATUS:</p>
+                <p>
+                  • <strong>Right Ankle Wound:</strong>
+                  <span
+                    data-evidence-for="M1340-wounds"
+                    class="hover:bg-yellow-100 transition-colors"
+                    >Reports wound "opened up more" ~2 days ago. Clear fluid drainage noted. No foul
+                    odor currently. Patient describes as "bigger wound" compared to smaller healed
+                    lesion.</span
+                  >
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Respiratory Assessment -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">RESPIRATORY STATUS</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p>
+                <strong>Dyspnea:</strong>
+                <span
+                  data-evidence-for="M1400-dyspnea"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Shortness of breath with stairs - must stop halfway</span
+                >
+              </p>
+              <p>
+                <strong>Orthopnea:</strong>
+                <span
+                  data-evidence-for="M1400-dyspnea"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Now requires 3 pillows (increased from 1 pillow previously)</span
+                >
+              </p>
+              <p>
+                <strong>Paroxysmal Nocturnal Dyspnea:</strong>
+                <span
+                  data-evidence-for="M1400-dyspnea"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Occasional episodes waking at night</span
+                >
+              </p>
+              <p>
+                <strong>Chest Discomfort:</strong>
+                <span data-evidence-for="M1242-pain" class="hover:bg-yellow-100 transition-colors"
+                  >Reports "tightness" with overexertion</span
+                >
+              </p>
+              <p class="text-orange-700 mt-2">
+                <strong>Assessment:</strong>
+                <span
+                  data-evidence-for="M1400-dyspnea"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Possible volume overload despite diuretic therapy</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- ADLs & Self-Care -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">ACTIVITIES OF DAILY LIVING</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p>
+                <strong>Bathing:</strong>
+                <span
+                  data-evidence-for="GG0130-bathing"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Uses shower chair, requires assistance from daughter for safety</span
+                >
+              </p>
+              <p>
+                <strong>Dressing:</strong>
+                <span
+                  data-evidence-for="GG0130-dressing"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Independent but slow, difficulty with socks/shoes due to edema</span
+                >
+              </p>
+              <p>
+                <strong>Nutrition:</strong>
+                <span
+                  data-evidence-for="K0520-nutrition"
+                  class="text-orange-700 font-semibold hover:bg-yellow-100 transition-colors"
+                  >Poor appetite - "not eating much." Breakfast: toast + coffee only. Minimal intake
+                  overall.</span
+                >
+              </p>
+              <p>
+                <strong>Meal Preparation:</strong>
+                <span data-evidence-for="GG0130-meals" class="hover:bg-yellow-100 transition-colors"
+                  >Primarily microwave meals. Daughter (Jennifer) brings groceries/prepared meals
+                  2x/week</span
+                >
+              </p>
+              <p>
+                <strong>Bowel Function:</strong>
+                <span data-evidence-for="M1610-bowel" class="hover:bg-yellow-100 transition-colors"
+                  >Constipation - BM every 3 days with straining</span
+                >
+              </p>
+              <p>
+                <strong>Urination:</strong>
+                <span
+                  data-evidence-for="M1610-urinary"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Increased daytime frequency post-diuretic, decreased nocturia. No dysuria.</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- Psychosocial -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">PSYCHOSOCIAL ASSESSMENT</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p>
+                <strong>Mood:</strong>
+                <span data-evidence-for="D0150-mood" class="hover:bg-yellow-100 transition-colors"
+                  >Frustrated with loss of independence. "Some days are harder than others."</span
+                >
+              </p>
+              <p>
+                <strong>Sleep:</strong>
+                <span data-evidence-for="D0150-mood" class="hover:bg-yellow-100 transition-colors"
+                  >Poor - frequent wakening from pain and worry</span
+                >
+              </p>
+              <p>
+                <strong>Support System:</strong>
+                <span
+                  data-evidence-for="N0415-caregiver"
+                  class="hover:bg-yellow-100 transition-colors"
+                  >Daughter Jennifer (lives 20 minutes away) - primary caregiver, attends
+                  appointments, provides meals and assistance</span
+                >
+              </p>
+              <p>
+                <strong>Safety:</strong>
+                <span data-evidence-for="M2102-safety" class="hover:bg-yellow-100 transition-colors"
+                  >Cell phone kept accessible. Emergency contacts posted on refrigerator ✓</span
+                >
+              </p>
+            </div>
+          </section>
+
+          <!-- Assessment & Plan -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2 bg-blue-50 px-2 py-1">
+              NURSING ASSESSMENT & CARE PLAN
+            </h2>
+            <div class="text-xs text-slate-700 space-y-3">
+              <div class="font-semibold text-blue-900">IDENTIFIED PROBLEMS:</div>
+              <ol class="list-decimal ml-6 space-y-2">
+                <li>
+                  <strong>Impaired peripheral circulation</strong> - PAD with concerning toe
+                  discoloration, cool extremities, diminished pulses, claudication
+                </li>
+                <li>
+                  <strong>Wound deterioration</strong> - Right ankle wound worsening despite
+                  previous treatment
+                </li>
+                <li>
+                  <strong>Medication non-compliance</strong> - Contributing to uncontrolled
+                  hypertension
+                </li>
+                <li>
+                  <strong>Volume overload</strong> - Persistent edema, orthopnea, possible diuretic
+                  resistance
+                </li>
+                <li><strong>Malnutrition risk</strong> - Poor appetite, inadequate intake</li>
+                <li><strong>High fall risk</strong> - Gait instability, environmental hazards</li>
+              </ol>
+
+              <div class="bg-blue-50 p-3 rounded border border-blue-200 mt-3">
+                <p class="font-bold text-blue-900 mb-2">INTERVENTIONS:</p>
+                <p>
+                  ✓ <strong>MD Notification:</strong> Contacted Dr. Ramirez's office regarding toe
+                  discoloration - appointment expedited to this week (was scheduled for next month)
+                </p>
+                <p>
+                  ✓ <strong>Visit Frequency:</strong> Increased to 3x/week for closer monitoring
+                </p>
+                <p>✓ <strong>Referrals Placed:</strong></p>
+                <p class="ml-6">
+                  - Physical Therapy: Gait training, circulation exercises, safe mobility
+                </p>
+                <p class="ml-6">- Dietitian: Nutritional counseling - will call within 24 hours</p>
+                <p>✓ <strong>Patient Education Provided:</strong></p>
+                <p class="ml-6">
+                  - Foot care: Keep warm (no heating pads), elevate when sitting, toe/foot exercises
+                  hourly
+                </p>
+                <p class="ml-6">- Medication compliance: Importance of daily BP medication</p>
+                <p class="ml-6">- Warning signs: When to call 911 vs. agency</p>
+                <p class="ml-6">- Written instructions left at bedside</p>
+              </div>
+
+              <div class="bg-red-50 p-3 rounded border-2 border-red-300 mt-3">
+                <p class="font-bold text-red-900 mb-2">⚠ PATIENT/CAREGIVER WARNING SIGNS:</p>
+                <p class="text-red-900">
+                  <strong>Call 911 if:</strong> Chest pain, severe shortness of breath, sudden
+                  confusion, toe becomes more painful or changes color further
+                </p>
+                <p class="text-orange-700">
+                  <strong>Call Agency if:</strong> Wound drainage increases, fever develops,
+                  swelling worsens significantly
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Plan for Next Visit -->
+          <section class="mb-6">
+            <h2 class="text-sm font-bold text-slate-800 mb-2">NEXT VISIT PLAN</h2>
+            <div class="text-xs text-slate-700 space-y-1">
+              <p><strong>Scheduled:</strong> Friday, January 26, 2024 @ 10:00 AM</p>
+              <p>
+                <strong>Focus:</strong> Wound assessment, circulation monitoring, walker compliance
+                check, leg elevation compliance
+              </p>
+              <p>
+                <strong>Goals:</strong> Improved medication adherence, stable/improved toe
+                appearance, no fall incidents
+              </p>
+            </div>
+          </section>
+
+          <!-- Signature -->
+          <div class="mt-8 pt-4 border-t-2 border-slate-300">
+            <div class="text-xs text-slate-700">
+              <p><strong>Documented by:</strong> Maria Lopez, RN</p>
+              <p><strong>License:</strong> RN-FL-892456</p>
+              <p><strong>Date/Time:</strong> January 24, 2024 - 11:45 AM</p>
+              <p class="mt-2 text-slate-500 italic">Electronic signature on file</p>
+            </div>
           </div>
         </div>
       </div>
@@ -1073,6 +1566,46 @@
 
 <!-- ========================= MODALS ========================= -->
 
+<!-- PROCESSING OVERLAY -->
+<div
+  id="save-processing-overlay"
+  class="fixed inset-0 bg-slate-900 bg-opacity-90 hidden items-center justify-center z-40 text-white text-center"
+>
+  <div>
+    <svg
+      class="animate-spin h-16 w-16 text-white mx-auto"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        class="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        stroke-width="4"
+      ></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+    <h2 class="text-3xl font-bold mt-8">LANCE AI is Analyzing...</h2>
+    <p id="analysis-status" class="text-slate-300 mt-2">
+      Validating OASIS data • Running PDGM calculations • Checking compliance
+    </p>
+    <div class="mt-6 max-w-md mx-auto bg-slate-800 rounded-full h-2">
+      <div
+        id="analysis-progress-bar"
+        class="bg-indigo-500 h-2 rounded-full transition-all"
+        style="width: 0%"
+      ></div>
+    </div>
+  </div>
+</div>
+
 <!-- ELIGIBILITY MODAL -->
 <div
   id="eligibility-modal"
@@ -1193,6 +1726,56 @@
       >
         <ion-icon name="refresh-outline" class="mr-1"></ion-icon>
         Refresh
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT RECOMMENDATION MODAL -->
+<div
+  id="reject-modal"
+  class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 items-center justify-center z-50"
+>
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-slate-900">Reject Recommendation</h2>
+      <button (click)="hideModal('reject-modal')" class="text-slate-400 hover:text-slate-600">
+        <ion-icon name="close" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <div class="mb-6">
+      <p class="text-sm text-slate-600 mb-4">
+        Are you sure you want to reject this AI recommendation?
+      </p>
+
+      <div class="bg-slate-50 rounded-lg p-3 mb-4">
+        <p id="reject-modal-title" class="text-sm font-medium text-slate-900"></p>
+      </div>
+
+      <div>
+        <label class="text-xs font-medium text-slate-700 mb-2 block"> Reason (Optional) </label>
+        <textarea
+          id="reject-reason"
+          rows="3"
+          placeholder="Enter reason for rejection..."
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="flex space-x-3">
+      <button
+        (click)="confirmRejectRecommendation()"
+        class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+      >
+        Confirm Reject
+      </button>
+      <button
+        (click)="hideModal('reject-modal')"
+        class="px-6 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+      >
+        Cancel
       </button>
     </div>
   </div>

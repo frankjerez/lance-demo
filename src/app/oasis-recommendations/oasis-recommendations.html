@@ -1,4 +1,4 @@
-<aside class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+<aside class="flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm h-[calc(100vh-60px)]">
   <!-- ANALYZER ALERTS -->
   <section
     *ngIf="showAnalyzer() && analyzerAlerts() && analyzerAlerts().length > 0"
@@ -142,7 +142,7 @@
   </div>
 
   <!-- Recommendations List -->
-  <div id="recommendations-list" class="overflow-y-auto h-[calc(100%-210px)] px-6 py-4 space-y-3">
+  <div id="recommendations-list" class="flex-1 overflow-y-auto px-6 py-4 space-y-3">
     <div
       *ngFor="let rec of recommendations()"
       class="recommendation-card border border-slate-200 bg-white rounded-xl p-4 cursor-pointer hover:border-slate-300 hover:shadow-sm transition-all"

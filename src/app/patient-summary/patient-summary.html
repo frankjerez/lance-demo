@@ -208,6 +208,13 @@
                 (change)="onFileSelected($event)"
                 accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png"
               />
+              <input
+                #visitNoteFileInput
+                type="file"
+                class="hidden"
+                (change)="onVisitNoteFileSelected($event)"
+                accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png"
+              />
               <button
                 type="button"
                 (click)="showModal('upload-modal')"
@@ -263,7 +270,7 @@
                   (click)="onOpenDoc(doc)"
                   class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
                 >
-                  Open →
+                  View →
                 </button>
               </div>
             </div>
@@ -532,7 +539,7 @@
         <p class="text-xs text-slate-500 mt-1">Click to upload Document</p>
       </div>
       <div
-        (click)="triggerFileUpload()"
+        (click)="triggerVisitNoteUpload()"
         class="border-2 border-dashed border-slate-300 rounded-lg p-6 hover:border-indigo-500 hover:bg-indigo-50 cursor-pointer transition-all"
       >
         <ion-icon name="clipboard-outline" class="text-4xl text-slate-400 mx-auto"></ion-icon>

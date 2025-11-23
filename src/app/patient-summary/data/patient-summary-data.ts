@@ -146,9 +146,9 @@ export const myPatientSummary: PatientSummary = {
   payment: {
     hippsCode: '2CB21',
     baseRate: 2753.5,
-    comorbidityAdjustment: 287.0,
-    functionalLevelAdjustment: 125.0,
-    lutsAdjustment: 89.25,
-    totalPayment: 2753.5 + 287 + 125 + 89.25, // 3254.75
+    comorbidityAdjustment: 0, // Will increase by +$287 when high comorbidity is added
+    functionalLevelAdjustment: 122.0,
+    lutsAdjustment: 0,
+    totalPayment: 2875.5, // Matches initial oasis-john component payment
   },
 };
