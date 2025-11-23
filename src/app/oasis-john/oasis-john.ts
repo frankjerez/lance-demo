@@ -3,6 +3,7 @@ import {
   AfterViewInit,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
+  effect,
   inject,
   OnInit,
   signal,
@@ -68,6 +69,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
   // Track which documents are available (uploaded)
   availableDocs = signal<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(new Set());
+
+  // Track collapsed form sections
+  collapsedSections = signal<Set<string>>(new Set());
+
+  // Store the initial pre-filled count for reset functionality
+  private initialPrefilledCount = 0;
 
   // AI Recommendations state - All recommendations (before filtering)
   private allAiRecommendations = signal<AiRecommendation[]>([
@@ -237,11 +244,21 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     return this.analyzerAlerts().filter((a) => a.status === 'new').length;
   }
 
+  constructor() {
+    // Watch for changes to itemsAccepted and save to localStorage
+    effect(() => {
+      this.itemsAccepted(); // Read signal to track changes
+      this.saveItemsAcceptedCount();
+    });
+  }
+
   ngOnInit(): void {
     this.initializeAvailableDocuments();
     this.filterRecommendationsAndAlerts();
     this.restoreSavedRecommendationStates();
     this.handleNavigationState();
+    this.restoreItemsAcceptedCount();
+    this.collapseAllSections(); // Start with all sections collapsed
     this.showPage('copilot-page');
   }
 
@@ -335,35 +352,129 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     console.log('💾 Recommendation states restored');
   }
 
+  /**
+   * Restore items accepted count from localStorage
+   */
+  private restoreItemsAcceptedCount(): void {
+    const savedCount = localStorage.getItem('oasis-items-accepted-p1');
+    if (savedCount) {
+      const count = parseInt(savedCount, 10);
+      if (!isNaN(count)) {
+        this.itemsAccepted.set(count);
+        console.log(`💾 Restored items accepted count: ${count}`);
+      }
+    }
+  }
+
+  /**
+   * Save items accepted count to localStorage
+   */
+  private saveItemsAcceptedCount(): void {
+    localStorage.setItem('oasis-items-accepted-p1', this.itemsAccepted().toString());
+  }
+
   ngAfterViewInit(): void {
     // Populate form fields for accepted recommendations after view is initialized
     const savedStates = this.recommendationStateService.getAllRecommendationStates();
 
-    if (savedStates.size === 0) {
-      return;
+    if (savedStates.size > 0) {
+      // Collect sections that need to be expanded
+      const sectionsToExpand = new Set<string>();
+
+      this.aiRecommendations().forEach((rec) => {
+        const savedState = savedStates.get(rec.id);
+        if (savedState && savedState.status === 'accepted') {
+          const sectionId = this.getSectionIdForField(rec.formFieldId);
+          if (sectionId) {
+            sectionsToExpand.add(sectionId);
+          }
+        }
+      });
+
+      // Expand all sections with accepted recommendations
+      sectionsToExpand.forEach(sectionId => this.expandSection(sectionId));
+
+      // Populate fields after a brief delay to allow sections to expand
+      setTimeout(() => {
+        this.aiRecommendations().forEach((rec) => {
+          const savedState = savedStates.get(rec.id);
+          if (savedState && savedState.status === 'accepted') {
+            console.log(`💾 Populating form field for ${rec.id}`);
+
+            const isOtherDiagnosis = rec.formFieldId === 'form-I8000-other-diagnoses-container';
+            this.oasisFormComponent.populateField(
+              rec.formFieldId,
+              rec.acceptValue || rec.ggValue || '',
+              isOtherDiagnosis
+            );
+
+            // Update items accepted count
+            this.itemsAccepted.update((v) => v + 1);
+
+            // Update payment if applicable
+            if (rec.triggersPdgmUpdate) {
+              this.updatePaymentDisplay(rec);
+            }
+          }
+        });
+      }, 200);
     }
 
-    this.aiRecommendations().forEach((rec) => {
-      const savedState = savedStates.get(rec.id);
-      if (savedState && savedState.status === 'accepted') {
-        console.log(`💾 Populating form field for ${rec.id}`);
+    // Count pre-filled fields after view initialization
+    setTimeout(() => {
+      this.countPrefilledFields();
+    }, 500);
+  }
 
-        const isOtherDiagnosis = rec.formFieldId === 'form-I8000-other-diagnoses-container';
-        this.oasisFormComponent.populateField(
-          rec.formFieldId,
-          rec.acceptValue || rec.ggValue || '',
-          isOtherDiagnosis
-        );
+  // Count fields that have default values on page load
+  private countPrefilledFields(): void {
+    let prefilledCount = 0;
 
-        // Update items accepted count
-        this.itemsAccepted.update((v) => v + 1);
-
-        // Update payment if applicable
-        if (rec.triggersPdgmUpdate) {
-          this.updatePaymentDisplay(rec);
-        }
+    // Count filled select elements
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+      const selectEl = select as HTMLSelectElement;
+      if (selectEl.value && selectEl.value !== '') {
+        prefilledCount++;
       }
     });
+
+    // Count filled text inputs (exclude optional/empty ones)
+    const textInputs = document.querySelectorAll('input[type="text"]');
+    textInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (inputEl.value && inputEl.value !== '' && !inputEl.readOnly) {
+        prefilledCount++;
+      }
+    });
+
+    // Count filled date inputs
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (inputEl.value && inputEl.value !== '') {
+        prefilledCount++;
+      }
+    });
+
+    // Count checked checkboxes (at least 1 per checkbox group counts)
+    const checkboxGroups = new Set<string>();
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+      const parent = checkbox.closest('div[class*="space-y"]');
+      if (parent) {
+        const parentId = parent.getAttribute('id') || parent.className;
+        checkboxGroups.add(parentId);
+      }
+    });
+    prefilledCount += checkboxGroups.size;
+
+    // Update the counter if there are pre-filled fields
+    if (prefilledCount > 0) {
+      this.initialPrefilledCount = prefilledCount; // Store for reset functionality
+      this.itemsAccepted.set(prefilledCount);
+      console.log(`📊 Found ${prefilledCount} pre-filled fields on page load`);
+    }
   }
 
   // ======= Event Handlers from Child Components =======
@@ -453,21 +564,253 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   }
 
   handleReset(): void {
-    this.itemsAccepted.set(0);
+    console.log('🔄 Resetting form to initial pre-filled state...');
+
+    // Clear all dynamically filled form fields
+    this.clearDynamicFormFields();
+
+    // Reset payment and alerts
     this.currentPayment.set(2875.5);
     this.analyzerAlerts.set([]);
 
-    // Reset all recommendations
+    // Reset all recommendations to pending
     this.aiRecommendations.update((recs) =>
       recs.map((rec) => ({ ...rec, status: 'pending' as AiRecommendationStatus }))
     );
 
+    // Clear recommendation states from persistent storage
+    this.aiRecommendations().forEach((rec) => {
+      this.recommendationStateService.updateRecommendationStatus(rec.id, 'pending');
+    });
+
     const cards = document.querySelectorAll('.recommendation-card');
     cards.forEach((card) => card.classList.remove('accepted', 'rejected', 'selected'));
+
+    // After clearing fields, recount the pre-filled items and update the counter
+    setTimeout(() => {
+      this.countPrefilledFields();
+      const percentage = Math.round((this.itemsAccepted() / this.totalItems()) * 100);
+      console.log(`🔄 Form reset complete. Pre-filled items: ${this.itemsAccepted()} (${percentage}%)`);
+    }, 300);
+
+    // The itemsAccepted change will automatically save to localStorage via the effect in constructor
+  }
+
+  /**
+   * Clear all dynamically filled form fields, keeping only the initial pre-filled values
+   */
+  private clearDynamicFormFields(): void {
+    console.log('🧹 Clearing dynamic form fields...');
+
+    // Reset all selects to their default state
+    const allSelects = document.querySelectorAll('select');
+    allSelects.forEach(select => {
+      const selectEl = select as HTMLSelectElement;
+
+      // Find the option with the 'selected' attribute in HTML
+      let defaultOptionIndex = -1;
+      for (let i = 0; i < selectEl.options.length; i++) {
+        if (selectEl.options[i].defaultSelected) {
+          defaultOptionIndex = i;
+          break;
+        }
+      }
+
+      // Reset to default option or first option (usually empty)
+      if (defaultOptionIndex >= 0) {
+        selectEl.selectedIndex = defaultOptionIndex;
+      } else {
+        selectEl.selectedIndex = 0; // Reset to first option (usually empty)
+      }
+    });
+
+    // Clear form fields that were populated by AI recommendations
+    const formFields = document.querySelectorAll('.form-field-value, .border-emerald-400');
+    formFields.forEach(field => {
+      const fieldEl = field as HTMLElement;
+      // Restore to placeholder state
+      if (fieldEl.classList.contains('form-field-value')) {
+        fieldEl.innerHTML = 'Click here to select';
+        fieldEl.classList.remove(
+          'form-field-value',
+          'border-emerald-400',
+          'bg-emerald-50',
+          'border-solid'
+        );
+        fieldEl.classList.add(
+          'form-field-placeholder',
+          'border-dashed',
+          'border-yellow-400',
+          'bg-yellow-50',
+          'text-slate-600',
+          'justify-center'
+        );
+      }
+    });
+
+    // Clear dynamically added diagnosis entries (from Other Diagnoses container)
+    const otherDiagnosesContainer = document.getElementById('form-I8000-other-diagnoses-container');
+    if (otherDiagnosesContainer) {
+      // Remove all dynamically added diagnosis entries
+      const diagnosisEntries = otherDiagnosesContainer.querySelectorAll('.border-emerald-400');
+      diagnosisEntries.forEach(entry => entry.remove());
+
+      // Restore the placeholder if it was removed
+      if (otherDiagnosesContainer.children.length === 0) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'p-2 border-2 border-dashed border-slate-300 rounded min-h-[40px] flex items-center justify-center text-xs text-slate-500';
+        placeholder.textContent = 'Additional diagnoses will appear here';
+        otherDiagnosesContainer.appendChild(placeholder);
+      }
+    }
+
+    // Reset all checkboxes to their default state
+    const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+    allCheckboxes.forEach(checkbox => {
+      const checkboxEl = checkbox as HTMLInputElement;
+      checkboxEl.checked = checkboxEl.defaultChecked;
+    });
+
+    // Reset text inputs to their default values (keep pre-filled ones)
+    const textInputs = document.querySelectorAll('input[type="text"]');
+    textInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (!inputEl.readOnly) {
+        inputEl.value = inputEl.defaultValue;
+      }
+    });
+
+    // Reset date inputs to their default values
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      inputEl.value = inputEl.defaultValue;
+    });
+
+    // Reset number inputs to their default values
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (!inputEl.readOnly) {
+        inputEl.value = inputEl.defaultValue;
+      }
+    });
+
+    console.log('🧹 Dynamic form fields cleared');
   }
 
   handleExport(): void {
+    // Validate form completeness before allowing export
+    const validation = this.validateFormCompleteness();
+
+    if (!validation.isComplete) {
+      this.showValidationError(validation);
+      return;
+    }
+
+    // If validation passes, show export modal
     this.showModal('export-modal');
+  }
+
+  private validateFormCompleteness(): { isComplete: boolean; missingFields: string[]; emptyCount: number } {
+    const missingFields: string[] = [];
+
+    // Check all select elements
+    const allSelects = document.querySelectorAll('select');
+    allSelects.forEach(select => {
+      const selectEl = select as HTMLSelectElement;
+      if (!selectEl.value || selectEl.value === '') {
+        const label = selectEl.previousElementSibling?.textContent ||
+                     selectEl.closest('div')?.querySelector('label')?.textContent ||
+                     'Unnamed field';
+        missingFields.push(label.trim());
+      }
+    });
+
+    // Check required text inputs (exclude optional fields like SSN)
+    const requiredTextInputs = document.querySelectorAll('input[type="text"]:not([placeholder*="###"])');
+    requiredTextInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (!inputEl.readOnly && (!inputEl.value || inputEl.value === '')) {
+        const label = inputEl.previousElementSibling?.textContent ||
+                     inputEl.closest('div')?.querySelector('label')?.textContent ||
+                     'Unnamed field';
+        missingFields.push(label.trim());
+      }
+    });
+
+    // Check date inputs
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+      const inputEl = input as HTMLInputElement;
+      if (!inputEl.value || inputEl.value === '') {
+        const label = inputEl.previousElementSibling?.textContent ||
+                     inputEl.closest('div')?.querySelector('label')?.textContent ||
+                     'Unnamed date field';
+        missingFields.push(label.trim());
+      }
+    });
+
+    return {
+      isComplete: missingFields.length === 0,
+      missingFields: missingFields.slice(0, 10), // Limit to first 10 for display
+      emptyCount: missingFields.length
+    };
+  }
+
+  private showValidationError(validation: { missingFields: string[]; emptyCount: number }): void {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+        <div class="flex items-start gap-4 mb-6">
+          <div class="bg-red-100 rounded-full p-3">
+            <ion-icon name="alert-circle" class="text-red-600 text-3xl"></ion-icon>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-semibold text-slate-900 mb-2">Incomplete Assessment</h2>
+            <p class="text-sm text-slate-600">
+              ${validation.emptyCount} item${validation.emptyCount > 1 ? 's' : ''} must be completed before exporting.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-4 mb-6 max-h-64 overflow-y-auto">
+          <p class="text-xs font-semibold text-red-900 mb-2 uppercase">Missing Items:</p>
+          <ul class="text-sm text-red-800 space-y-1">
+            ${validation.missingFields.map(field => `<li class="flex items-start gap-2">
+              <ion-icon name="chevron-forward" class="text-red-600 flex-shrink-0 mt-0.5"></ion-icon>
+              <span>${field}</span>
+            </li>`).join('')}
+            ${validation.emptyCount > 10 ? `<li class="text-xs text-red-600 italic">...and ${validation.emptyCount - 10} more</li>` : ''}
+          </ul>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="this.closest('.fixed').remove()"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
+          >
+            Complete Assessment
+          </button>
+          <button
+            onclick="this.closest('.fixed').remove()"
+            class="px-6 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Auto-remove after 30 seconds
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        modal.remove();
+      }
+    }, 30000);
   }
 
   handleRecommendationSelect(data: { recommendation: AiRecommendation; event: Event }): void {
@@ -506,47 +849,134 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     data.event.stopPropagation();
     const { recommendation } = data;
 
-    // Populate form field
-    const isOtherDiagnosis = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
-
-    this.oasisFormComponent.populateField(
-      recommendation.formFieldId,
-      recommendation.acceptValue || recommendation.ggValue || '',
-      isOtherDiagnosis
-    );
-
-    // Update progress
-    this.itemsAccepted.update((v) => v + 1);
-
-    // Update PDGM if applicable
-    if (recommendation.triggersPdgmUpdate) {
-      this.updatePaymentDisplay(recommendation);
+    // Determine which section contains this field and expand it
+    const sectionId = this.getSectionIdForField(recommendation.formFieldId);
+    if (sectionId) {
+      this.expandSection(sectionId);
     }
 
-    // Mark recommendation as accepted
-    this.aiRecommendations.update((recs) =>
-      recs.map((rec) =>
-        rec.id === recommendation.id
-          ? { ...rec, status: 'accepted' as AiRecommendationStatus }
-          : rec
-      )
-    );
+    // Small delay to ensure section expansion animation completes before populating
+    setTimeout(() => {
+      // Populate form field
+      const isOtherDiagnosis = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
 
-    // Save to persistent state
-    this.recommendationStateService.updateRecommendationStatus(recommendation.id, 'accepted');
+      this.oasisFormComponent.populateField(
+        recommendation.formFieldId,
+        recommendation.acceptValue || recommendation.ggValue || '',
+        isOtherDiagnosis
+      );
 
-    // Recompute analyzer alerts to hide any linked to this accepted recommendation
-    this.computeAnalyzerAlerts();
+      // Update progress
+      this.itemsAccepted.update((v) => v + 1);
 
-    // Update Summary Card comorbidity tier if needed
-    if (recommendation.oasisTargetId === 'I8000-comorbidity') {
-      const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
-      if (summaryComorbidityEl) {
-        summaryComorbidityEl.innerText = 'High';
-        summaryComorbidityEl.classList.add('form-field-highlight');
-        setTimeout(() => summaryComorbidityEl.classList.remove('form-field-highlight'), 1500);
+      // Update PDGM if applicable
+      if (recommendation.triggersPdgmUpdate) {
+        this.updatePaymentDisplay(recommendation);
       }
+
+      // Mark recommendation as accepted
+      this.aiRecommendations.update((recs) =>
+        recs.map((rec) =>
+          rec.id === recommendation.id
+            ? { ...rec, status: 'accepted' as AiRecommendationStatus }
+            : rec
+        )
+      );
+
+      // Save to persistent state
+      this.recommendationStateService.updateRecommendationStatus(recommendation.id, 'accepted');
+
+      // Recompute analyzer alerts to hide any linked to this accepted recommendation
+      this.computeAnalyzerAlerts();
+
+      // Update Summary Card comorbidity tier if needed
+      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
+        const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
+        if (summaryComorbidityEl) {
+          summaryComorbidityEl.innerText = 'High';
+          summaryComorbidityEl.classList.add('form-field-highlight');
+          setTimeout(() => summaryComorbidityEl.classList.remove('form-field-highlight'), 1500);
+        }
+      }
+    }, 200);
+  }
+
+  /**
+   * Determine which section contains a given form field
+   */
+  private getSectionIdForField(formFieldId: string): string | null {
+    // Map form field IDs to their section IDs
+    if (formFieldId.includes('I8000')) {
+      return 'diagnoses';
     }
+    if (formFieldId.includes('GG0170')) {
+      return 'gg-mobility';
+    }
+    if (formFieldId.includes('GG0130')) {
+      return 'gg-selfcare';
+    }
+    if (formFieldId.includes('GG0100')) {
+      return 'gg-prior';
+    }
+    if (formFieldId.includes('GG0110')) {
+      return 'gg-prior-device';
+    }
+    if (formFieldId.includes('M0') || formFieldId.includes('admin')) {
+      return 'admin';
+    }
+    if (formFieldId.includes('A') || formFieldId.includes('demo')) {
+      return 'demographics';
+    }
+    if (formFieldId.includes('B')) {
+      return 'sensory';
+    }
+    if (formFieldId.includes('C')) {
+      return 'cognitive';
+    }
+    if (formFieldId.includes('D')) {
+      return 'mood';
+    }
+    if (formFieldId.includes('J1') || formFieldId.includes('J0')) {
+      return 'health-conditions';
+    }
+    if (formFieldId.includes('K')) {
+      return 'nutritional';
+    }
+    if (formFieldId.includes('M13') || formFieldId.includes('integument')) {
+      return 'integumentary';
+    }
+    if (formFieldId.includes('M14') || formFieldId.includes('respiratory')) {
+      return 'respiratory';
+    }
+    if (formFieldId.includes('M16') || formFieldId.includes('elimination')) {
+      return 'elimination';
+    }
+    if (formFieldId.includes('M20') || formFieldId.includes('medication')) {
+      return 'medications';
+    }
+    if (formFieldId.includes('N04') || formFieldId.includes('high-risk')) {
+      return 'high-risk-drugs';
+    }
+    if (formFieldId.includes('M21') || formFieldId.includes('M22') || formFieldId.includes('care-mgmt')) {
+      return 'care-management';
+    }
+    if (formFieldId.includes('O0') || formFieldId.includes('special')) {
+      return 'special-treatments';
+    }
+
+    return null;
+  }
+
+  /**
+   * Expand a specific section
+   */
+  private expandSection(sectionId: string): void {
+    this.collapsedSections.update(sections => {
+      const newSections = new Set(sections);
+      newSections.delete(sectionId);
+      return newSections;
+    });
+    console.log(`📂 Expanded section: ${sectionId}`);
   }
 
   handleRecommendationReject(data: { recommendation: AiRecommendation; event: Event }): void {
@@ -809,6 +1239,199 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   exportToXML(): void {
     this.hideModal('export-modal');
 
+    try {
+      // Generate the XML content
+      const xmlContent = this.generateOasisXML();
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const patientName = 'john_smith'; // Default patient name
+      const filename = `${patientName}_oasis_e1_soc_${timestamp}.xml`;
+
+      // Create a Blob and trigger download
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Show success notification
+      this.showExportNotification(filename);
+
+      console.log('✅ OASIS XML exported successfully:', filename);
+    } catch (error) {
+      console.error('❌ Error exporting XML:', error);
+      this.showExportErrorNotification();
+    }
+  }
+
+  /**
+   * Generate OASIS-E1 XML content from form data
+   */
+  private generateOasisXML(): string {
+    const formData = this.collectFormData();
+    const timestamp = new Date().toISOString();
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<OASISAssessment xmlns="http://www.cms.gov/oasis" version="E1">\n';
+    xml += '  <Metadata>\n';
+    xml += `    <ExportDate>${timestamp}</ExportDate>\n`;
+    xml += `    <AssessmentType>Start of Care</AssessmentType>\n`;
+    xml += `    <CompletionStatus>${this.itemsAccepted()}/${this.totalItems()}</CompletionStatus>\n`;
+    xml += '  </Metadata>\n\n';
+
+    // Administrative Section
+    xml += '  <Administrative>\n';
+    xml += `    <M0010>${this.escapeXML(formData['M0010'] || '')}</M0010>\n`;
+    xml += `    <M0014>${this.escapeXML(formData['M0014'] || '')}</M0014>\n`;
+    xml += `    <M0016>${this.escapeXML(formData['M0016'] || '')}</M0016>\n`;
+    xml += `    <M0018>${this.escapeXML(formData['M0018'] || '')}</M0018>\n`;
+    xml += `    <M0020>${this.escapeXML(formData['M0020'] || '')}</M0020>\n`;
+    xml += `    <M0030>${this.escapeXML(formData['M0030'] || '')}</M0030>\n`;
+    xml += `    <M0064>${this.escapeXML(formData['M0064'] || '')}</M0064>\n`;
+    xml += `    <M0066>${this.escapeXML(formData['M0066'] || '')}</M0066>\n`;
+    xml += `    <M0069>${this.escapeXML(formData['M0069'] || '')}</M0069>\n`;
+    xml += `    <M0080>${this.escapeXML(formData['M0080'] || '')}</M0080>\n`;
+    xml += `    <M0090>${this.escapeXML(formData['M0090'] || '')}</M0090>\n`;
+    xml += `    <M0100>${this.escapeXML(formData['M0100'] || '')}</M0100>\n`;
+    xml += `    <M0102>${this.escapeXML(formData['M0102'] || '')}</M0102>\n`;
+    xml += `    <M0104>${this.escapeXML(formData['M0104'] || '')}</M0104>\n`;
+    xml += `    <M0150>${this.escapeXML(formData['M0150'] || '')}</M0150>\n`;
+    xml += '  </Administrative>\n\n';
+
+    // Diagnoses Section
+    xml += '  <Diagnoses>\n';
+    xml += `    <I8000_Primary>${this.escapeXML(formData['I8000_primary'] || '')}</I8000_Primary>\n`;
+    xml += `    <I8000_Comorbidity>${this.escapeXML(formData['I8000_comorbidity'] || '')}</I8000_Comorbidity>\n`;
+    xml += `    <I8000_Other>${this.escapeXML(formData['I8000_other'] || '')}</I8000_Other>\n`;
+    xml += '  </Diagnoses>\n\n';
+
+    // Functional Status - GG Items
+    xml += '  <FunctionalStatus>\n';
+    xml += '    <PriorFunctioning>\n';
+    Object.keys(formData).filter(k => k.startsWith('GG0100')).forEach(key => {
+      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '    </PriorFunctioning>\n';
+    xml += '    <SelfCare>\n';
+    Object.keys(formData).filter(k => k.startsWith('GG0130')).forEach(key => {
+      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '    </SelfCare>\n';
+    xml += '    <Mobility>\n';
+    Object.keys(formData).filter(k => k.startsWith('GG0170')).forEach(key => {
+      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '    </Mobility>\n';
+    xml += '  </FunctionalStatus>\n\n';
+
+    // Clinical Status
+    xml += '  <ClinicalStatus>\n';
+    Object.keys(formData).filter(k => k.startsWith('B') || k.startsWith('C') || k.startsWith('D') || k.startsWith('J')).forEach(key => {
+      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '  </ClinicalStatus>\n\n';
+
+    // Medications
+    xml += '  <Medications>\n';
+    Object.keys(formData).filter(k => k.startsWith('M20') || k.startsWith('N04')).forEach(key => {
+      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '  </Medications>\n\n';
+
+    // Other M Items
+    xml += '  <OtherClinical>\n';
+    Object.keys(formData).filter(k => k.startsWith('M') && !k.startsWith('M0') && !k.startsWith('M20')).forEach(key => {
+      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '  </OtherClinical>\n\n';
+
+    // Care Management
+    xml += '  <CareManagement>\n';
+    Object.keys(formData).filter(k => k.startsWith('O')).forEach(key => {
+      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+    });
+    xml += '  </CareManagement>\n';
+
+    xml += '</OASISAssessment>';
+
+    return xml;
+  }
+
+  /**
+   * Collect all form data from the DOM
+   */
+  private collectFormData(): Record<string, string> {
+    const data: Record<string, string> = {};
+
+    // Collect all select values
+    document.querySelectorAll('select').forEach(select => {
+      const id = (select as HTMLSelectElement).id;
+      const value = (select as HTMLSelectElement).value;
+      if (id && value) {
+        data[id] = value;
+      }
+    });
+
+    // Collect all text inputs
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+      const id = (input as HTMLInputElement).id;
+      const value = (input as HTMLInputElement).value;
+      if (id && value) {
+        data[id] = value;
+      }
+    });
+
+    // Collect all date inputs
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      const id = (input as HTMLInputElement).id;
+      const value = (input as HTMLInputElement).value;
+      if (id && value) {
+        data[id] = value;
+      }
+    });
+
+    // Collect all number inputs
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      const id = (input as HTMLInputElement).id;
+      const value = (input as HTMLInputElement).value;
+      if (id && value) {
+        data[id] = value;
+      }
+    });
+
+    // Collect checked checkboxes
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+      const id = (checkbox as HTMLInputElement).id;
+      if (id) {
+        const currentValue = data[id] || '';
+        data[id] = currentValue ? `${currentValue},checked` : 'checked';
+      }
+    });
+
+    return data;
+  }
+
+  /**
+   * Escape special XML characters
+   */
+  private escapeXML(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  /**
+   * Show success notification after export
+   */
+  private showExportNotification(filename: string): void {
     const notification = document.createElement('div');
     notification.className =
       'fixed top-24 right-8 bg-white border border-emerald-200 rounded-xl shadow-lg p-4 z-50';
@@ -820,10 +1443,10 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         </div>
         <div>
           <p class="text-sm font-semibold text-slate-900">
-            OASIS XML Generated
+            OASIS XML Downloaded
           </p>
           <p class="text-xs text-slate-500">
-            john_smith_soc_20250118.xml (demo)
+            ${filename}
           </p>
         </div>
       </div>
@@ -834,5 +1457,410 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       notification.remove();
     }, 4000);
+  }
+
+  /**
+   * Show error notification if export fails
+   */
+  private showExportErrorNotification(): void {
+    const notification = document.createElement('div');
+    notification.className =
+      'fixed top-24 right-8 bg-white border border-red-200 rounded-xl shadow-lg p-4 z-50';
+
+    notification.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="bg-red-500 rounded-full p-2">
+          <ion-icon name="alert-circle" class="text-white text-xl"></ion-icon>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-900">
+            Export Failed
+          </p>
+          <p class="text-xs text-slate-500">
+            Unable to generate XML file
+          </p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 4000);
+  }
+
+  // Toggle section collapse/expand
+  toggleSection(sectionId: string): void {
+    this.collapsedSections.update((sections) => {
+      const newSections = new Set(sections);
+      if (newSections.has(sectionId)) {
+        newSections.delete(sectionId);
+      } else {
+        newSections.add(sectionId);
+      }
+      return newSections;
+    });
+  }
+
+  // Check if section is collapsed
+  isSectionCollapsed(sectionId: string): boolean {
+    return this.collapsedSections().has(sectionId);
+  }
+
+  // Collapse all sections
+  collapseAllSections(): void {
+    const allSectionIds = [
+      'admin',
+      'demographics',
+      'sensory',
+      'cognitive',
+      'mood',
+      'diagnoses',
+      'health-conditions',
+      'gg-prior',
+      'gg-prior-device',
+      'gg-selfcare',
+      'gg-mobility',
+      'nutritional',
+      'integumentary',
+      'respiratory',
+      'elimination',
+      'medications',
+      'high-risk-drugs',
+      'care-management',
+      'special-treatments',
+    ];
+    this.collapsedSections.set(new Set(allSectionIds));
+  }
+
+  // Expand all sections
+  expandAllSections(): void {
+    this.collapsedSections.set(new Set());
+  }
+
+  // Autofill form with demo data - ALL 89 items
+  autofillDemoData(): void {
+    // Expand all sections first for better UX
+    this.expandAllSections();
+
+    // Use setTimeout to ensure sections are expanded before filling
+    setTimeout(() => {
+      let filledCount = 0;
+
+      // Helper to select option by value or text
+      const selectOption = (selectElement: HTMLSelectElement, valueOrText: string) => {
+        const options = Array.from(selectElement.options);
+        const option = options.find(opt =>
+          opt.value === valueOrText ||
+          opt.text.includes(valueOrText) ||
+          opt.value.includes(valueOrText)
+        );
+        if (option) {
+          selectElement.value = option.value;
+          filledCount++;
+          return true;
+        }
+        return false;
+      };
+
+      // 1. ADMINISTRATIVE - Already filled by default (14 items counted)
+      filledCount += 14;
+
+      // 2. DEMOGRAPHICS (6 items) - Most already set
+      filledCount += 6;
+
+      // 3. SENSORY STATUS (2 items)
+      const allSelects = document.querySelectorAll('select');
+      allSelects.forEach(select => {
+        const label = select.previousElementSibling?.textContent || '';
+        if (label.includes('B1000') || label.includes('Vision')) {
+          selectOption(select, '0'); // Sees adequately
+        }
+        if (label.includes('B1200') || label.includes('Hearing')) {
+          selectOption(select, '0'); // No difficulty
+        }
+      });
+
+      // 4. COGNITIVE PATTERNS (8 items) - BIMS Assessment
+      // C0100
+      document.querySelectorAll('select').forEach(select => {
+        if (select.previousElementSibling?.textContent?.includes('C0100')) {
+          selectOption(select, '1'); // Yes, conduct BIMS
+        }
+      });
+
+      // C0200-C0500 - Number inputs for BIMS scores (already have demo values)
+      filledCount += 8;
+
+      // 5. MOOD (2 items) - PHQ scores already set with values
+      filledCount += 2;
+
+      // 6. DIAGNOSES (3 items) - Already handled by AI
+      filledCount += 3;
+
+      // 7. HEALTH CONDITIONS - J Items (4 items)
+      allSelects.forEach(select => {
+        const prevText = select.previousElementSibling?.textContent || '';
+        if (prevText.includes('J0510')) {
+          selectOption(select, '1'); // Pain affects sleep
+        }
+        if (prevText.includes('J1800')) {
+          selectOption(select, '0'); // No falls
+        }
+        if (prevText.includes('J2030')) {
+          selectOption(select, '1'); // Mild dyspnea
+        }
+      });
+
+      // 8. GG0100 PRIOR FUNCTIONING (3 items)
+      document.querySelectorAll('select').forEach(select => {
+        const id = select.id || '';
+        if (id.includes('GG0100A')) selectOption(select, '0'); // Independent
+        if (id.includes('GG0100B')) selectOption(select, '0'); // Independent
+        if (id.includes('GG0100C')) selectOption(select, '0'); // Independent
+      });
+
+      // 9. GG0110 PRIOR DEVICE USE (1 item with checkboxes)
+      const deviceCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      deviceCheckboxes.forEach(checkbox => {
+        const label = checkbox.parentElement?.textContent || '';
+        if (label.toLowerCase().includes('walker')) {
+          (checkbox as HTMLInputElement).checked = true;
+          filledCount++;
+        }
+      });
+
+      // 10. GG0130 SELF-CARE (7 items)
+      const selfCareValues = ['06', '05', '04', '03', '02', '03', '03'];
+      const selfCareSelects = document.querySelectorAll('select[id^="GG0130"]');
+      selfCareSelects.forEach((select, index) => {
+        const val = selfCareValues[index] || '04';
+        selectOption(select as HTMLSelectElement, val);
+      });
+
+      // 11. GG0170 MOBILITY (17 items - includes all mobility sub-items)
+      const mobilityValues = ['06', '05', '04', '03', '02', '03', '03', '04', '02', '03', '04', '03', '02', '03', '04', '02', '03'];
+      const mobilitySelects = document.querySelectorAll('select[id^="GG0170"]');
+      mobilitySelects.forEach((select, index) => {
+        const val = mobilityValues[index] || '03';
+        selectOption(select as HTMLSelectElement, val);
+      });
+
+      // 12. NUTRITIONAL - K0520 (1 item with checkboxes)
+      const nutritionCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      nutritionCheckboxes.forEach(checkbox => {
+        const label = checkbox.parentElement?.textContent || '';
+        if (label.toLowerCase().includes('therapeutic diet')) {
+          (checkbox as HTMLInputElement).checked = true;
+          filledCount++;
+        }
+      });
+
+      // 13. INTEGUMENTARY - M Items (7 items)
+      allSelects.forEach(select => {
+        const prevText = select.previousElementSibling?.textContent || '';
+        if (prevText.includes('M1306')) selectOption(select, '0'); // No pressure ulcers
+        if (prevText.includes('M1330')) selectOption(select, '0'); // No stasis ulcers
+        if (prevText.includes('M1340')) selectOption(select, '0'); // No surgical wounds
+        if (prevText.includes('M1350')) selectOption(select, '0'); // No lesions
+      });
+
+      // 14. RESPIRATORY - M1400 (1 item)
+      allSelects.forEach(select => {
+        if (select.previousElementSibling?.textContent?.includes('M1400')) {
+          selectOption(select, '1'); // Mild dyspnea
+        }
+      });
+
+      // 15. ELIMINATION - M Items (4 items)
+      allSelects.forEach(select => {
+        const prevText = select.previousElementSibling?.textContent || '';
+        if (prevText.includes('M1600')) selectOption(select, '0'); // No UTI
+        if (prevText.includes('M1610')) selectOption(select, '0'); // No incontinence
+        if (prevText.includes('M1620')) selectOption(select, '0'); // No bowel incontinence
+        if (prevText.includes('M1630')) selectOption(select, 'NA'); // No ostomy
+      });
+
+      // 16. MEDICATIONS - M Items (6 items)
+      allSelects.forEach(select => {
+        const prevText = select.previousElementSibling?.textContent || '';
+        if (prevText.includes('M2001')) selectOption(select, '0'); // Drug review completed
+        if (prevText.includes('M2003')) selectOption(select, 'NA'); // No follow-up needed
+        if (prevText.includes('M2005')) selectOption(select, 'NA'); // No intervention
+        if (prevText.includes('M2010')) selectOption(select, '0'); // Education provided
+        if (prevText.includes('M2020')) selectOption(select, '0'); // Independent with oral meds
+        if (prevText.includes('M2030')) selectOption(select, 'NA'); // No injectable meds
+      });
+
+      // 17. HIGH-RISK DRUGS - N0415 (6 checkboxes = 1 item)
+      const drugCheckboxes = document.querySelectorAll('input[id^="N0415"]');
+      if (drugCheckboxes.length >= 2) {
+        (drugCheckboxes[0] as HTMLInputElement).checked = true; // Anticoagulant
+        (drugCheckboxes[1] as HTMLInputElement).checked = true; // Antiplatelet
+        filledCount++;
+      }
+
+      // 18. CARE MANAGEMENT - M Items (4 items)
+      // M2102, M2250 are checkbox groups
+      const careCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      careCheckboxes.forEach(checkbox => {
+        const label = checkbox.parentElement?.textContent || '';
+        if (label.toLowerCase().includes('adl')) {
+          (checkbox as HTMLInputElement).checked = true;
+        }
+        if (label.toLowerCase().includes('medication')) {
+          (checkbox as HTMLInputElement).checked = true;
+        }
+      });
+      filledCount += 2;
+
+      // 19. SPECIAL TREATMENTS - O Items (2 items)
+      allSelects.forEach(select => {
+        const prevText = select.previousElementSibling?.textContent || '';
+        if (prevText.includes('O0350')) {
+          selectOption(select, '1'); // COVID vaccination up to date
+        }
+      });
+      const treatmentCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+      treatmentCheckboxes.forEach(checkbox => {
+        const label = checkbox.parentElement?.textContent || '';
+        if (label.toLowerCase().includes('physical therapy')) {
+          (checkbox as HTMLInputElement).checked = true;
+          filledCount++;
+        }
+      });
+
+      // FINAL PASS: Fill any remaining empty selects with smart defaults
+      setTimeout(() => {
+        const allSelectsForFinalPass = document.querySelectorAll('select');
+        allSelectsForFinalPass.forEach(select => {
+          const selectEl = select as HTMLSelectElement;
+
+          // Skip if already has a value selected
+          if (selectEl.value && selectEl.value !== '') {
+            return;
+          }
+
+          // Get context from label
+          const label = selectEl.previousElementSibling?.textContent || '';
+          const parentText = selectEl.parentElement?.textContent || '';
+          const contextText = (label + ' ' + parentText).toLowerCase();
+
+          // Smart defaults based on context
+          if (contextText.includes('na') || contextText.includes('not applicable')) {
+            // If NA is an option, select it
+            const naOption = Array.from(selectEl.options).find(opt =>
+              opt.value === 'NA' || opt.text.includes('NA') || opt.text.includes('Not applicable')
+            );
+            if (naOption) {
+              selectEl.value = naOption.value;
+              return;
+            }
+          }
+
+          // For yes/no questions, default to "No" (0) unless it's negative
+          if (contextText.includes('yes') || contextText.includes('no')) {
+            const noOption = Array.from(selectEl.options).find(opt =>
+              opt.value === '0' || opt.text.toLowerCase().includes('no')
+            );
+            if (noOption) {
+              selectEl.value = noOption.value;
+              return;
+            }
+          }
+
+          // For medication/intervention questions, default to appropriate value
+          if (contextText.includes('medication') || contextText.includes('intervention')) {
+            const firstReasonableOption = Array.from(selectEl.options).find(opt =>
+              opt.value === '0' || opt.value === 'NA' || opt.text.includes('No')
+            );
+            if (firstReasonableOption) {
+              selectEl.value = firstReasonableOption.value;
+              return;
+            }
+          }
+
+          // Default: Select first non-empty option if nothing else worked
+          if (selectEl.options.length > 0) {
+            for (let i = 0; i < selectEl.options.length; i++) {
+              if (selectEl.options[i].value !== '') {
+                selectEl.value = selectEl.options[i].value;
+                break;
+              }
+            }
+          }
+        });
+
+        // Fill any empty number inputs with reasonable defaults
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+          const inputEl = input as HTMLInputElement;
+          if (!inputEl.value || inputEl.value === '') {
+            const min = parseInt(inputEl.min) || 0;
+            const max = parseInt(inputEl.max) || 10;
+            // Set to middle value or min if readonly
+            inputEl.value = inputEl.readOnly ? '0' : Math.floor((min + max) / 2).toString();
+          }
+        });
+
+        // Set realistic completion count (all 89 items)
+        this.itemsAccepted.set(89);
+
+        // Accept all AI recommendations since all items are now filled
+        this.acceptAllRecommendations();
+
+        this.showAutofillNotification();
+      }, 100);
+    }, 300);
+  }
+
+  /**
+   * Accept all AI recommendations - used during demo autofill
+   */
+  private acceptAllRecommendations(): void {
+    // Update all recommendations to 'accepted' status
+    this.aiRecommendations.update((recs) =>
+      recs.map((rec) => ({
+        ...rec,
+        status: 'accepted' as AiRecommendationStatus,
+      }))
+    );
+
+    // Save all recommendation states to persistent storage
+    this.aiRecommendations().forEach((rec) => {
+      this.recommendationStateService.updateRecommendationStatus(rec.id, 'accepted');
+    });
+
+    // Recompute analyzer alerts to hide any linked to accepted recommendations
+    this.computeAnalyzerAlerts();
+
+    console.log('✅ All AI recommendations accepted during demo autofill');
+  }
+
+  private showAutofillNotification(): void {
+    const notification = document.createElement('div');
+    notification.className =
+      'fixed bottom-4 right-4 bg-white rounded-lg shadow-2xl p-4 border-l-4 border-indigo-500 z-50';
+    notification.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-500 rounded-full p-2">
+          <ion-icon name="checkmark-done" class="text-white text-xl"></ion-icon>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-900">
+            Demo Data Loaded
+          </p>
+          <p class="text-xs text-slate-500">
+            Form populated with sample assessment data
+          </p>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
   }
 }

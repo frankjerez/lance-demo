@@ -1031,14 +1031,48 @@
             </div>
           </div>
 
+          <!-- Collapse/Expand All Controls -->
+          <div class="flex justify-between items-center gap-2 mb-4">
+            <button
+              (click)="autofillDemoData()"
+              class="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-1.5"
+            >
+              <ion-icon name="flash" class="text-sm"></ion-icon>
+              Demo Autofill
+            </button>
+            <div class="flex gap-2">
+              <button
+                (click)="expandAllSections()"
+                class="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition-colors flex items-center gap-1"
+              >
+                <ion-icon name="expand-outline" class="text-sm"></ion-icon>
+                Expand All
+              </button>
+              <button
+                (click)="collapseAllSections()"
+                class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-300 transition-colors flex items-center gap-1"
+              >
+                <ion-icon name="contract-outline" class="text-sm"></ion-icon>
+                Collapse All
+              </button>
+            </div>
+          </div>
+
           <!-- ADMINISTRATIVE INFORMATION -->
-          <div class="bg-blue-50 border-l-4 border-blue-600 px-3 py-2 mb-3">
+          <div
+            (click)="toggleSection('admin')"
+            class="bg-blue-50 border-l-4 border-blue-600 px-3 py-2 mb-3 cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-between"
+          >
             <h3 class="font-bold text-blue-900 text-xs uppercase tracking-wider">
               Administrative Information
             </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('admin') ? 'chevron-down' : 'chevron-up'"
+              class="text-blue-900 text-lg"
+            ></ion-icon>
           </div>
 
-          <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div *ngIf="!isSectionCollapsed('admin')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
             <div>
               <label class="text-[11px] font-bold text-slate-700"
                 >M0010. CMS Certification Number</label
@@ -1052,12 +1086,102 @@
             </div>
 
             <div>
+              <label class="text-[11px] font-bold text-slate-700">M0014. Branch State</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select State -</option>
+                <option value="FL" selected>FL - Florida</option>
+                <option value="CA">CA - California</option>
+                <option value="TX">TX - Texas</option>
+                <option value="NY">NY - New York</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">M0016. Branch ID Number</label>
+              <input
+                type="text"
+                value="BR-001"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >M0018. National Provider Identifier (NPI) - Attending Physician</label
+              >
+              <input
+                type="text"
+                value="1234567890"
+                maxlength="10"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">M0020. Patient ID Number</label>
+              <input
+                type="text"
+                value="PAT-87654"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs font-mono"
+              />
+            </div>
+
+            <div>
               <label class="text-[11px] font-bold text-slate-700">M0030. Start of Care Date</label>
               <input
                 type="date"
                 value="2024-11-16"
                 class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
               />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >M0064. Social Security Number</label
+              >
+              <input
+                type="text"
+                placeholder="###-##-####"
+                maxlength="11"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">M0066. Patient Birth Date</label>
+              <input
+                type="date"
+                value="1958-09-03"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">M0069. Patient Gender</label>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option value="1" selected>1 - Male</option>
+                <option value="2">2 - Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >M0080. Discipline of Person Completing Assessment</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option value="1" selected>1 - RN</option>
+                <option value="2">2 - PT</option>
+                <option value="3">3 - SLP/ST</option>
+                <option value="4">4 - OT</option>
+              </select>
             </div>
 
             <div>
@@ -1082,25 +1206,88 @@
                 <option>03 - Resumption of care</option>
                 <option>04 - Recertification</option>
                 <option>05 - Other follow-up</option>
+                <option>06 - Transferred to inpatient facility - not discharged</option>
+                <option>07 - Transferred to inpatient facility - discharged</option>
+                <option>08 - Death at home</option>
+                <option>09 - Discharge from agency</option>
               </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >M0102. Date of Physician-Ordered Start of Care</label
+              >
+              <input
+                type="date"
+                value="2024-11-15"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">M0104. Date of Referral</label>
+              <input
+                type="date"
+                value="2024-11-14"
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >M0150. Current Payment Sources for Home Care
+                <span class="text-slate-500 font-normal">(Check all that apply)</span></label
+              >
+              <div class="mt-1 space-y-1">
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" checked class="mr-2" /> 1 - Medicare (traditional
+                  fee-for-service)
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 2 - Medicare (HMO/managed care/Advantage)
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 3 - Medicaid (traditional
+                  fee-for-service)
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 4 - Medicaid (HMO/managed care)
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 5 - Workers' compensation
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 8 - Private insurance
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> 10 - Self-pay
+                </label>
+              </div>
             </div>
           </div>
 
           <!-- DEMOGRAPHICS -->
-          <div class="bg-green-50 border-l-4 border-green-600 px-3 py-2 mb-3">
+          <div
+            (click)="toggleSection('demographics')"
+            class="bg-green-50 border-l-4 border-green-600 px-3 py-2 mb-3 cursor-pointer hover:bg-green-100 transition-colors flex items-center justify-between"
+          >
             <h3 class="font-bold text-green-900 text-xs uppercase tracking-wider">
               Patient Demographics
             </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('demographics') ? 'chevron-down' : 'chevron-up'"
+              class="text-green-900 text-lg"
+            ></ion-icon>
           </div>
 
-          <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div *ngIf="!isSectionCollapsed('demographics')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
             <div>
               <label class="text-[11px] font-bold text-slate-700">A1005. Ethnicity</label>
               <select
                 class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
               >
-                <option>0 - Hispanic or Latino</option>
-                <option selected>1 - Not Hispanic or Latino</option>
+                <option selected>0 - Not of Hispanic, Latino/Latina, or Spanish origin</option>
+                <option>1 - Yes, Hispanic, Latino/Latina, or Spanish origin</option>
                 <option>9 - Patient declines to respond</option>
               </select>
             </div>
@@ -1111,32 +1298,459 @@
               >
               <div class="mt-1 space-y-1">
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" class="mr-2" /> 01 - American Indian or Alaska Native
+                  <input type="checkbox" class="mr-2" /> A - American Indian or Alaska Native
                 </label>
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" class="mr-2" /> 02 - Asian
+                  <input type="checkbox" class="mr-2" /> B - Asian
                 </label>
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" class="mr-2" /> 03 - Black or African American
+                  <input type="checkbox" class="mr-2" /> C - Black or African American
                 </label>
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" class="mr-2" /> 04 - Native Hawaiian/Pacific Islander
+                  <input type="checkbox" class="mr-2" /> D - Native Hawaiian/Pacific Islander
                 </label>
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" checked class="mr-2" /> 05 - White
+                  <input type="checkbox" checked class="mr-2" /> E - White
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >A1110A. Preferred Language</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option selected>English</option>
+                <option>Spanish</option>
+                <option>Chinese</option>
+                <option>French</option>
+                <option>German</option>
+                <option>Italian</option>
+                <option>Portuguese</option>
+                <option>Russian</option>
+                <option>Tagalog</option>
+                <option>Vietnamese</option>
+                <option>Other (specify)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >A1110B. Need or Want an Interpreter?</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option selected>0 - No</option>
+                <option>1 - Yes</option>
+                <option>8 - Patient declines to respond</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">A1250. Transportation</label>
+              <p class="text-[10px] text-slate-600 mt-1 mb-1">
+                Does the patient have a car, other vehicle, or public transportation to obtain
+                health care?
+              </p>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option selected>0 - Yes, patient has transportation</option>
+                <option>1 - No, patient does not have transportation</option>
+                <option>9 - Patient declines to respond</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >A1700. Cognitive, Behavioral, and Psychiatric Symptoms</label
+              >
+              <p class="text-[10px] text-slate-600 mt-1 mb-1">
+                Are any of the symptoms demonstrated at least once a week? (Check all that apply)
+              </p>
+              <div class="mt-1 space-y-1">
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> A - Wandering
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> B - Verbally abusive behavioral symptoms
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> C - Physically abusive behavioral symptoms
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> D - Disruptive behavioral symptoms
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" class="mr-2" /> E - Delusions
+                </label>
+                <label class="flex items-center text-xs">
+                  <input type="checkbox" checked class="mr-2" /> F - None of the above
                 </label>
               </div>
             </div>
           </div>
 
+          <!-- SENSORY STATUS -->
+          <div
+            (click)="toggleSection('sensory')"
+            class="bg-amber-50 border-l-4 border-amber-600 px-3 py-2 mb-3 cursor-pointer hover:bg-amber-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-amber-900 text-xs uppercase tracking-wider">
+              Sensory Status
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('sensory') ? 'chevron-down' : 'chevron-up'"
+              class="text-amber-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('sensory')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">B1000. Vision</label>
+              <p class="text-[10px] text-slate-600 mt-1 mb-1">
+                Ability to see in adequate light (with glasses if used)
+              </p>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option selected>0 - Sees adequately; can see medication labels, newsprint</option>
+                <option>1 - Sees large print, but not regular print</option>
+                <option>2 - Sees large objects, but not small objects</option>
+                <option>3 - Sees small objects poorly or not at all</option>
+                <option>4 - No vision; unable to see</option>
+                <option>9 - Patient declines to respond</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >B1200. Hearing (with hearing aid if applicable)</label
+              >
+              <p class="text-[10px] text-slate-600 mt-1 mb-1">
+                Ability to hear (with hearing aid if used)
+              </p>
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option selected>
+                  0 - No difficulty in normal conversation, social interaction, listening to TV
+                </option>
+                <option>
+                  1 - Difficulty in some situations (e.g., when not facing speaker)
+                </option>
+                <option>
+                  2 - Difficulty in many situations (speaker must increase volume and speak
+                  distinctly)
+                </option>
+                <option>
+                  3 - Difficulty in most/all situations (speaker must speak loudly and slowly)
+                </option>
+                <option>4 - Unable to hear in all situations</option>
+                <option>9 - Patient declines to respond</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- COGNITIVE PATTERNS -->
+          <div
+            (click)="toggleSection('cognitive')"
+            class="bg-cyan-50 border-l-4 border-cyan-600 px-3 py-2 mb-3 cursor-pointer hover:bg-cyan-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-cyan-900 text-xs uppercase tracking-wider">
+              Cognitive Patterns
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('cognitive') ? 'chevron-down' : 'chevron-up'"
+              class="text-cyan-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('cognitive')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >C0100. Should Brief Interview for Mental Status (BIMS) be Conducted?</label
+              >
+              <select
+                class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+              >
+                <option value="">- Select -</option>
+                <option>0 - No (patient is rarely/never understood)</option>
+                <option selected>1 - Yes</option>
+              </select>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <p class="text-[10px] font-semibold text-slate-700 mb-2">
+                BIMS Assessment (if C0100 = Yes)
+              </p>
+
+              <div class="space-y-2">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700"
+                    >C0200. Repetition of Three Words (0-3)</label
+                  >
+                  <input
+                    type="number"
+                    min="0"
+                    max="3"
+                    value="3"
+                    class="mt-1 block w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700"
+                    >C0300. Temporal Orientation (Score each: 0-4)</label
+                  >
+                  <div class="grid grid-cols-3 gap-2 mt-1">
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0300A. Year</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="4"
+                        value="4"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0300B. Month</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="4"
+                        value="4"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0300C. Day</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="4"
+                        value="3"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700"
+                    >C0400. Recall (Score each: 0-2)</label
+                  >
+                  <div class="grid grid-cols-3 gap-2 mt-1">
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0400A. Word 1</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="2"
+                        value="2"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0400B. Word 2</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="2"
+                        value="2"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-[10px] text-slate-600">C0400C. Word 3</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="2"
+                        value="1"
+                        class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700"
+                    >C0500. BIMS Summary Score (0-15)</label
+                  >
+                  <input
+                    type="number"
+                    readonly
+                    value="14"
+                    class="mt-1 block w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded text-xs font-semibold"
+                  />
+                  <p class="text-[10px] text-emerald-700 mt-1">13-15 = Cognitively intact</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >C1310. Signs and Symptoms of Delirium</label
+              >
+              <div class="mt-2 space-y-2">
+                <div>
+                  <label class="text-[10px] font-medium text-slate-700"
+                    >C1310A. Acute Onset Mental Status Change</label
+                  >
+                  <select
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                  >
+                    <option selected>0 - No</option>
+                    <option>1 - Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[10px] font-medium text-slate-700">C1310B. Inattention</label>
+                  <select
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                  >
+                    <option selected>0 - Behavior not present</option>
+                    <option>1 - Behavior present, fluctuates</option>
+                    <option>2 - Behavior present, continuous</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[10px] font-medium text-slate-700"
+                    >C1310C. Disorganized Thinking</label
+                  >
+                  <select
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                  >
+                    <option selected>0 - Behavior not present</option>
+                    <option>1 - Behavior present, fluctuates</option>
+                    <option>2 - Behavior present, continuous</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[10px] font-medium text-slate-700"
+                    >C1310D. Altered Level of Consciousness</label
+                  >
+                  <select
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                  >
+                    <option selected>0 - Alert</option>
+                    <option>1 - Vigilant</option>
+                    <option>2 - Lethargic</option>
+                    <option>3 - Stupor</option>
+                    <option>4 - Coma</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MOOD AND BEHAVIOR PATTERNS -->
+          <div
+            (click)="toggleSection('mood')"
+            class="bg-rose-50 border-l-4 border-rose-600 px-3 py-2 mb-3 cursor-pointer hover:bg-rose-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-rose-900 text-xs uppercase tracking-wider">
+              Mood and Behavior Patterns
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('mood') ? 'chevron-down' : 'chevron-up'"
+              class="text-rose-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('mood')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+            <div>
+              <label class="text-[11px] font-bold text-slate-700"
+                >D0150. Patient Health Questionnaire (PHQ-2 to 9)</label
+              >
+              <p class="text-[10px] text-slate-600 mt-1 mb-2">
+                Over the last 2 weeks, how often have you been bothered by...
+              </p>
+              <div class="bg-slate-50 p-3 rounded space-y-2">
+                <div class="text-[10px] text-slate-600 mb-2">
+                  <strong>Scoring:</strong> 0=Not at all, 1=Several days, 2=More than half the
+                  days, 3=Nearly every day
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                  <div>
+                    <label class="text-[10px] text-slate-700">D0150A1. Little interest or pleasure in doing things</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="3"
+                      value="0"
+                      class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-700">D0150A2. Feeling down, depressed, or hopeless</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="3"
+                      value="1"
+                      class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-700">D0150B3. Trouble falling or staying asleep</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="3"
+                      value="1"
+                      class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-700">D0150B4. Feeling tired or having little energy</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="3"
+                      value="2"
+                      class="mt-0.5 block w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-slate-700">D0160. PHQ-9 Total Severity Score</label>
+              <input
+                type="number"
+                readonly
+                value="4"
+                class="mt-1 block w-full px-2 py-1.5 bg-yellow-50 border border-yellow-300 rounded text-xs font-semibold"
+              />
+              <p class="text-[10px] text-slate-600 mt-1">1-4 = Minimal depression</p>
+            </div>
+          </div>
+
           <!-- DIAGNOSES (AI-Populated) -->
-          <div class="bg-red-50 border-l-4 border-red-600 px-3 py-2 mb-3">
+          <div
+            (click)="toggleSection('diagnoses')"
+            class="bg-red-50 border-l-4 border-red-600 px-3 py-2 mb-3 cursor-pointer hover:bg-red-100 transition-colors flex items-center justify-between"
+          >
             <h3 class="font-bold text-red-900 text-xs uppercase tracking-wider">
               Health Conditions - Diagnoses
             </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('diagnoses') ? 'chevron-down' : 'chevron-up'"
+              class="text-red-900 text-lg"
+            ></ion-icon>
           </div>
 
-          <div class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div *ngIf="!isSectionCollapsed('diagnoses')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
             <!-- I8000 Primary Diagnosis -->
             <div>
               <label class="text-[11px] font-bold text-slate-700">
@@ -1194,15 +1808,273 @@
             </div>
           </div>
 
+          <!-- SECTION J: HEALTH CONDITIONS -->
+          <div
+            (click)="toggleSection('health-conditions')"
+            class="bg-rose-50 border-l-4 border-rose-600 px-3 py-2 mb-3 cursor-pointer hover:bg-rose-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-rose-900 text-xs uppercase tracking-wider">
+              Section J. Health Conditions
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('health-conditions') ? 'chevron-down' : 'chevron-up'"
+              class="text-rose-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('health-conditions')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- J0510 Pain Effect on Sleep -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  J0510. Pain Effect on Sleep
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="J0510-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Does not apply (no pain)</option>
+                  <option value="1">1 - Pain does not interfere with sleep</option>
+                  <option value="2">2 - Pain interferes with sleep</option>
+                </select>
+              </div>
+
+              <!-- J1800 Any Falls Since SOC -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  J1800. Any Falls Since SOC/ROC
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="J1800-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- J1900 Number of Falls (conditional) -->
+              <div id="J1900-container" class="pl-4 border-l-2 border-rose-300 space-y-2">
+                <p class="text-[10px] text-slate-600 italic">
+                  Complete if J1800 = Yes
+                </p>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700">
+                    J1900A. Number of Falls - No Injury
+                  </label>
+                  <input
+                    type="number"
+                    id="J1900A-input"
+                    min="0"
+                    max="99"
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                    placeholder="0-99"
+                  />
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700">
+                    J1900B. Number of Falls - Injury (except major)
+                  </label>
+                  <input
+                    type="number"
+                    id="J1900B-input"
+                    min="0"
+                    max="99"
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                    placeholder="0-99"
+                  />
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700">
+                    J1900C. Number of Falls - Major Injury
+                  </label>
+                  <input
+                    type="number"
+                    id="J1900C-input"
+                    min="0"
+                    max="99"
+                    class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                    placeholder="0-99"
+                  />
+                  <p class="text-[9px] text-slate-500 mt-1">
+                    Major injury: bone fractures, joint dislocations, closed head injury
+                  </p>
+                </div>
+              </div>
+
+              <!-- J2030 Dyspnea -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  J2030. Shortness of Breath (Dyspnea)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="J2030-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Not short of breath</option>
+                  <option value="1">1 - When walking more than 20 feet, climbing stairs</option>
+                  <option value="2">2 - With moderate exertion (dressing, using commode)</option>
+                  <option value="3">3 - With minimal exertion or with ADLs</option>
+                  <option value="4">4 - At rest (during day or night)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- GG0100: PRIOR FUNCTIONING -->
+          <div
+            (click)="toggleSection('gg-prior')"
+            class="bg-teal-50 border-l-4 border-teal-600 px-3 py-2 mb-3 cursor-pointer hover:bg-teal-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-teal-900 text-xs uppercase tracking-wider">
+              GG0100. Prior Functioning: Everyday Activities
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('gg-prior') ? 'chevron-down' : 'chevron-up'"
+              class="text-teal-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('gg-prior')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <p class="text-[10px] text-slate-600 mb-3 italic bg-teal-50 p-2 rounded">
+              <strong>Instructions:</strong> Prior to the current illness, exacerbation, or injury,
+              what was the patient's usual ability with everyday activities?
+            </p>
+
+            <div class="space-y-3">
+              <!-- GG0100A Self-Care -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  GG0100A. Self-Care (Eating, Toileting, Hygiene)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="GG0100A-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="3">3 - Independent</option>
+                  <option value="2">2 - Needed some help</option>
+                  <option value="1">1 - Dependent</option>
+                  <option value="8">8 - Unknown</option>
+                  <option value="9">9 - Not applicable</option>
+                </select>
+              </div>
+
+              <!-- GG0100B Indoor Mobility -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  GG0100B. Indoor Mobility (Walking, Wheelchair)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="GG0100B-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="3">3 - Independent</option>
+                  <option value="2">2 - Needed some help</option>
+                  <option value="1">1 - Dependent</option>
+                  <option value="8">8 - Unknown</option>
+                  <option value="9">9 - Not applicable</option>
+                </select>
+              </div>
+
+              <!-- GG0100C Stairs -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  GG0100C. Stairs
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="GG0100C-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="3">3 - Independent</option>
+                  <option value="2">2 - Needed some help</option>
+                  <option value="1">1 - Dependent</option>
+                  <option value="8">8 - Unknown</option>
+                  <option value="9">9 - Not applicable</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- GG0110: PRIOR DEVICE USE -->
+          <div
+            (click)="toggleSection('gg-prior-device')"
+            class="bg-cyan-50 border-l-4 border-cyan-600 px-3 py-2 mb-3 cursor-pointer hover:bg-cyan-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-cyan-900 text-xs uppercase tracking-wider">
+              GG0110. Prior Device Use
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('gg-prior-device') ? 'chevron-down' : 'chevron-up'"
+              class="text-cyan-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('gg-prior-device')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <p class="text-[10px] text-slate-600 mb-3 italic bg-cyan-50 p-2 rounded">
+              <strong>Instructions:</strong> Did the patient use any of the following prior to the
+              current illness, exacerbation, or injury? (Check all that apply)
+            </p>
+
+            <div class="space-y-2">
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-A" class="mr-2" />
+                <span>A - Manual wheelchair</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-B" class="mr-2" />
+                <span>B - Motorized wheelchair/scooter</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-C" class="mr-2" />
+                <span>C - Mechanical lift</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-D" class="mr-2" />
+                <span>D - Walker</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-E" class="mr-2" />
+                <span>E - Orthotics/prosthetics</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-F" class="mr-2" />
+                <span>F - None of the above</span>
+              </label>
+              <label class="flex items-center text-xs">
+                <input type="checkbox" id="GG0110-Z" class="mr-2" />
+                <span>Z - Unknown</span>
+              </label>
+            </div>
+          </div>
+
           <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
           <!-- FUNCTIONAL ABILITIES: SELF-CARE (GG Section) -->
-          <div class="bg-purple-50 border-l-4 border-purple-600 px-3 py-2 mb-3">
+          <div
+            (click)="toggleSection('gg-selfcare')"
+            class="bg-purple-50 border-l-4 border-purple-600 px-3 py-2 mb-3 cursor-pointer hover:bg-purple-100 transition-colors flex items-center justify-between"
+          >
             <h3 class="font-bold text-purple-900 text-xs uppercase tracking-wider">
               GG0130. Self-Care (Admission Performance)
             </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('gg-selfcare') ? 'chevron-down' : 'chevron-up'"
+              class="text-purple-900 text-lg"
+            ></ion-icon>
           </div>
 
-          <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div *ngIf="!isSectionCollapsed('gg-selfcare')" class="bg-white border border-slate-300 rounded p-3 mb-4">
             <p class="text-[10px] text-slate-600 mb-3 italic bg-purple-50 p-2 rounded">
               <strong>Coding:</strong> Code the patient's usual performance at admission. Use
               6-point scale: 06=Independent, 05=Setup help, 04=Supervision, 03=Partial assist,
@@ -1340,13 +2212,20 @@
           </div>
 
           <!-- FUNCTIONAL ABILITIES: MOBILITY (GG Section) -->
-          <div class="bg-indigo-50 border-l-4 border-indigo-600 px-3 py-2 mb-3">
+          <div
+            (click)="toggleSection('gg-mobility')"
+            class="bg-indigo-50 border-l-4 border-indigo-600 px-3 py-2 mb-3 cursor-pointer hover:bg-indigo-100 transition-colors flex items-center justify-between"
+          >
             <h3 class="font-bold text-indigo-900 text-xs uppercase tracking-wider">
               GG0170. Mobility (Admission Performance)
             </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('gg-mobility') ? 'chevron-down' : 'chevron-up'"
+              class="text-indigo-900 text-lg"
+            ></ion-icon>
           </div>
 
-          <div class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div *ngIf="!isSectionCollapsed('gg-mobility')" class="bg-white border border-slate-300 rounded p-3 mb-4">
             <p class="text-[10px] text-slate-600 mb-3 italic bg-indigo-50 p-2 rounded">
               <strong>Coding:</strong> Code the patient's usual performance at admission. Same
               6-point scale as Self-Care section.
@@ -1389,26 +2268,11 @@
                 </select>
               </div>
 
-              <div class="border-t border-slate-200 pt-3">
-                <label class="text-[11px] font-bold text-slate-700 flex items-center">
-                  <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
-                  GG0170C. Walk 10 Feet (AI-Populated)
-                </label>
-                <div
-                  id="form-GG0170C-answer"
-                  class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
-                >
-                  <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
-                  LANCE AI has recommendations - Click "Accept" to apply
-                </div>
-              </div>
-
               <div>
                 <label class="text-[11px] font-bold text-slate-700"
-                  >GG0170D. Walk 50 Feet with Two Turns</label
+                  >GG0170C. Lying to Sitting on Side of Bed</label
                 >
                 <select
-                  id="GG0170D-select"
                   class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
                 >
                   <option value="">- Select -</option>
@@ -1424,7 +2288,111 @@
               </div>
 
               <div>
-                <label class="text-[11px] font-bold text-slate-700">GG0170I. Walk 150 Feet</label>
+                <label class="text-[11px] font-bold text-slate-700">GG0170D. Sit to Stand</label>
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700"
+                  >GG0170E. Chair/Bed-to-Chair Transfer</label
+                >
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">GG0170F. Toilet Transfer</label>
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">GG0170G. Car Transfer</label>
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div class="border-t border-slate-200 pt-3">
+                <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                  <ion-icon name="sparkles" class="text-yellow-500 mr-1"></ion-icon>
+                  GG0170I. Walk 10 Feet (AI-Populated)
+                </label>
+                <div
+                  id="form-GG0170I-answer"
+                  class="mt-1 p-2 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded min-h-[40px] form-field-placeholder flex items-center text-slate-600 text-xs"
+                >
+                  <ion-icon name="sparkles-outline" class="text-yellow-600 mr-2"></ion-icon>
+                  LANCE AI has recommendations - Click "Accept" to apply
+                </div>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700"
+                  >GG0170J. Walk 50 Feet with Two Turns</label
+                >
+                <select
+                  id="GG0170J-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">GG0170K. Walk 150 Feet</label>
                 <select
                   class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
                 >
@@ -1507,6 +2475,912 @@
                   <option>01 - Dependent</option>
                   <option>07 - Patient refused</option>
                   <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700"
+                  >GG0170P. Picking up Object from Floor</label
+                >
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700"
+                  >GG0170Q. Wheel 50 Feet with Two Turns</label
+                >
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+                <p class="text-[9px] text-slate-500 mt-1">
+                  Complete only if walking items not applicable
+                </p>
+              </div>
+
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">GG0170R. Wheel 150 Feet</label>
+                <select
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option>06 - Independent</option>
+                  <option>05 - Setup or clean-up assistance</option>
+                  <option>04 - Supervision or touching assistance</option>
+                  <option>03 - Partial/moderate assistance</option>
+                  <option>02 - Substantial/maximal assistance</option>
+                  <option>01 - Dependent</option>
+                  <option>07 - Patient refused</option>
+                  <option>09 - Not applicable</option>
+                </select>
+                <p class="text-[9px] text-slate-500 mt-1">
+                  Complete only if walking items not applicable
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION K: NUTRITIONAL STATUS -->
+          <div
+            (click)="toggleSection('nutritional')"
+            class="bg-amber-50 border-l-4 border-amber-600 px-3 py-2 mb-3 cursor-pointer hover:bg-amber-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-amber-900 text-xs uppercase tracking-wider">
+              Section K. Nutritional Status
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('nutritional') ? 'chevron-down' : 'chevron-up'"
+              class="text-amber-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('nutritional')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- K0520 Nutritional Approaches -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  K0520. Nutritional Approaches (Check all that apply)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <div class="mt-2 space-y-2">
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="K0520-A" class="mr-2" />
+                    <span>A - Parenteral/IV feeding</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="K0520-B" class="mr-2" />
+                    <span>B - Feeding tube (nasogastric, G-tube, J-tube, PEG)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="K0520-C" class="mr-2" />
+                    <span>C - Mechanically altered diet</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="K0520-D" class="mr-2" />
+                    <span>D - Therapeutic diet</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="K0520-Z" class="mr-2" />
+                    <span>Z - None of the above</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION M: INTEGUMENTARY STATUS -->
+          <div
+            (click)="toggleSection('integumentary')"
+            class="bg-pink-50 border-l-4 border-pink-600 px-3 py-2 mb-3 cursor-pointer hover:bg-pink-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-pink-900 text-xs uppercase tracking-wider">
+              Section M. Integumentary Status
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('integumentary') ? 'chevron-down' : 'chevron-up'"
+              class="text-pink-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('integumentary')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- M1306 Pressure Ulcers Present -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1306. Does this patient have at least one Unhealed Pressure Ulcer/Injury at Stage 2
+                  or Higher?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1306-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- M1324 Stage of Most Problematic Pressure Ulcer -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1324. Stage of Most Problematic Unhealed Pressure Ulcer/Injury
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1324-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="1">1 - Stage 1</option>
+                  <option value="2">2 - Stage 2</option>
+                  <option value="3">3 - Stage 3</option>
+                  <option value="4">4 - Stage 4</option>
+                  <option value="A1">A1 - Unstageable: Known but not stageable due to coverage</option>
+                  <option value="A2">A2 - Unstageable: Deep tissue injury</option>
+                  <option value="NA">NA - No pressure ulcers</option>
+                </select>
+              </div>
+
+              <!-- M1330 Stasis Ulcer -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1330. Does this patient have a Stasis Ulcer?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1330-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes, unhealed stasis ulcer(s)</option>
+                  <option value="2">2 - Yes, healing stasis ulcer(s) but no unhealed</option>
+                </select>
+              </div>
+
+              <!-- M1334 Status of Most Problematic Stasis Ulcer -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1334. Status of Most Problematic Stasis Ulcer
+                </label>
+                <select
+                  id="M1334-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="1">1 - Fully granulating</option>
+                  <option value="2">2 - Early/partial granulation</option>
+                  <option value="3">3 - Not healing</option>
+                  <option value="NA">NA - No stasis ulcer</option>
+                </select>
+              </div>
+
+              <!-- M1340 Surgical Wound -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1340. Does this patient have a Surgical Wound?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1340-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes, patient has surgical wound</option>
+                </select>
+              </div>
+
+              <!-- M1342 Status of Most Problematic Surgical Wound -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1342. Status of Most Problematic Surgical Wound
+                </label>
+                <select
+                  id="M1342-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Newly epithelialized</option>
+                  <option value="1">1 - Fully granulating</option>
+                  <option value="2">2 - Early/partial granulation</option>
+                  <option value="3">3 - Not healing</option>
+                  <option value="NA">NA - No surgical wound</option>
+                </select>
+              </div>
+
+              <!-- M1350 Skin Lesions or Open Wounds -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1350. Does the patient have a Skin Lesion or Open Wound?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1350-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+                <p class="text-[9px] text-slate-500 mt-1">
+                  Excludes pressure ulcers, stasis ulcers, and surgical wounds
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION M: RESPIRATORY STATUS -->
+          <div
+            (click)="toggleSection('respiratory')"
+            class="bg-sky-50 border-l-4 border-sky-600 px-3 py-2 mb-3 cursor-pointer hover:bg-sky-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-sky-900 text-xs uppercase tracking-wider">
+              Section M. Respiratory Status
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('respiratory') ? 'chevron-down' : 'chevron-up'"
+              class="text-sky-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('respiratory')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- M1400 Dyspnea -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1400. When is the patient dyspneic or noticeably Short of Breath?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1400-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Never, patient is not short of breath</option>
+                  <option value="1">1 - When walking more than 20 feet, climbing stairs</option>
+                  <option value="2">2 - With moderate exertion (dressing, using commode)</option>
+                  <option value="3">3 - With minimal exertion or with agitation</option>
+                  <option value="4">4 - At rest (during day or night)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION M: ELIMINATION STATUS -->
+          <div
+            (click)="toggleSection('elimination')"
+            class="bg-lime-50 border-l-4 border-lime-600 px-3 py-2 mb-3 cursor-pointer hover:bg-lime-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-lime-900 text-xs uppercase tracking-wider">
+              Section M. Elimination Status
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('elimination') ? 'chevron-down' : 'chevron-up'"
+              class="text-lime-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('elimination')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- M1600 UTI -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1600. Has this patient been treated for a Urinary Tract Infection in the past 14
+                  days?
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1600-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                  <option value="NA">NA - Patient on prophylactic treatment</option>
+                  <option value="UK">UK - Unknown</option>
+                </select>
+              </div>
+
+              <!-- M1610 Urinary Incontinence -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1610. Urinary Incontinence or Urinary Catheter Presence
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1610-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No incontinence or catheter</option>
+                  <option value="1">1 - Patient is incontinent</option>
+                  <option value="2">
+                    2 - Patient requires catheter (external, indwelling, intermittent, suprapubic)
+                  </option>
+                </select>
+              </div>
+
+              <!-- M1620 Bowel Incontinence -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1620. Bowel Incontinence Frequency
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1620-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Very rarely or never has bowel incontinence</option>
+                  <option value="1">1 - Less than once weekly</option>
+                  <option value="2">2 - One to three times weekly</option>
+                  <option value="3">3 - Four to six times weekly</option>
+                  <option value="4">4 - On a daily basis</option>
+                  <option value="5">5 - More often than once daily</option>
+                  <option value="NA">NA - Patient has ostomy for bowel elimination</option>
+                  <option value="UK">UK - Unknown</option>
+                </select>
+              </div>
+
+              <!-- M1630 Ostomy -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M1630. Ostomy for Bowel Elimination
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <select
+                  id="M1630-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - Patient does not have ostomy for bowel elimination</option>
+                  <option value="1">
+                    1 - Ostomy not related to inpatient stay, no change in regimen
+                  </option>
+                  <option value="2">
+                    2 - Ostomy related to inpatient stay or necessitated change in regimen
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION M: MEDICATIONS -->
+          <div
+            (click)="toggleSection('medications')"
+            class="bg-violet-50 border-l-4 border-violet-600 px-3 py-2 mb-3 cursor-pointer hover:bg-violet-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-violet-900 text-xs uppercase tracking-wider">
+              Section M. Medications
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('medications') ? 'chevron-down' : 'chevron-up'"
+              class="text-violet-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('medications')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- M2001 Drug Regimen Review -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2001. Drug Regimen Review
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  Does a complete drug regimen review indicate potential clinically significant
+                  medication issues?
+                </p>
+                <select
+                  id="M2001-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No issues found during review</option>
+                  <option value="1">1 - Issues found during review</option>
+                  <option value="9">9 - No review conducted</option>
+                </select>
+              </div>
+
+              <!-- M2003 Medication Follow-up -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2003. Medication Follow-up
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  If issues identified in M2001, was follow-up conducted?
+                </p>
+                <select
+                  id="M2003-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                  <option value="NA">NA - No issues found in M2001</option>
+                </select>
+              </div>
+
+              <!-- M2005 Medication Intervention -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2005. Medication Intervention
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  If issues identified, was medication intervention provided?
+                </p>
+                <select
+                  id="M2005-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                  <option value="NA">NA - No issues found in M2001</option>
+                </select>
+              </div>
+
+              <!-- M2010 High-Risk Drug Education -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2010. Patient/Caregiver High-Risk Drug Education
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  Has the patient/caregiver received education on high-risk medications?
+                </p>
+                <select
+                  id="M2010-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                  <option value="NA">NA - Patient not taking any high-risk drugs</option>
+                </select>
+              </div>
+
+              <!-- M2020 Management of Oral Medications -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2020. Management of Oral Medications
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  Patient's current ability to prepare and take all oral medications reliably and
+                  safely
+                </p>
+                <select
+                  id="M2020-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">
+                    0 - Able to independently take correct medication(s) and dosage(s) at correct
+                    times
+                  </option>
+                  <option value="1">
+                    1 - Able to take if dosages prepared in advance or using dispensing device
+                  </option>
+                  <option value="2">2 - Able to take if given reminders at appropriate times</option>
+                  <option value="3">3 - Unable to take unless administered by another person</option>
+                  <option value="NA">NA - No oral medications prescribed</option>
+                </select>
+              </div>
+
+              <!-- M2030 Management of Injectable Medications -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2030. Management of Injectable Medications
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  Patient's ability to prepare and administer injectable medications
+                </p>
+                <select
+                  id="M2030-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">
+                    0 - Able to independently take correct injectable at correct times
+                  </option>
+                  <option value="1">1 - Able to take if syringes prepared in advance</option>
+                  <option value="2">
+                    2 - Able to take if another person prepares and prompts at correct times
+                  </option>
+                  <option value="3">3 - Unable to take unless administered by another person</option>
+                  <option value="NA">NA - No injectable medications prescribed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION N: HIGH-RISK DRUG CLASSES -->
+          <div
+            (click)="toggleSection('high-risk-drugs')"
+            class="bg-fuchsia-50 border-l-4 border-fuchsia-600 px-3 py-2 mb-3 cursor-pointer hover:bg-fuchsia-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-fuchsia-900 text-xs uppercase tracking-wider">
+              Section N. High-Risk Drug Classes
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('high-risk-drugs') ? 'chevron-down' : 'chevron-up'"
+              class="text-fuchsia-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('high-risk-drugs')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <p class="text-[10px] text-slate-600 mb-3 italic bg-fuchsia-50 p-2 rounded">
+              <strong>N0415. High-Risk Drug Classes:</strong> For each drug class, indicate if
+              patient is currently taking and if indication is documented
+            </p>
+
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-700 pb-2 border-b">
+                <div>Drug Class</div>
+                <div>Currently Taking?</div>
+              </div>
+
+              <!-- N0415A Anticoagulant -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415A. Anticoagulant</label>
+                <select
+                  id="N0415A-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- N0415B Antiplatelet -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415B. Antiplatelet</label>
+                <select
+                  id="N0415B-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- N0415C Antipsychotic -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415C. Antipsychotic</label>
+                <select
+                  id="N0415C-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- N0415D Antibiotic -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415D. Antibiotic</label>
+                <select
+                  id="N0415D-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- N0415E Opioid -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415E. Opioid</label>
+                <select
+                  id="N0415E-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+
+              <!-- N0415F Hypoglycemic -->
+              <div class="grid grid-cols-2 gap-2 items-center">
+                <label class="text-xs text-slate-700">N0415F. Hypoglycemic (Diabetes medication)</label>
+                <select
+                  id="N0415F-select"
+                  class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION M: CARE MANAGEMENT -->
+          <div
+            (click)="toggleSection('care-management')"
+            class="bg-orange-50 border-l-4 border-orange-600 px-3 py-2 mb-3 cursor-pointer hover:bg-orange-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-orange-900 text-xs uppercase tracking-wider">
+              Section M. Care Management
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('care-management') ? 'chevron-down' : 'chevron-up'"
+              class="text-orange-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('care-management')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- M2102 Types and Sources of Assistance -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2102. Types and Sources of Assistance (Check all that apply)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <div class="mt-2 space-y-2">
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-ADL" class="mr-2" />
+                    <span>ADL assistance</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-IADL" class="mr-2" />
+                    <span>IADL assistance</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Med" class="mr-2" />
+                    <span>Medication administration</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Proc" class="mr-2" />
+                    <span>Medical procedures/treatments</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Equip" class="mr-2" />
+                    <span>Management of complex medical equipment</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Advocacy" class="mr-2" />
+                    <span>Advocacy or facilitation of patient participation</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Financial" class="mr-2" />
+                    <span>Financial management</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-Emotional" class="mr-2" />
+                    <span>Emotional/psychological support</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2102-None" class="mr-2" />
+                    <span>No assistance needed</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- M2250 Plan of Care Synopsis -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2250. Plan of Care Synopsis (Check all that apply)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <div class="mt-2 space-y-2">
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Med" class="mr-2" />
+                    <span>Medication management</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Nutrition" class="mr-2" />
+                    <span>Nutrition/hydration/elimination</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Skin" class="mr-2" />
+                    <span>Skin care</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Pain" class="mr-2" />
+                    <span>Pain management</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Behavioral" class="mr-2" />
+                    <span>Behavioral/psychiatric care</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Cardiac" class="mr-2" />
+                    <span>Cardiac/circulatory care</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Respiratory" class="mr-2" />
+                    <span>Respiratory care</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="M2250-Diabetes" class="mr-2" />
+                    <span>Diabetes care</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- M2300 Emergent Care -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2300. Emergent Care (Since SOC/ROC)
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  For follow-up/discharge assessments only
+                </p>
+                <select
+                  id="M2300-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes, used ER without hospitalization</option>
+                  <option value="2">2 - Yes, hospitalized (including ER visit)</option>
+                </select>
+              </div>
+
+              <!-- M2420 Discharge Disposition -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  M2420. Discharge Disposition
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  For discharge assessments only
+                </p>
+                <select
+                  id="M2420-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="1">1 - Patient remained in community</option>
+                  <option value="2">2 - Patient transferred to noninstitutional hospice</option>
+                  <option value="3">3 - Unknown</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION O: SPECIAL TREATMENTS AND PROCEDURES -->
+          <div
+            (click)="toggleSection('special-treatments')"
+            class="bg-emerald-50 border-l-4 border-emerald-600 px-3 py-2 mb-3 cursor-pointer hover:bg-emerald-100 transition-colors flex items-center justify-between"
+          >
+            <h3 class="font-bold text-emerald-900 text-xs uppercase tracking-wider">
+              Section O. Special Treatments and Procedures
+            </h3>
+            <ion-icon
+              [name]="isSectionCollapsed('special-treatments') ? 'chevron-down' : 'chevron-up'"
+              class="text-emerald-900 text-lg"
+            ></ion-icon>
+          </div>
+
+          <div *ngIf="!isSectionCollapsed('special-treatments')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+            <div class="space-y-3">
+              <!-- O0110 Special Treatments -->
+              <div>
+                <label class="text-[11px] font-bold text-slate-700">
+                  O0110. Special Treatments, Procedures, and Programs (Check all that apply)
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <div class="mt-2 space-y-2 grid grid-cols-2 gap-2">
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-A1" class="mr-2" />
+                    <span>A1 - Parenteral/IV feeding</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-A2" class="mr-2" />
+                    <span>A2 - Enteral feeding</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-B1" class="mr-2" />
+                    <span>B1 - IV medications</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-B2" class="mr-2" />
+                    <span>B2 - IV antibiotics</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-C1" class="mr-2" />
+                    <span>C1 - Oxygen therapy</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-C2" class="mr-2" />
+                    <span>C2 - Ventilator/respirator</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-D1" class="mr-2" />
+                    <span>D1 - Tracheostomy care</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-E1" class="mr-2" />
+                    <span>E1 - Chemotherapy (IV)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-E2" class="mr-2" />
+                    <span>E2 - Chemotherapy (oral)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-F1" class="mr-2" />
+                    <span>F1 - Radiation</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-G1" class="mr-2" />
+                    <span>G1 - Dialysis (hemodialysis)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-G2" class="mr-2" />
+                    <span>G2 - Dialysis (peritoneal)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-H1" class="mr-2" />
+                    <span>H1 - IV access (peripheral)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-H2" class="mr-2" />
+                    <span>H2 - IV access (PICC)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-H3" class="mr-2" />
+                    <span>H3 - IV access (central/port)</span>
+                  </label>
+                  <label class="flex items-center text-xs">
+                    <input type="checkbox" id="O0110-Z" class="mr-2" />
+                    <span>Z - None of the above</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- O0350 COVID-19 Vaccination (NEW in E1) -->
+              <div class="border-t-2 border-emerald-300 pt-3 mt-3">
+                <label class="text-[11px] font-bold text-slate-700 flex items-center">
+                  O0350. Patient's COVID-19 Vaccination is Up to Date
+                  <span
+                    class="ml-2 px-2 py-0.5 bg-emerald-200 text-emerald-800 text-[9px] font-bold rounded"
+                    >NEW in E1</span
+                  >
+                  <span class="text-red-600 ml-1">*</span>
+                </label>
+                <p class="text-[10px] text-slate-600 italic mt-1">
+                  Per CDC definition for COVID-19 vaccination up to date status
+                </p>
+                <select
+                  id="O0350-select"
+                  class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
+                >
+                  <option value="">- Select -</option>
+                  <option value="0">0 - No</option>
+                  <option value="1">1 - Yes</option>
+                  <option value="2">2 - Patient is not eligible for COVID-19 vaccination</option>
+                  <option value="3">3 - Unknown</option>
                 </select>
               </div>
             </div>

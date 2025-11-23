@@ -277,104 +277,196 @@
           </div>
         </div>
 
-        <!-- Episode History -->
-        <div class="border border-slate-200 rounded-lg p-4 space-y-3 bg-white">
-          <header class="flex items-center justify-between mb-1">
-            <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">History</h2>
+        <!-- Episode History - Timeline Style -->
+        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+          <header class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <ion-icon name="time-outline" class="text-indigo-600 text-lg"></ion-icon>
+              <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">
+                Care Timeline
+              </h2>
+            </div>
+            <span class="text-[0.65rem] text-slate-500">
+              {{ patientSummary.history?.length || 0 }} episodes
+            </span>
           </header>
 
-          <div class="space-y-3">
+          <!-- Timeline Container -->
+          <div class="relative space-y-6">
             <div
-              *ngFor="let ep of patientSummary.history"
-              class="border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
-              (click)="selectEpisode(ep)"
+              *ngFor="let ep of patientSummary.history; let i = index; let last = last"
+              class="relative"
             >
-              <!-- HEADER ROW -->
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="text-xs font-semibold text-slate-800">
-                    {{ ep.type }}
-                  </p>
+              <!-- Timeline Line -->
+              <div
+                *ngIf="!last"
+                class="absolute left-[17px] top-[36px] bottom-[-24px] w-0.5 bg-gradient-to-b from-indigo-200 to-slate-200"
+              ></div>
 
-                  <p class="text-[0.7rem] text-slate-500">
-                    {{ ep.startDate }}
-                    <ng-container *ngIf="ep.endDate"> &nbsp;–&nbsp;{{ ep.endDate }} </ng-container>
-                  </p>
-
-                  <p class="text-[0.7rem] text-slate-500 mt-1">
-                    Clinician:
-                    <span class="font-medium text-slate-700">
-                      {{ ep.clinician }}
-                    </span>
-                  </p>
-                </div>
-
-                <div class="flex flex-col items-end gap-1">
-                  <span
-                    class="px-2 py-0.5 text-[0.65rem] font-medium rounded-full"
-                    [ngClass]="
-                      ep.status === 'Completed'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-blue-100 text-blue-700'
-                    "
-                  >
-                    {{ ep.status }}
-                  </span>
-
-                  <!-- simple chevron indicator -->
-                  <ion-icon
-                    [name]="selectedEpisode === ep ? 'chevron-up-outline' : 'chevron-down-outline'"
-                    class="text-slate-400 text-sm"
-                  ></ion-icon>
-                </div>
+              <!-- Timeline Dot with Icon -->
+              <div class="absolute left-0 top-0 w-9 h-9 rounded-full flex items-center justify-center z-10"
+                   [ngClass]="ep.status === 'Completed' ? 'bg-emerald-100' : 'bg-indigo-100'">
+                <ion-icon
+                  [name]="ep.status === 'Completed' ? 'checkmark-circle' : 'pulse'"
+                  class="text-xl"
+                  [ngClass]="ep.status === 'Completed' ? 'text-emerald-600' : 'text-indigo-600'"
+                ></ion-icon>
               </div>
 
-              <!-- DETAILS / EXPANDED PANEL -->
-              <div
-                *ngIf="selectedEpisode === ep"
-                class="mt-3 border-t border-slate-100 pt-2.5 text-[0.7rem] text-slate-600 space-y-2"
-              >
-                <p *ngIf="ep.primaryReason">
-                  <span class="font-semibold text-slate-700">Reason for episode:</span>
-                  {{ ep.primaryReason }}
-                </p>
+              <!-- Episode Card -->
+              <div class="ml-14 cursor-pointer" (click)="selectEpisode(ep)">
+                <div
+                  class="border rounded-lg p-3 transition-all duration-200 hover:shadow-md"
+                  [ngClass]="
+                    ep.status === 'Completed'
+                      ? 'border-slate-200 bg-white hover:border-slate-300'
+                      : 'border-indigo-200 bg-indigo-50 hover:border-indigo-300'
+                  "
+                >
+                  <!-- Header -->
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h3 class="text-xs font-bold text-slate-800">
+                          {{ ep.type }}
+                        </h3>
+                        <span
+                          class="px-2 py-0.5 text-[0.6rem] font-semibold rounded-full"
+                          [ngClass]="
+                            ep.status === 'Completed'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-blue-100 text-blue-700'
+                          "
+                        >
+                          {{ ep.status }}
+                        </span>
+                      </div>
 
-                <p *ngIf="ep.diagnoses?.length">
-                  <span class="font-semibold text-slate-700">Key diagnoses:</span>
-                  {{ ep.diagnoses.join(', ') }}
-                </p>
+                      <!-- Date Range -->
+                      <div class="flex items-center gap-2 text-[0.65rem] text-slate-600">
+                        <ion-icon name="calendar-outline" class="text-sm"></ion-icon>
+                        <span class="font-medium">{{ ep.startDate }}</span>
+                        <ng-container *ngIf="ep.endDate">
+                          <ion-icon name="arrow-forward" class="text-[0.5rem]"></ion-icon>
+                          <span class="font-medium">{{ ep.endDate }}</span>
+                        </ng-container>
+                        <ng-container *ngIf="!ep.endDate">
+                          <span class="text-blue-600 font-semibold">• Present</span>
+                        </ng-container>
+                      </div>
 
-                <div *ngIf="ep.planOfCare?.length" class="space-y-1.5">
-                  <p class="font-semibold text-slate-700 uppercase tracking-wide">
-                    Plan of care focus
-                  </p>
+                      <!-- Clinician -->
+                      <div class="flex items-center gap-1.5 mt-1.5 text-[0.65rem]">
+                        <ion-icon name="person-circle-outline" class="text-sm text-slate-500"></ion-icon>
+                        <span class="text-slate-600">{{ ep.clinician }}</span>
+                      </div>
 
-                  <div *ngFor="let poc of ep.planOfCare" class="bg-slate-50 rounded-md px-2 py-1.5">
-                    <p class="font-semibold text-slate-700">
-                      {{ poc.title }}
-                    </p>
-                    <ul class="list-disc ml-4 mt-0.5 space-y-0.5">
-                      <li *ngFor="let item of poc.items">
-                        {{ item }}
-                      </li>
-                    </ul>
+                      <!-- Quick Summary Tags -->
+                      <div *ngIf="ep.diagnoses?.length && selectedEpisode !== ep" class="flex flex-wrap gap-1 mt-2">
+                        <span
+                          *ngFor="let dx of ep.diagnoses.slice(0, 3)"
+                          class="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[0.6rem] font-medium"
+                        >
+                          {{ dx }}
+                        </span>
+                        <span
+                          *ngIf="ep.diagnoses.length > 3"
+                          class="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[0.6rem]"
+                        >
+                          +{{ ep.diagnoses.length - 3 }} more
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Expand/Collapse Icon -->
+                    <ion-icon
+                      [name]="selectedEpisode === ep ? 'chevron-up-circle' : 'chevron-down-circle'"
+                      class="text-xl text-slate-400 flex-shrink-0 ml-2"
+                    ></ion-icon>
+                  </div>
+
+                  <!-- Expanded Details -->
+                  <div
+                    *ngIf="selectedEpisode === ep"
+                    class="mt-3 pt-3 border-t border-slate-200 space-y-3 text-[0.7rem]"
+                  >
+                    <!-- Primary Reason -->
+                    <div *ngIf="ep.primaryReason" class="bg-blue-50 border-l-4 border-blue-400 rounded-r p-2">
+                      <p class="font-semibold text-blue-900 mb-1 flex items-center gap-1.5">
+                        <ion-icon name="alert-circle" class="text-sm"></ion-icon>
+                        Reason for Episode
+                      </p>
+                      <p class="text-blue-800">{{ ep.primaryReason }}</p>
+                    </div>
+
+                    <!-- Diagnoses -->
+                    <div *ngIf="ep.diagnoses?.length">
+                      <p class="font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                        <ion-icon name="medical" class="text-sm text-red-500"></ion-icon>
+                        Key Diagnoses
+                      </p>
+                      <div class="flex flex-wrap gap-1.5">
+                        <span
+                          *ngFor="let dx of ep.diagnoses"
+                          class="px-2 py-1 bg-red-50 border border-red-200 text-red-800 rounded-md text-[0.65rem] font-medium"
+                        >
+                          {{ dx }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Plan of Care -->
+                    <div *ngIf="ep.planOfCare?.length">
+                      <p class="font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <ion-icon name="clipboard" class="text-sm text-indigo-500"></ion-icon>
+                        Plan of Care Focus
+                      </p>
+                      <div class="space-y-2">
+                        <div *ngFor="let poc of ep.planOfCare" class="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
+                          <p class="font-bold text-indigo-900 text-[0.7rem] mb-1">
+                            {{ poc.title }}
+                          </p>
+                          <ul class="space-y-1">
+                            <li *ngFor="let item of poc.items" class="flex items-start gap-1.5 text-indigo-800">
+                              <ion-icon name="checkmark-circle" class="text-xs text-indigo-500 mt-0.5 flex-shrink-0"></ion-icon>
+                              <span>{{ item }}</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Interventions -->
+                    <div *ngIf="ep.interventions?.length">
+                      <p class="font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                        <ion-icon name="build" class="text-sm text-amber-500"></ion-icon>
+                        Key Interventions Completed
+                      </p>
+                      <ul class="space-y-1">
+                        <li *ngFor="let int of ep.interventions" class="flex items-start gap-1.5 text-slate-700">
+                          <ion-icon name="arrow-forward-circle" class="text-xs text-amber-500 mt-0.5 flex-shrink-0"></ion-icon>
+                          <span>{{ int }}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Outcome -->
+                    <div *ngIf="ep.outcome" class="bg-emerald-50 border-l-4 border-emerald-400 rounded-r p-2">
+                      <p class="font-semibold text-emerald-900 mb-1 flex items-center gap-1.5">
+                        <ion-icon name="trophy" class="text-sm"></ion-icon>
+                        Outcome
+                      </p>
+                      <p class="text-emerald-800">{{ ep.outcome }}</p>
+                    </div>
                   </div>
                 </div>
-
-                <div *ngIf="ep.interventions?.length">
-                  <p class="font-semibold text-slate-700">Key interventions completed</p>
-                  <ul class="list-disc ml-4 mt-0.5 space-y-0.5">
-                    <li *ngFor="let int of ep.interventions">
-                      {{ int }}
-                    </li>
-                  </ul>
-                </div>
-
-                <p *ngIf="ep.outcome">
-                  <span class="font-semibold text-slate-700">Outcome:</span>
-                  {{ ep.outcome }}
-                </p>
               </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!patientSummary.history || patientSummary.history.length === 0" class="text-center py-8">
+              <ion-icon name="time-outline" class="text-6xl text-slate-300 mb-2"></ion-icon>
+              <p class="text-sm text-slate-500">No episode history available</p>
             </div>
           </div>
         </div>

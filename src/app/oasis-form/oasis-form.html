@@ -1,24 +1,24 @@
 <aside class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-  <!-- Form Header with Progress -->
-  <div class="px-6 py-4 border-b border-slate-100">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold text-slate-900">OASIS-E1 Assessment</h2>
-      <span class="text-xs text-slate-500">{{ itemsAccepted() }} / {{ totalItems() }} items</span>
-    </div>
-
-    <!-- Progress Bar -->
-    <div class="w-full bg-slate-100 rounded-full h-2">
+  <!-- Compact Progress Bar Header -->
+  <div class="px-6 py-3 border-b border-slate-100">
+    <!-- Progress Bar with embedded text -->
+    <div class="relative w-full bg-slate-200 rounded-full h-8 overflow-hidden shadow-inner">
       <div
         id="progress-bar"
-        class="bg-indigo-600 h-2 rounded-full transition-all"
+        class="h-8 rounded-full transition-all duration-500 ease-out"
         [style.width.%]="progressPercentage"
+        [style.background]="progressPercentage < 100 ? 'linear-gradient(to right, #4f46e5, #6366f1)' : 'linear-gradient(to right, #10b981, #059669)'"
       ></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <span class="text-xs font-bold text-slate-700 px-2 py-0.5 bg-white/90 rounded-full shadow-sm backdrop-blur-sm">
+          OASIS-E1: {{ itemsAccepted() }}/{{ totalItems() }} • {{ progressPercentage }}%
+        </span>
+      </div>
     </div>
-    <p class="text-xs text-slate-500 mt-2 text-center">{{ progressPercentage }}% Complete</p>
   </div>
 
   <!-- Summary Card -->
-  <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+  <!-- <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
     <h3 class="text-xs font-semibold text-slate-900 mb-2">Assessment Summary</h3>
     <div class="space-y-2 text-xs">
       <div class="flex justify-between">
@@ -46,10 +46,10 @@
         >
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Form Content Area -->
-  <div class="overflow-y-auto h-[calc(100%-280px)] px-6 py-4">
+  <div class="overflow-y-auto h-[calc(100%-100px)] px-6 py-4">
     <!-- Slot for form content to be passed from parent -->
     <ng-content></ng-content>
   </div>

@@ -57,8 +57,8 @@ export class OasisFormComponent {
         // Highlight animation
         setTimeout(() => diagnosisDiv.classList.remove('form-field-highlight'), 1500);
 
-        // Scroll to container
-        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll to container within the form (not the entire page)
+        this.scrollToFieldWithinForm(container);
       }
     } else {
       // Normal single-value field handling
@@ -84,8 +84,8 @@ export class OasisFormComponent {
         formField.classList.add('form-field-highlight');
         setTimeout(() => formField.classList.remove('form-field-highlight'), 1500);
 
-        // Scroll form to this field
-        formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll form to this field within the form container
+        this.scrollToFieldWithinForm(formField);
       }
     }
   }
@@ -95,7 +95,36 @@ export class OasisFormComponent {
     if (formField) {
       formField.classList.add('form-field-highlight');
       setTimeout(() => formField.classList.remove('form-field-highlight'), 1500);
-      formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.scrollToFieldWithinForm(formField);
+    }
+  }
+
+  /**
+   * Scroll to a field within the form content area without scrolling the entire page
+   */
+  private scrollToFieldWithinForm(element: HTMLElement): void {
+    // Find the scrollable form container
+    const formContainer = element.closest('.overflow-y-auto') as HTMLElement | null;
+
+    if (formContainer) {
+      // Calculate position relative to the scrollable container
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = formContainer.getBoundingClientRect();
+
+      // Calculate the scroll position to center the element in the container
+      const elementTop = element.offsetTop;
+      const containerHeight = formContainer.clientHeight;
+      const elementHeight = element.offsetHeight;
+      const scrollTo = elementTop - (containerHeight / 2) + (elementHeight / 2);
+
+      // Smooth scroll within the container
+      formContainer.scrollTo({
+        top: Math.max(0, scrollTo),
+        behavior: 'smooth'
+      });
+    } else {
+      // Fallback: use nearest block to minimize page scrolling
+      element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 }
