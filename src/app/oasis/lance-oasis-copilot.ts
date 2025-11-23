@@ -503,17 +503,105 @@ export class LanceOasisCopilotComponent implements OnInit {
   acceptGGRecommendation(event: Event, ggId: string, code: string): void {
     event.stopPropagation();
 
-    const button = event.currentTarget as HTMLElement;
-    const card = button.closest('.recommendation-card') as HTMLElement | null;
-    if (card) {
-      card.classList.add('accepted');
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const card = target.closest('.recommendation-card') as HTMLElement | null;
+    if (!card) return;
+
+    const formId = card.getAttribute('data-form-id');
+    if (!formId) return;
+
+    // Find the form element (could be a select or a div)
+    const formElement = document.getElementById(formId) as HTMLElement | null;
+    if (!formElement) return;
+
+    // Handle select elements
+    if (formElement.tagName === 'SELECT') {
+      const selectElement = formElement as HTMLSelectElement;
+
+      // Find the option that starts with the code
+      const options = Array.from(selectElement.options);
+      const matchingOption = options.find(opt => opt.value.startsWith(code) || opt.text.startsWith(code));
+
+      if (matchingOption) {
+        selectElement.value = matchingOption.value;
+
+        // Add visual feedback
+        selectElement.classList.remove('bg-slate-50', 'border-slate-300');
+        selectElement.classList.add('bg-emerald-50', 'border-emerald-400', 'border-2', 'form-field-highlight');
+
+        setTimeout(() => selectElement.classList.remove('form-field-highlight'), 1500);
+
+        // Scroll to the field
+        selectElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } else {
+      // Handle div/span elements (auto-populated fields)
+      const codeDescriptions: { [key: string]: string } = {
+        '06': '06 - Independent',
+        '05': '05 - Setup or clean-up assistance',
+        '04': '04 - Supervision or touching assistance',
+        '03': '03 - Partial/moderate assistance',
+        '02': '02 - Substantial/maximal assistance',
+        '01': '01 - Dependent',
+        '07': '07 - Patient refused',
+        '09': '09 - Not applicable'
+      };
+
+      const displayValue = codeDescriptions[code] || code;
+
+      formElement.innerHTML = displayValue;
+      formElement.classList.remove(
+        'form-field-placeholder',
+        'border-dashed',
+        'border-yellow-400',
+        'bg-yellow-50',
+        'text-slate-600',
+        'justify-center'
+      );
+      formElement.classList.add(
+        'form-field-value',
+        'border-emerald-400',
+        'bg-emerald-50',
+        'border-solid',
+        'form-field-highlight'
+      );
+
+      setTimeout(() => formElement.classList.remove('form-field-highlight'), 1500);
+
+      // Scroll to the field
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
+    // Update progress
     this.itemsAccepted++;
     this.updateProgress();
 
-    // TODO: update GG select / input in the OASIS form based on ggId/code
-    console.log('Accepted GG', { ggId, code });
+    // Update Summary Card items completed
+    const summaryItemsEl = document.getElementById('summary-items-completed') as HTMLElement | null;
+    if (summaryItemsEl) {
+      summaryItemsEl.innerText = `${this.itemsAccepted} / ${this.totalItems}`;
+    }
+
+    // Mark card as accepted
+    card.classList.add('accepted');
+    const buttons = card.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
+    buttons.forEach((btn) => {
+      btn.disabled = true;
+      if (btn.textContent && btn.textContent.includes('Accept')) {
+        btn.innerHTML = '✓ Accepted';
+        btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        btn.classList.add('bg-slate-400', 'cursor-not-allowed');
+      }
+    });
+
+    // Auto-advance to next recommendation
+    setTimeout(() => {
+      this.moveToNextRecommendation(card);
+    }, 800);
+
+    console.log('Accepted GG', { ggId, code, formId });
   }
 
   // ======= progress / payment UI =======
