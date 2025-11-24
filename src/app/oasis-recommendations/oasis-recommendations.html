@@ -178,31 +178,40 @@
       </div>
 
       <div class="flex space-x-2">
-        <!-- ICD / Diagnosis recommendations -->
+        <!-- Pending State: Accept Button -->
         <button
-          *ngIf="rec.kind === 'icd' && rec.status === 'pending'"
+          *ngIf="rec.status === 'pending'"
           (click)="handleRecommendationAccept(rec, $event)"
           class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
         >
           Accept
         </button>
 
-        <!-- GG recommendations -->
-        <button
-          *ngIf="rec.kind === 'gg' && rec.status === 'pending'"
-          (click)="handleRecommendationAccept(rec, $event)"
-          class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-2 rounded-lg transition-colors"
-        >
-          Accept
-        </button>
-
-        <!-- Accepted State -->
+        <!-- Accepted State: Show status + Undo button -->
         <button
           *ngIf="rec.status === 'accepted'"
           disabled
-          class="flex-1 bg-slate-400 text-white text-xs font-medium py-2 rounded-lg cursor-not-allowed"
+          class="flex-1 bg-emerald-500 text-white text-xs font-medium py-2 rounded-lg cursor-default"
         >
           ✓ Accepted
+        </button>
+
+        <!-- Rejected State: Show status + Undo button -->
+        <button
+          *ngIf="rec.status === 'rejected'"
+          disabled
+          class="flex-1 bg-slate-400 text-white text-xs font-medium py-2 rounded-lg cursor-default"
+        >
+          ✗ Rejected
+        </button>
+
+        <!-- Undo Button (for accepted/rejected) -->
+        <button
+          *ngIf="rec.status === 'accepted' || rec.status === 'rejected'"
+          (click)="handleRecommendationUndo(rec, $event); $event.stopPropagation()"
+          class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-2 rounded-lg transition-colors"
+        >
+          Undo
         </button>
 
         <!-- Reject Button (only for pending) -->

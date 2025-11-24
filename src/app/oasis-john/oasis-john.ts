@@ -995,6 +995,98 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.hideModal('reject-modal');
   }
 
+  handleRecommendationUndo(data: { recommendation: AiRecommendation; event: Event }): void {
+    data.event.stopPropagation();
+    const { recommendation } = data;
+
+    console.log('↩️ Undoing recommendation:', recommendation.id, 'Previous status:', recommendation.status);
+
+    // If recommendation was accepted, we need to revert changes
+    if (recommendation.status === 'accepted') {
+      // Revert form field - clear the field value
+      const formField = document.getElementById(recommendation.formFieldId) as HTMLElement | null;
+      if (formField) {
+        const isMultiDiagnosisContainer = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
+
+        if (isMultiDiagnosisContainer) {
+          // For multi-diagnosis containers, restore placeholder
+          formField.innerHTML = `
+            <div class="p-2 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs">
+              Click 'Accept' on a diagnosis recommendation to add here
+            </div>
+          `;
+        } else {
+          // For single-value fields, restore placeholder style and content
+          const placeholderText = formField.dataset['placeholder'] || 'Click Accept to fill';
+          formField.innerHTML = placeholderText;
+          formField.classList.remove(
+            'form-field-value',
+            'border-emerald-400',
+            'bg-emerald-50',
+            'border-solid'
+          );
+          formField.classList.add(
+            'form-field-placeholder',
+            'border-dashed',
+            'border-yellow-400',
+            'bg-yellow-50',
+            'text-slate-600',
+            'justify-center'
+          );
+        }
+      }
+
+      // Remove form field from OasisStateService
+      this.oasisStateService.updateFormField(recommendation.formFieldId, '');
+
+      // Decrement items count
+      this.oasisStateService.updateItemsAccepted(Math.max(0, this.itemsAccepted() - 1));
+
+      // Revert payment if applicable
+      if (recommendation.triggersPdgmUpdate) {
+        this.currentPayment.update((v) => Math.max(2875.5, v - 287));
+        this.paymentStateService.updatePayment(this.currentPayment(), 0);
+
+        // Update DOM elements
+        const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
+        const paymentEstimateEl = document.getElementById('payment-estimate') as HTMLElement | null;
+        if (pdgmValueEl) {
+          pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
+        }
+        if (paymentEstimateEl) {
+          paymentEstimateEl.innerText = '$' + this.currentPayment().toFixed(2);
+        }
+
+        console.log('💰 Payment reverted to:', this.currentPayment());
+      }
+
+      // If it was comorbidity recommendation, reset tier display
+      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
+        const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
+        if (summaryComorbidityEl) {
+          summaryComorbidityEl.innerText = 'None';
+        }
+      }
+    }
+
+    // Reset recommendation status to pending
+    this.aiRecommendations.update((recs) =>
+      recs.map((rec) =>
+        rec.id === recommendation.id
+          ? { ...rec, status: 'pending' as AiRecommendationStatus }
+          : rec
+      )
+    );
+
+    // Update persistent state
+    this.recommendationStateService.updateRecommendationStatus(recommendation.id, 'pending');
+
+    // Recompute analyzer alerts
+    this.computeAnalyzerAlerts();
+
+    console.log('✅ Recommendation undone and reset to pending');
+  }
+
   handleAlertClick(data: { alert: AnalyzerAlert; event?: Event }): void {
     if (data.event) {
       data.event.stopPropagation();

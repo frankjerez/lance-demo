@@ -73,6 +73,10 @@ export class OasisRecommendationsComponent {
     recommendation: AiRecommendation;
     event: Event;
   }>();
+  onRecommendationUndo = output<{
+    recommendation: AiRecommendation;
+    event: Event;
+  }>();
   onAlertClick = output<{ alert: AnalyzerAlert; event?: Event }>();
   onAlertStatusChange = output<{
     alert: AnalyzerAlert;
@@ -93,6 +97,10 @@ export class OasisRecommendationsComponent {
 
   handleRecommendationReject(recommendation: AiRecommendation, event: Event): void {
     this.onRecommendationReject.emit({ recommendation, event });
+  }
+
+  handleRecommendationUndo(recommendation: AiRecommendation, event: Event): void {
+    this.onRecommendationUndo.emit({ recommendation, event });
   }
 
   handleAlertClick(alert: AnalyzerAlert, event?: Event): void {
