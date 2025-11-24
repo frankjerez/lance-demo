@@ -24,10 +24,10 @@
       <article
         *ngFor="let alert of analyzerAlerts()"
         (click)="handleAlertClick(alert, $event)"
-        class="px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+        class="alert-card px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
         [ngClass]="{
           'bg-amber-50': alert.status === 'new',
-          'opacity-60': alert.status === 'dismissed'
+          'dismissed': alert.status === 'dismissed'
         }"
       >
         <div class="flex items-start justify-between">
@@ -83,30 +83,47 @@
           </div>
 
           <div class="flex flex-col items-end space-y-1 text-[0.6rem]">
-            <button
-              type="button"
-              (click)="handleAlertClick(alert, $event)"
-              class="px-2 py-1 rounded border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center space-x-1"
-            >
-              <ion-icon name="search-outline" class="text-[0.6rem]"></ion-icon>
-              <span>Evidence</span>
-            </button>
+            <!-- Active Alert: Show Evidence, Reviewed, Dismiss buttons -->
+            @if (alert.status !== 'dismissed') {
+              <button
+                type="button"
+                (click)="handleAlertClick(alert, $event)"
+                class="px-2 py-1 rounded border border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center space-x-1"
+              >
+                <ion-icon name="search-outline" class="text-[0.6rem]"></ion-icon>
+                <span>Evidence</span>
+              </button>
 
-            <button
-              type="button"
-              (click)="handleAlertStatusChange(alert, 'reviewed', $event)"
-              class="px-2 py-0.5 rounded text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-            >
-              Reviewed
-            </button>
+              <button
+                type="button"
+                (click)="handleAlertStatusChange(alert, 'reviewed', $event)"
+                class="px-2 py-0.5 rounded text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+              >
+                Reviewed
+              </button>
 
-            <button
-              type="button"
-              (click)="handleAlertStatusChange(alert, 'dismissed', $event)"
-              class="px-2 py-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-            >
-              Dismiss
-            </button>
+              <button
+                type="button"
+                (click)="handleAlertStatusChange(alert, 'dismissed', $event)"
+                class="px-2 py-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+              >
+                Dismiss
+              </button>
+            }
+
+            <!-- Dismissed Alert: Show status label and Undo button -->
+            @if (alert.status === 'dismissed') {
+              <span class="px-2 py-1 rounded bg-slate-200 text-slate-600 font-medium">
+                ✗ Dismissed
+              </span>
+              <button
+                type="button"
+                (click)="handleAlertStatusChange(alert, 'new', $event)"
+                class="px-2 py-0.5 rounded text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium"
+              >
+                Undo
+              </button>
+            }
           </div>
         </div>
       </article>

@@ -45,19 +45,20 @@
 
       <div class="w-px h-8 bg-slate-200"></div>
 
-      <!-- Analyzer Alert Toggle -->
+      <!-- OASIS Analyzer Button -->
       <button
-        *ngIf="hasAnalyzerAlerts()"
         type="button"
-        (click)="handleToggleAnalyzer()"
-        class="flex items-center space-x-1 px-3 py-1 rounded-full border border-amber-300 bg-amber-50 text-[0.7rem] text-amber-800 hover:bg-amber-100"
+        (click)="handleOpenAnalyzer()"
+        class="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 border border-amber-700 shadow-sm transition-all relative"
       >
-        <ion-icon name="alert-circle-outline" class="text-xs"></ion-icon>
-        <span>Oasis Analyzer: {{ newAnalyzerAlertCount() }} alert(s)</span>
-        <ion-icon
-          [name]="showAnalyzer() ? 'chevron-up-outline' : 'chevron-down-outline'"
-          class="text-[0.7rem]"
-        ></ion-icon>
+        <ion-icon name="analytics-outline" class="text-sm"></ion-icon>
+        <span>OASIS Analyzer</span>
+        <span
+          *ngIf="hasAnalyzerAlerts() && newAnalyzerAlertCount() > 0"
+          class="absolute -top-1 -right-1 bg-red-500 text-white text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center"
+        >
+          {{ newAnalyzerAlertCount() }}
+        </span>
       </button>
 
       <!-- Save Button -->

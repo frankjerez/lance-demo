@@ -110,6 +110,50 @@ span[data-evidence-for^='GG0170']:hover {
   padding: 2px 4px;
 }
 
+/* Enhanced evidence highlight for analyzer alerts */
+.evidence-alert-highlight {
+  animation: evidenceAlertPulse 2s ease-in-out;
+  position: relative;
+}
+
+@keyframes evidenceAlertPulse {
+  0% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    transform: scale(1);
+  }
+  15% {
+    background-color: rgba(251, 191, 36, 0.3);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.6);
+    transform: scale(1.02);
+  }
+  30% {
+    background-color: rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 0 12px rgba(245, 158, 11, 0.4);
+    transform: scale(1.03);
+  }
+  45% {
+    background-color: rgba(251, 191, 36, 0.3);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.6);
+    transform: scale(1.02);
+  }
+  60% {
+    background-color: rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 0 12px rgba(245, 158, 11, 0.4);
+    transform: scale(1.03);
+  }
+  75% {
+    background-color: rgba(251, 191, 36, 0.3);
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.6);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: rgba(251, 191, 36, 0.15);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    transform: scale(1);
+  }
+}
+
 @keyframes highlightPulse {
   0%,
   100% {

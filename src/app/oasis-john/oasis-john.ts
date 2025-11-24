@@ -481,18 +481,6 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       this.hideModal('save-processing-overlay');
       this.isSavingAssessment.set(false);
 
-      // Mark as saved to enable alerts
-      this.hasBeenSaved.set(true);
-      this.computeAnalyzerAlerts();
-
-      // Automatically show analyzer if there are alerts
-      if (this.analyzerAlerts().length > 0) {
-        this.showAnalyzer.set(true);
-
-        // Scroll to top to show the analyzer alerts
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
       // Reset progress bar for next time
       if (progressBar) {
         progressBar.style.width = '0%';
@@ -661,7 +649,18 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   }
 
   handleExport(): void {
-    // Validate form completeness before allowing export
+    // First, check the actual OASIS completion percentage
+    const completionPercentage = this.oasisStateService.progressPercentage;
+    const requiredPercentage = 80; // Require at least 80% completion
+    const currentItems = this.itemsAccepted();
+    const totalItems = this.totalItems();
+
+    if (completionPercentage < requiredPercentage) {
+      this.showCompletionPercentageError(completionPercentage, requiredPercentage, currentItems, totalItems);
+      return;
+    }
+
+    // Secondary check: validate visible fields are filled
     const validation = this.validateFormCompleteness();
 
     if (!validation.isComplete) {
@@ -669,17 +668,52 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    // If validation passes, show export modal
+    // If all validations pass, show export modal
     this.showModal('export-modal');
   }
 
   private validateFormCompleteness(): { isComplete: boolean; missingFields: string[]; emptyCount: number } {
     const missingFields: string[] = [];
 
-    // Check all select elements
+    // Helper function to check if an element is visible
+    const isElementVisible = (el: HTMLElement): boolean => {
+      if (!el) return false;
+
+      // Check if element or any parent is hidden
+      let current: HTMLElement | null = el;
+      while (current) {
+        const style = window.getComputedStyle(current);
+        if (
+          style.display === 'none' ||
+          style.visibility === 'hidden' ||
+          current.classList.contains('hidden')
+        ) {
+          return false;
+        }
+
+        // Check if in collapsed accordion section (max-height: 0)
+        if (
+          current.classList.contains('max-h-0') ||
+          (style.maxHeight === '0px' && style.overflow === 'hidden')
+        ) {
+          return false;
+        }
+
+        current = current.parentElement;
+      }
+      return true;
+    };
+
+    // Check all select elements (only visible ones)
     const allSelects = document.querySelectorAll('select');
     allSelects.forEach(select => {
       const selectEl = select as HTMLSelectElement;
+
+      // Skip if element is not visible, disabled, or in a collapsed section
+      if (!isElementVisible(selectEl) || selectEl.disabled) {
+        return;
+      }
+
       if (!selectEl.value || selectEl.value === '') {
         const label = selectEl.previousElementSibling?.textContent ||
                      selectEl.closest('div')?.querySelector('label')?.textContent ||
@@ -692,7 +726,13 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const requiredTextInputs = document.querySelectorAll('input[type="text"]:not([placeholder*="###"])');
     requiredTextInputs.forEach(input => {
       const inputEl = input as HTMLInputElement;
-      if (!inputEl.readOnly && (!inputEl.value || inputEl.value === '')) {
+
+      // Skip if element is not visible, disabled, or readonly
+      if (!isElementVisible(inputEl) || inputEl.disabled || inputEl.readOnly) {
+        return;
+      }
+
+      if (!inputEl.value || inputEl.value === '') {
         const label = inputEl.previousElementSibling?.textContent ||
                      inputEl.closest('div')?.querySelector('label')?.textContent ||
                      'Unnamed field';
@@ -704,6 +744,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {
       const inputEl = input as HTMLInputElement;
+
+      // Skip if element is not visible or disabled
+      if (!isElementVisible(inputEl) || inputEl.disabled) {
+        return;
+      }
+
       if (!inputEl.value || inputEl.value === '') {
         const label = inputEl.previousElementSibling?.textContent ||
                      inputEl.closest('div')?.querySelector('label')?.textContent ||
@@ -753,6 +799,91 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
             class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
           >
             Complete Assessment
+          </button>
+          <button
+            onclick="this.closest('.fixed').remove()"
+            class="px-6 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Auto-remove after 30 seconds
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        modal.remove();
+      }
+    }, 30000);
+  }
+
+  private showCompletionPercentageError(
+    currentPercentage: number,
+    requiredPercentage: number,
+    currentItems: number,
+    totalItems: number
+  ): void {
+    const remainingItems = totalItems - currentItems;
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+        <div class="flex items-start gap-4 mb-6">
+          <div class="bg-amber-100 rounded-full p-3">
+            <ion-icon name="warning" class="text-amber-600 text-3xl"></ion-icon>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-semibold text-slate-900 mb-2">Assessment Incomplete</h2>
+            <p class="text-sm text-slate-600">
+              The OASIS assessment must be at least ${requiredPercentage}% complete before you can finalize and export.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 rounded-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-center flex-1">
+              <div class="text-3xl font-bold text-amber-600">${currentPercentage}%</div>
+              <div class="text-xs text-slate-600 mt-1">Current Progress</div>
+            </div>
+            <div class="text-slate-400 text-2xl">→</div>
+            <div class="text-center flex-1">
+              <div class="text-3xl font-bold text-emerald-600">${requiredPercentage}%</div>
+              <div class="text-xs text-slate-600 mt-1">Required</div>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+            <div class="bg-amber-500 h-full transition-all duration-300" style="width: ${currentPercentage}%"></div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-amber-200">
+            <div class="flex justify-between text-sm">
+              <span class="text-slate-700">
+                <span class="font-semibold text-amber-700">${currentItems}</span> of <span class="font-semibold">${totalItems}</span> items completed
+              </span>
+              <span class="font-semibold text-red-700">
+                ${remainingItems} remaining
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+          <p class="text-sm text-blue-900">
+            <span class="font-semibold">💡 Tip:</span> Complete at least ${Math.ceil((requiredPercentage / 100) * totalItems) - currentItems} more OASIS item${Math.ceil((requiredPercentage / 100) * totalItems) - currentItems !== 1 ? 's' : ''} to reach ${requiredPercentage}% and enable export.
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="this.closest('.fixed').remove()"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors"
+          >
+            Continue Assessment
           </button>
           <button
             onclick="this.closest('.fixed').remove()"
@@ -1107,21 +1238,40 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     }
 
     if (data.alert.evidenceAnchorId) {
+      console.log('🎯 Looking for evidence with anchor ID:', data.alert.evidenceAnchorId);
+
       // Wait for tab switch to complete before scrolling
       setTimeout(() => {
         const viewer = document.getElementById('document-viewer');
-        if (!viewer) return;
+        if (!viewer) {
+          console.warn('⚠️ Document viewer not found');
+          return;
+        }
 
         const el = viewer.querySelector(
           `[data-evidence-for="${data.alert.evidenceAnchorId}"]`
         ) as HTMLElement | null;
 
         if (el) {
+          console.log('✅ Found evidence element, applying animation');
+
+          // Scroll to evidence with smooth animation
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          el.classList.add('form-field-highlight');
-          setTimeout(() => el.classList.remove('form-field-highlight'), 1500);
+
+          // Add enhanced evidence highlight animation
+          el.classList.add('evidence-alert-highlight');
+
+          // Remove the class after animation completes
+          setTimeout(() => {
+            el.classList.remove('evidence-alert-highlight');
+            console.log('✨ Animation complete');
+          }, 2000);
+        } else {
+          console.warn('⚠️ Evidence element not found for anchor:', data.alert.evidenceAnchorId);
         }
       }, 100); // Small delay to allow tab switch animation to complete
+    } else {
+      console.log('ℹ️ Alert has no evidenceAnchorId');
     }
   }
 
@@ -1235,6 +1385,67 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+  }
+
+  openAnalyzerOverlay(): void {
+    // Mark as saved to enable analyzer alerts
+    this.hasBeenSaved.set(true);
+
+    // Show the analyzer processing overlay
+    this.showModal('analyzer-processing-overlay');
+
+    const statusEl = document.getElementById('analyzer-status');
+    const progressBar = document.getElementById('analyzer-progress-bar');
+
+    // Analysis steps with messages and progress
+    const steps = [
+      { message: 'Scanning form fields for completeness...', progress: 25, delay: 800 },
+      { message: 'Cross-referencing documentation evidence...', progress: 50, delay: 800 },
+      { message: 'Validating PDGM logic and clinical consistency...', progress: 75, delay: 800 },
+      { message: 'Finalizing compliance review...', progress: 95, delay: 600 },
+    ];
+
+    let currentStep = 0;
+
+    const runStep = () => {
+      if (currentStep < steps.length) {
+        const step = steps[currentStep];
+        if (statusEl) statusEl.textContent = step.message;
+        if (progressBar) progressBar.style.width = `${step.progress}%`;
+        currentStep++;
+        setTimeout(runStep, step.delay);
+      } else {
+        // Complete the analysis
+        if (progressBar) progressBar.style.width = '100%';
+        setTimeout(() => {
+          this.hideModal('analyzer-processing-overlay');
+
+          // Compute and show analyzer alerts
+          this.computeAnalyzerAlerts();
+
+          // Show analyzer alerts in the sidebar if there are any
+          if (this.analyzerAlerts().length > 0) {
+            this.showAnalyzer.set(true);
+
+            // Scroll to the analyzer section in the recommendations panel
+            setTimeout(() => {
+              const analyzerSection = document.querySelector('.analyzer-alerts-section');
+              if (analyzerSection) {
+                analyzerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }
+
+          // Reset progress bar for next time
+          if (progressBar) {
+            progressBar.style.width = '0%';
+          }
+        }, 500);
+      }
+    };
+
+    // Start the animation
+    setTimeout(runStep, 300);
   }
 
   checkEligibility(): void {

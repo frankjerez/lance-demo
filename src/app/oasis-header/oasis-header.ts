@@ -25,6 +25,7 @@ export class OasisHeaderComponent {
   onBackToDashboard = output<void>();
   onQuickEligibilityCheck = output<Event>();
   onToggleAnalyzer = output<void>();
+  onOpenAnalyzer = output<void>();
   onSaveAssessment = output<void>();
   onReset = output<void>();
   onExport = output<void>();
@@ -40,6 +41,10 @@ export class OasisHeaderComponent {
 
   handleToggleAnalyzer(): void {
     this.onToggleAnalyzer.emit();
+  }
+
+  handleOpenAnalyzer(): void {
+    this.onOpenAnalyzer.emit();
   }
 
   handleSaveClick(): void {
