@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   CUSTOM_ELEMENTS_SCHEMA,
-  effect,
   inject,
   OnInit,
   signal,
@@ -26,6 +26,7 @@ import { OasisFormComponent } from '../oasis-form/oasis-form';
 import { PaymentStateService } from '../services/payment-state.service';
 import { DocumentStateService } from '../services/document-state.service';
 import { RecommendationStateService } from '../services/recommendation-state.service';
+import { OasisStateService } from '../services/oasis-state.service';
 
 @Component({
   selector: 'app-oasis-john',
@@ -45,6 +46,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   private paymentStateService = inject(PaymentStateService);
   private documentStateService = inject(DocumentStateService);
   private recommendationStateService = inject(RecommendationStateService);
+  private oasisStateService = inject(OasisStateService);
 
   // Document mapping: patient-summary doc IDs -> oasis-john doc IDs
   private readonly DOC_MAPPING = {
@@ -57,7 +59,6 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   @ViewChild(OasisDocumentViewerComponent) documentViewerComponent!: OasisDocumentViewerComponent;
 
   // Signals for shared state
-  itemsAccepted = signal(0);
   totalItems = signal(89);
   currentPayment = signal(2875.5);
   showAnalyzer = signal(false);
@@ -67,14 +68,15 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc'>('referral-doc'); // Default to referral since it's the only one uploaded initially
   highlightEvidence = signal<EvidenceHighlight | null>(null);
 
-  // Track which documents are available (uploaded)
-  availableDocs = signal<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(new Set());
+  // Computed from OasisStateService
+  itemsAccepted = computed(() => this.oasisStateService.form().itemsAccepted);
+  availableDocs = computed(() => new Set(this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc')[]));
 
   // Track collapsed form sections
   collapsedSections = signal<Set<string>>(new Set());
 
-  // Store the initial pre-filled count for reset functionality
-  private initialPrefilledCount = 0;
+  // Store the initial pre-filled count (default pre-filled fields in the form)
+  private initialPrefilledCount = 18; // ~20% completion (18/89 items)
 
   // AI Recommendations state - All recommendations (before filtering)
   private allAiRecommendations = signal<AiRecommendation[]>([
@@ -245,11 +247,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   }
 
   constructor() {
-    // Watch for changes to itemsAccepted and save to localStorage
-    effect(() => {
-      this.itemsAccepted(); // Read signal to track changes
-      this.saveItemsAcceptedCount();
-    });
+    // No longer needed - OasisStateService handles persistence automatically
   }
 
   ngOnInit(): void {
@@ -257,7 +255,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.filterRecommendationsAndAlerts();
     this.restoreSavedRecommendationStates();
     this.handleNavigationState();
-    this.restoreItemsAcceptedCount();
+    // Items accepted count restored automatically by OasisStateService
     this.collapseAllSections(); // Start with all sections collapsed
     this.showPage('copilot-page');
   }
@@ -298,7 +296,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     // Referral doc (doc2) is always available by default (hardcoded in patient-summary)
     available.add('referral-doc');
 
-    this.availableDocs.set(available);
+    // Update OasisStateService with available documents
+    available.forEach(docId => this.oasisStateService.addAvailableDocument(docId));
     console.log('📄 Available documents:', Array.from(available));
   }
 
@@ -352,27 +351,6 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     console.log('💾 Recommendation states restored');
   }
 
-  /**
-   * Restore items accepted count from localStorage
-   */
-  private restoreItemsAcceptedCount(): void {
-    const savedCount = localStorage.getItem('oasis-items-accepted-p1');
-    if (savedCount) {
-      const count = parseInt(savedCount, 10);
-      if (!isNaN(count)) {
-        this.itemsAccepted.set(count);
-        console.log(`💾 Restored items accepted count: ${count}`);
-      }
-    }
-  }
-
-  /**
-   * Save items accepted count to localStorage
-   */
-  private saveItemsAcceptedCount(): void {
-    localStorage.setItem('oasis-items-accepted-p1', this.itemsAccepted().toString());
-  }
-
   ngAfterViewInit(): void {
     // Populate form fields for accepted recommendations after view is initialized
     const savedStates = this.recommendationStateService.getAllRecommendationStates();
@@ -409,7 +387,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
             );
 
             // Update items accepted count
-            this.itemsAccepted.update((v) => v + 1);
+            this.oasisStateService.updateItemsAccepted(this.itemsAccepted() + 1);
 
             // Update payment if applicable
             if (rec.triggersPdgmUpdate) {
@@ -420,61 +398,17 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       }, 200);
     }
 
-    // Count pre-filled fields after view initialization
+    // Set initial pre-filled count after view initialization
     setTimeout(() => {
-      this.countPrefilledFields();
+      // Set to initial pre-filled count if no saved state exists
+      const currentCount = this.itemsAccepted();
+      if (currentCount === 0) {
+        this.oasisStateService.updateItemsAccepted(this.initialPrefilledCount);
+        console.log(`💾 Set initial pre-filled count: ${this.initialPrefilledCount} items (${Math.round((this.initialPrefilledCount / this.totalItems()) * 100)}%)`);
+      } else {
+        console.log(`💾 Restored from saved state: ${currentCount} items (${Math.round((currentCount / this.totalItems()) * 100)}%)`);
+      }
     }, 500);
-  }
-
-  // Count fields that have default values on page load
-  private countPrefilledFields(): void {
-    let prefilledCount = 0;
-
-    // Count filled select elements
-    const selects = document.querySelectorAll('select');
-    selects.forEach(select => {
-      const selectEl = select as HTMLSelectElement;
-      if (selectEl.value && selectEl.value !== '') {
-        prefilledCount++;
-      }
-    });
-
-    // Count filled text inputs (exclude optional/empty ones)
-    const textInputs = document.querySelectorAll('input[type="text"]');
-    textInputs.forEach(input => {
-      const inputEl = input as HTMLInputElement;
-      if (inputEl.value && inputEl.value !== '' && !inputEl.readOnly) {
-        prefilledCount++;
-      }
-    });
-
-    // Count filled date inputs
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(input => {
-      const inputEl = input as HTMLInputElement;
-      if (inputEl.value && inputEl.value !== '') {
-        prefilledCount++;
-      }
-    });
-
-    // Count checked checkboxes (at least 1 per checkbox group counts)
-    const checkboxGroups = new Set<string>();
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-    checkboxes.forEach(checkbox => {
-      const parent = checkbox.closest('div[class*="space-y"]');
-      if (parent) {
-        const parentId = parent.getAttribute('id') || parent.className;
-        checkboxGroups.add(parentId);
-      }
-    });
-    prefilledCount += checkboxGroups.size;
-
-    // Update the counter if there are pre-filled fields
-    if (prefilledCount > 0) {
-      this.initialPrefilledCount = prefilledCount; // Store for reset functionality
-      this.itemsAccepted.set(prefilledCount);
-      console.log(`📊 Found ${prefilledCount} pre-filled fields on page load`);
-    }
   }
 
   // ======= Event Handlers from Child Components =======
@@ -569,9 +503,31 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     // Clear all dynamically filled form fields
     this.clearDynamicFormFields();
 
+    // Reset OasisStateService form state
+    this.oasisStateService.resetForm();
+
+    // Reset available documents to only referral-doc (initial state)
+    this.oasisStateService.resetDocuments();
+    this.documentStateService.resetDocuments();
+
+    // Reset active document tab to referral/orders
+    this.activeDocId.set('referral-doc');
+
     // Reset payment and alerts
     this.currentPayment.set(2875.5);
+    this.paymentStateService.resetPayment();
     this.analyzerAlerts.set([]);
+    this.oasisStateService.resetAlerts();
+
+    // Update payment display in DOM (since it's directly manipulated)
+    const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
+    const paymentEstimateEl = document.getElementById('payment-estimate') as HTMLElement | null;
+    if (pdgmValueEl) {
+      pdgmValueEl.innerText = '$2,875.50';
+    }
+    if (paymentEstimateEl) {
+      paymentEstimateEl.innerText = '$2,875.50';
+    }
 
     // Reset all recommendations to pending
     this.aiRecommendations.update((recs) =>
@@ -586,14 +542,16 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const cards = document.querySelectorAll('.recommendation-card');
     cards.forEach((card) => card.classList.remove('accepted', 'rejected', 'selected'));
 
-    // After clearing fields, recount the pre-filled items and update the counter
-    setTimeout(() => {
-      this.countPrefilledFields();
-      const percentage = Math.round((this.itemsAccepted() / this.totalItems()) * 100);
-      console.log(`🔄 Form reset complete. Pre-filled items: ${this.itemsAccepted()} (${percentage}%)`);
-    }, 300);
+    // Refilter recommendations and alerts based on now-reset documents (only referral-doc)
+    this.filterRecommendationsAndAlerts();
 
-    // The itemsAccepted change will automatically save to localStorage via the effect in constructor
+    // Restore items count to initial pre-filled value
+    this.oasisStateService.updateItemsAccepted(this.initialPrefilledCount);
+    const percentage = Math.round((this.initialPrefilledCount / this.totalItems()) * 100);
+    console.log(`🔄 Form reset complete. Restored to initial pre-filled state: ${this.initialPrefilledCount} items (${percentage}%)`);
+    console.log('📄 Available documents reset to: referral-doc only');
+
+    // State changes automatically save to localStorage via OasisStateService
   }
 
   /**
@@ -867,7 +825,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       );
 
       // Update progress
-      this.itemsAccepted.update((v) => v + 1);
+      this.oasisStateService.updateItemsAccepted(this.itemsAccepted() + 1);
 
       // Update PDGM if applicable
       if (recommendation.triggersPdgmUpdate) {
@@ -1102,16 +1060,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     pdgmValueEl.style.transition = 'all 0.4s ease-in-out';
 
     setTimeout(() => {
-      // Update payment
-      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
-        this.currentPayment.set(3162.5);
-        // Update shared payment state for patient-summary
-        this.paymentStateService.updatePayment(3162.5, 287.0);
-      } else {
-        this.currentPayment.update((v) => v + 287);
-        // Update shared payment state for patient-summary
-        this.paymentStateService.updatePayment(this.currentPayment(), 0);
-      }
+      // Update payment - always ADD $287 to current value
+      this.currentPayment.update((v) => v + 287);
+
+      // Determine comorbidity adjustment based on which recommendation
+      const comorbidityAdjustment = recommendation.oasisTargetId === 'I8000-comorbidity' ? 287.0 : 0;
+
+      // Update shared payment state for patient-summary
+      this.paymentStateService.updatePayment(this.currentPayment(), comorbidityAdjustment);
 
       pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
       if (paymentEstimateEl) {
@@ -1806,7 +1762,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         });
 
         // Set realistic completion count (all 89 items)
-        this.itemsAccepted.set(89);
+        this.oasisStateService.updateItemsAccepted(89);
 
         // Accept all AI recommendations since all items are now filled
         this.acceptAllRecommendations();

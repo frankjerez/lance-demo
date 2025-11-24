@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output, inject, OnInit } from '@angular/core';
+import { OasisStateService } from '../services/oasis-state.service';
 
 export interface FormFieldUpdate {
   fieldId: string;
@@ -14,7 +15,10 @@ export interface FormFieldUpdate {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [CommonModule],
 })
-export class OasisFormComponent {
+export class OasisFormComponent implements OnInit {
+  // Inject state service
+  private oasisStateService = inject(OasisStateService);
+
   // Inputs from parent
   patientName = input<string>('');
   itemsAccepted = input<number>(0);
@@ -23,6 +27,11 @@ export class OasisFormComponent {
 
   // Outputs to parent
   onValidateForm = output<void>();
+
+  ngOnInit(): void {
+    // Restore persisted form field values
+    this.restoreFormFields();
+  }
 
   get progressPercentage(): number {
     const total = this.totalItems();
@@ -59,6 +68,9 @@ export class OasisFormComponent {
 
         // Scroll to container within the form (not the entire page)
         this.scrollToFieldWithinForm(container);
+
+        // Persist to state service - store HTML content for multi-diagnosis fields
+        this.oasisStateService.updateFormField(fieldId, container.innerHTML);
       }
     } else {
       // Normal single-value field handling
@@ -86,6 +98,9 @@ export class OasisFormComponent {
 
         // Scroll form to this field within the form container
         this.scrollToFieldWithinForm(formField);
+
+        // Persist to state service
+        this.oasisStateService.updateFormField(fieldId, value);
       }
     }
   }
@@ -97,6 +112,45 @@ export class OasisFormComponent {
       setTimeout(() => formField.classList.remove('form-field-highlight'), 1500);
       this.scrollToFieldWithinForm(formField);
     }
+  }
+
+  /**
+   * Restore form field values from persisted state
+   */
+  private restoreFormFields(): void {
+    const formFields = this.oasisStateService.getAllFormFields();
+
+    Object.entries(formFields).forEach(([fieldId, value]) => {
+      const formField = document.getElementById(fieldId) as HTMLElement | null;
+      if (formField && value) {
+        // Check if this is a multi-diagnosis container (M1021-M1023)
+        const isMultiDiagnosisContainer = fieldId.match(/^M102[123]$/);
+
+        if (isMultiDiagnosisContainer) {
+          // Restore entire container HTML for multi-diagnosis fields
+          formField.innerHTML = value;
+        } else {
+          // Restore single-value field
+          formField.innerHTML = value;
+          formField.classList.remove(
+            'form-field-placeholder',
+            'border-dashed',
+            'border-yellow-400',
+            'bg-yellow-50',
+            'text-slate-600',
+            'justify-center'
+          );
+          formField.classList.add(
+            'form-field-value',
+            'border-emerald-400',
+            'bg-emerald-50',
+            'border-solid'
+          );
+        }
+      }
+    });
+
+    console.log('📦 Restored', Object.keys(formFields).length, 'form field values');
   }
 
   /**
