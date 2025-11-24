@@ -31,6 +31,10 @@ export class PatientSummaryComponent implements OnInit {
     this.selectedEpisode = this.selectedEpisode === ep ? undefined : ep;
   }
 
+  getUploadedDocsCount(): number {
+    return this.patientSummary?.docs?.filter(doc => doc.uploaded).length || 0;
+  }
+
   private buildJohnSmithHistory(): EpisodeHistory[] {
     return [
       {

@@ -86,48 +86,56 @@
       <!-- Top summary row -->
       <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Patient card -->
-        <div class="border border-slate-200 rounded-lg p-3 bg-white">
-          <p class="text-xs text-slate-500">Patient</p>
-          <p class="text-sm font-semibold text-slate-900">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-2 mb-2">
+            <ion-icon name="person-circle-outline" class="text-indigo-600 text-lg"></ion-icon>
+            <p class="text-xs font-semibold tracking-wide text-slate-700 uppercase">Patient</p>
+          </div>
+          <p class="text-sm font-bold text-slate-900">
             {{ patientSummary.demographics.name }}
           </p>
-          <p class="text-[0.7rem] text-slate-500 mt-1">
+          <p class="text-[0.7rem] text-slate-600 mt-2">
             Age {{ patientSummary.demographics.age }} •
             {{ patientSummary.demographics.sex === 'F' ? 'Female' : 'Male' }}
           </p>
           <p class="text-[0.7rem] text-slate-500">DOB: {{ patientSummary.demographics.dob }}</p>
         </div>
 
-        <!-- Care team / coverage card with clearer primary payer -->
-        <div class="border border-slate-200 rounded-lg p-3 bg-white">
-          <p class="text-xs text-slate-500">Care Team / Coverage</p>
-          <p class="text-sm font-semibold text-slate-900">
-            PCP: {{ patientSummary.demographics.pcp }}
+        <!-- Care team / coverage card -->
+        <div class="border border-slate-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-2 mb-2">
+            <ion-icon name="medical-outline" class="text-indigo-600 text-lg"></ion-icon>
+            <p class="text-xs font-semibold tracking-wide text-slate-700 uppercase">Care Team</p>
+          </div>
+          <p class="text-sm font-bold text-slate-900">
+            {{ patientSummary.demographics.pcp }}
           </p>
-          <p class="text-[0.7rem] text-slate-500 mt-1">
-            Primary Payer:
+          <p class="text-[0.7rem] text-slate-600 mt-2">
             <span class="font-medium text-slate-800">
               {{ patientSummary.demographics.insurance }}
             </span>
           </p>
           <p class="text-[0.7rem] text-slate-500">
-            Member ID: {{ patientSummary.demographics.memberId }}
+            ID: {{ patientSummary.demographics.memberId }}
           </p>
         </div>
 
         <!-- PDGM breakdown -->
-        <div class="border border-indigo-100 bg-indigo-50 rounded-lg p-3">
-          <p class="text-xs text-slate-500 mb-1">PDGM Breakdown</p>
-          <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[0.75rem]">
+        <div class="border border-indigo-200 bg-indigo-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-2 mb-2">
+            <ion-icon name="cash-outline" class="text-indigo-600 text-lg"></ion-icon>
+            <p class="text-xs font-semibold tracking-wide text-slate-700 uppercase">PDGM Breakdown</p>
+          </div>
+          <div class="grid grid-cols-2 gap-x-3 gap-y-2 text-[0.75rem]">
             <div class="flex flex-col">
-              <span class="text-slate-500">Base Rate</span>
-              <span class="font-semibold text-slate-900">
+              <span class="text-slate-600">Base Rate</span>
+              <span class="font-bold text-slate-900">
                 {{ patientSummary.payment.baseRate | currency : 'USD' : 'symbol' : '1.0-2' }}
               </span>
             </div>
             <div class="flex flex-col">
-              <span class="text-slate-500">Comorbidity</span>
-              <span class="font-semibold text-emerald-700">
+              <span class="text-slate-600">Comorbidity</span>
+              <span class="font-bold text-emerald-700">
                 +{{
                   patientSummary.payment.comorbidityAdjustment
                     | currency : 'USD' : 'symbol' : '1.0-2'
@@ -135,8 +143,8 @@
               </span>
             </div>
             <div class="flex flex-col">
-              <span class="text-slate-500">Functional Level</span>
-              <span class="font-semibold text-emerald-700">
+              <span class="text-slate-600">Functional</span>
+              <span class="font-bold text-emerald-700">
                 +{{
                   patientSummary.payment.functionalLevelAdjustment
                     | currency : 'USD' : 'symbol' : '1.0-2'
@@ -144,63 +152,81 @@
               </span>
             </div>
             <div class="flex flex-col">
-              <span class="text-slate-500">LUPA / LUTS</span>
-              <span class="font-semibold text-emerald-700">
+              <span class="text-slate-600">LUPA/LUTS</span>
+              <span class="font-bold text-emerald-700">
                 +{{ patientSummary.payment.lutsAdjustment | currency : 'USD' : 'symbol' : '1.0-2' }}
               </span>
             </div>
           </div>
-          <p class="text-[0.7rem] text-slate-500 mt-2">
-            HIPPS {{ patientSummary.payment.hippsCode }} → Estimated total:
-            <span class="font-semibold text-emerald-700">
+          <div class="mt-3 pt-3 border-t border-indigo-200">
+            <p class="text-[0.7rem] text-slate-600">
+              HIPPS {{ patientSummary.payment.hippsCode }}
+            </p>
+            <p class="text-sm font-bold text-emerald-700 mt-1">
               {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
-            </span>
-          </p>
+            </p>
+          </div>
         </div>
       </section>
 
-      <!-- Demographics (leaner, no duplicate Insurance line) -->
-      <section class="border border-slate-200 rounded-lg p-4 space-y-3 bg-white">
-        <header class="flex items-center justify-between mb-1">
-          <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">Demographics</h2>
-        </header>
+      <!-- Demographics -->
+      <section class="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+        <div class="flex items-center gap-2 mb-3">
+          <ion-icon name="information-circle-outline" class="text-indigo-600 text-lg"></ion-icon>
+          <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">Contact Information</h2>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p class="text-xs text-slate-500">Address</p>
-            <p class="font-medium text-slate-800">
-              {{ patientSummary.demographics.address }}
-            </p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="flex items-start gap-2">
+            <ion-icon name="location-outline" class="text-slate-400 text-base mt-0.5 flex-shrink-0"></ion-icon>
+            <div>
+              <p class="text-[0.65rem] text-slate-500 uppercase tracking-wide">Address</p>
+              <p class="text-xs font-medium text-slate-800 mt-0.5">
+                {{ patientSummary.demographics.address }}
+              </p>
+            </div>
           </div>
-          <div>
-            <p class="text-xs text-slate-500">Phone</p>
-            <p class="font-medium text-slate-800">
-              {{ patientSummary.demographics.phone }}
-            </p>
+          <div class="flex items-start gap-2">
+            <ion-icon name="call-outline" class="text-slate-400 text-base mt-0.5 flex-shrink-0"></ion-icon>
+            <div>
+              <p class="text-[0.65rem] text-slate-500 uppercase tracking-wide">Phone</p>
+              <p class="text-xs font-medium text-slate-800 mt-0.5">
+                {{ patientSummary.demographics.phone }}
+              </p>
+            </div>
           </div>
-          <div>
-            <p class="text-xs text-slate-500">Agency</p>
-            <p class="font-medium text-slate-800">
-              {{ patientSummary.demographics.agencyName }}
-            </p>
+          <div class="flex items-start gap-2">
+            <ion-icon name="business-outline" class="text-slate-400 text-base mt-0.5 flex-shrink-0"></ion-icon>
+            <div>
+              <p class="text-[0.65rem] text-slate-500 uppercase tracking-wide">Agency</p>
+              <p class="text-xs font-medium text-slate-800 mt-0.5">
+                {{ patientSummary.demographics.agencyName }}
+              </p>
+            </div>
           </div>
-          <div>
-            <p class="text-xs text-slate-500">Member ID</p>
-            <p class="font-medium text-slate-800">
-              {{ patientSummary.demographics.memberId }}
-            </p>
+          <div class="flex items-start gap-2">
+            <ion-icon name="card-outline" class="text-slate-400 text-base mt-0.5 flex-shrink-0"></ion-icon>
+            <div>
+              <p class="text-[0.65rem] text-slate-500 uppercase tracking-wide">Member ID</p>
+              <p class="text-xs font-medium text-slate-800 mt-0.5">
+                {{ patientSummary.demographics.memberId }}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Documents -->
-        <div class="border border-slate-200 rounded-lg p-4 space-y-3 bg-white">
-          <header class="flex items-center justify-between mb-1">
-            <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">
-              Documents (Medical Records)
-            </h2>
-            <div class="flex items-center space-x-2">
+        <!-- Documents - Matches Timeline Design -->
+        <div class="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+          <header class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <ion-icon name="folder-outline" class="text-indigo-600 text-lg"></ion-icon>
+              <h2 class="text-xs font-semibold tracking-wide text-slate-700 uppercase">
+                Medical Records
+              </h2>
+            </div>
+            <div class="flex items-center gap-3">
               <input
                 #fileInput
                 type="file"
@@ -215,70 +241,99 @@
                 (change)="onVisitNoteFileSelected($event)"
                 accept=".pdf,.doc,.docx,.txt,.rtf,.jpg,.jpeg,.png"
               />
+              <span class="text-[0.65rem] text-slate-500">
+                {{ getUploadedDocsCount() }} / {{ patientSummary.docs.length }} uploaded
+              </span>
               <button
                 type="button"
                 (click)="showModal('upload-modal')"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm flex items-center space-x-1"
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md transition-colors"
               >
-                <ion-icon name="cloud-upload-outline" class="text-sm"></ion-icon>
+                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
                 <span>Upload</span>
               </button>
             </div>
           </header>
 
-          <div class="space-y-2">
+          <!-- Documents List -->
+          <div class="space-y-3">
             <div
               *ngFor="let doc of patientSummary.docs"
-              class="flex items-center justify-between border border-slate-100 rounded-md px-3 py-2"
+              class="border border-slate-200 bg-white rounded-lg p-3 transition-all duration-200 hover:shadow-md hover:border-slate-300 cursor-pointer"
             >
-              <div>
-                <p class="text-xs font-semibold text-slate-800">
-                  {{ doc.displayLabel }}
-                </p>
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <ion-icon
+                      [name]="doc.uploaded ? 'document-text' : 'alert-circle'"
+                      class="text-base"
+                      [ngClass]="doc.uploaded ? 'text-slate-600' : 'text-indigo-600'"
+                    ></ion-icon>
+                    <h3 class="text-xs font-bold text-slate-800">
+                      {{ doc.displayLabel }}
+                    </h3>
+                    <span
+                      class="px-2 py-0.5 text-[0.6rem] font-semibold rounded-full"
+                      [ngClass]="
+                        doc.uploaded
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-indigo-100 text-indigo-700'
+                      "
+                    >
+                      {{ doc.uploaded ? 'Available' : 'Missing' }}
+                    </span>
+                  </div>
 
-                <p class="text-[0.7rem] text-slate-500">Type: {{ doc.type }}</p>
+                  <!-- Document Details -->
+                  <div class="flex items-center gap-2 text-[0.65rem] text-slate-600 ml-6">
+                    <span class="font-medium text-slate-500 uppercase">{{ doc.type }}</span>
+                    <ng-container *ngIf="doc.uploaded">
+                      <span class="text-slate-400">•</span>
+                      <span class="truncate">{{ doc.fileName }}</span>
+                      <ng-container *ngIf="doc.uploadedAt">
+                        <span class="text-slate-400">•</span>
+                        <span>{{ doc.uploadedAt }}</span>
+                      </ng-container>
+                    </ng-container>
+                    <ng-container *ngIf="!doc.uploaded">
+                      <span class="text-slate-400">•</span>
+                      <span class="text-indigo-700">{{ doc.missingReason || 'Not yet uploaded' }}</span>
+                    </ng-container>
+                  </div>
+                </div>
 
-                <p class="text-[0.7rem] text-slate-500 mt-0.5" *ngIf="doc.uploaded">
-                  Uploaded: {{ doc.uploadedAt }} • {{ doc.fileName }}
-                </p>
-
-                <p class="text-[0.7rem] text-rose-600 mt-0.5" *ngIf="!doc.uploaded">
-                  Missing:
-                  <span class="italic">
-                    {{ doc.missingReason || 'Not provided' }}
-                  </span>
-                </p>
-              </div>
-
-              <div class="flex items-center space-x-2">
-                <span
-                  *ngIf="doc.uploaded"
-                  class="px-2 py-0.5 text-[0.65rem] font-medium rounded-full bg-emerald-100 text-emerald-700"
-                >
-                  Available
-                </span>
-                <span
-                  *ngIf="!doc.uploaded"
-                  class="px-2 py-0.5 text-[0.65rem] font-medium rounded-full bg-slate-100 text-slate-500"
-                >
-                  Missing
-                </span>
-
+                <!-- Action Button -->
                 <button
                   *ngIf="doc.uploaded"
                   type="button"
-                  (click)="onOpenDoc(doc)"
-                  class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                  (click)="onOpenDoc(doc); $event.stopPropagation()"
+                  class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-md transition-colors text-xs font-medium"
                 >
-                  View →
+                  <ion-icon name="eye-outline" class="text-base"></ion-icon>
+                  <span>View</span>
+                </button>
+                <button
+                  *ngIf="!doc.uploaded"
+                  type="button"
+                  (click)="showModal('upload-modal'); $event.stopPropagation()"
+                  class="flex items-center gap-1.5 px-3 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 hover:text-indigo-800 rounded-md transition-colors text-xs font-medium"
+                >
+                  <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
+                  <span>Upload</span>
                 </button>
               </div>
             </div>
           </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!patientSummary.docs || patientSummary.docs.length === 0" class="text-center py-8">
+            <ion-icon name="folder-open-outline" class="text-6xl text-slate-300 mb-2"></ion-icon>
+            <p class="text-sm text-slate-500">No documents available</p>
+          </div>
         </div>
 
         <!-- Episode History - Timeline Style -->
-        <div class="border border-slate-200 rounded-lg p-4 bg-white">
+        <div class="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
           <header class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
               <ion-icon name="time-outline" class="text-indigo-600 text-lg"></ion-icon>

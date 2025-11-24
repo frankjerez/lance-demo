@@ -36,16 +36,16 @@ export const myPatients: PatientListItem[] = [
     assessmentType: 'Start of Care (SOC)',
     docs: { ds: 'present', ro: 'present', vn: 'present' },
     status: {
-      label: 'AI Draft Ready',
+      label: 'Assessment Ready',
       badgeClass: 'bg-yellow-100 text-yellow-800',
     },
     deadlineLabel: 'Today, 5:00 PM',
     eligibility: {
       label: '✓ Eligible',
       badgeClass: 'bg-emerald-100 text-emerald-800',
-      canRecheck: true,
+      canRecheck: false,
     },
-    primaryActionLabel: 'Review Draft →',
+    primaryActionLabel: 'Review',
     primaryActionType: 'review',
   },
   {
@@ -62,9 +62,9 @@ export const myPatients: PatientListItem[] = [
     eligibility: {
       label: '✓ Eligible',
       badgeClass: 'bg-emerald-100 text-emerald-800',
-      canRecheck: false,
+      canRecheck: true,
     },
-    primaryActionLabel: 'Continue Review →',
+    primaryActionLabel: 'Continue Review',
     primaryActionType: 'continue',
   },
   {
@@ -93,16 +93,16 @@ export const myPatients: PatientListItem[] = [
     assessmentType: 'Start of Care (SOC)',
     docs: { ds: 'present', ro: 'present', vn: 'present' },
     status: {
-      label: 'AI Draft Ready',
+      label: 'Assessment Ready',
       badgeClass: 'bg-yellow-100 text-yellow-800',
     },
     deadlineLabel: 'Today, 7:00 PM',
     eligibility: {
       label: '✓ Eligible',
       badgeClass: 'bg-emerald-100 text-emerald-800',
-      canRecheck: true,
+      canRecheck: false,
     },
-    primaryActionLabel: 'Review Draft →',
+    primaryActionLabel: 'Review',
     primaryActionType: 'review',
   },
   {
@@ -121,7 +121,7 @@ export const myPatients: PatientListItem[] = [
       badgeClass: 'bg-emerald-100 text-emerald-800',
       canRecheck: false,
     },
-    primaryActionLabel: 'Upload Documents →',
+    primaryActionLabel: 'Upload Documents',
     primaryActionType: 'upload',
   },
   {
@@ -131,7 +131,7 @@ export const myPatients: PatientListItem[] = [
     assessmentType: 'Recertification (ROC)',
     docs: { ds: 'present', ro: 'present', vn: 'present' },
     status: {
-      label: 'AI Draft Ready',
+      label: 'Assessment Ready',
       badgeClass: 'bg-yellow-100 text-yellow-800',
     },
     deadlineLabel: 'Tomorrow, 11:00 AM',
@@ -140,7 +140,7 @@ export const myPatients: PatientListItem[] = [
       badgeClass: 'bg-emerald-100 text-emerald-800',
       canRecheck: false,
     },
-    primaryActionLabel: 'Review Draft →',
+    primaryActionLabel: 'Review',
     primaryActionType: 'review',
   },
   {
@@ -157,9 +157,9 @@ export const myPatients: PatientListItem[] = [
     eligibility: {
       label: '⚠ Pending',
       badgeClass: 'bg-yellow-100 text-yellow-800',
-      canRecheck: true,
+      canRecheck: false,
     },
-    primaryActionLabel: 'Continue Review →',
+    primaryActionLabel: 'Continue Review',
     primaryActionType: 'continue',
   },
   {
@@ -188,7 +188,7 @@ export const myPatients: PatientListItem[] = [
     assessmentType: 'Start of Care (SOC)',
     docs: { ds: 'present', ro: 'present', vn: 'present' },
     status: {
-      label: 'AI Draft Ready',
+      label: 'Assessment Ready',
       badgeClass: 'bg-yellow-100 text-yellow-800',
     },
     deadlineLabel: 'Tomorrow, 9:00 AM',
@@ -197,7 +197,7 @@ export const myPatients: PatientListItem[] = [
       badgeClass: 'bg-emerald-100 text-emerald-800',
       canRecheck: false,
     },
-    primaryActionLabel: 'Review Draft →',
+    primaryActionLabel: 'Review',
     primaryActionType: 'review',
   },
   {
@@ -216,7 +216,7 @@ export const myPatients: PatientListItem[] = [
       badgeClass: 'bg-emerald-100 text-emerald-800',
       canRecheck: false,
     },
-    primaryActionLabel: 'Continue Review →',
+    primaryActionLabel: 'Continue Review',
     primaryActionType: 'continue',
   },
   {
@@ -233,9 +233,9 @@ export const myPatients: PatientListItem[] = [
     eligibility: {
       label: '⚠ Pending',
       badgeClass: 'bg-yellow-100 text-yellow-800',
-      canRecheck: true,
+      canRecheck: false,
     },
-    primaryActionLabel: 'Upload Documents →',
+    primaryActionLabel: 'Upload Documents',
     primaryActionType: 'upload',
   },
   {

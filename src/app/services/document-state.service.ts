@@ -7,12 +7,18 @@ export interface DocumentUploadStatus {
   fileName?: string;
 }
 
+const STORAGE_KEY = 'lance-document-uploads';
+
 @Injectable({
   providedIn: 'root',
 })
 export class DocumentStateService {
   // Track uploaded documents
   private uploadedDocuments = signal<Map<string, DocumentUploadStatus>>(new Map());
+
+  constructor() {
+    this.loadFromStorage();
+  }
 
   markDocumentAsUploaded(documentId: string, fileName: string): void {
     const now = new Date();
@@ -34,6 +40,7 @@ export class DocumentStateService {
     });
 
     this.uploadedDocuments.set(currentDocs);
+    this.saveToStorage();
   }
 
   isDocumentUploaded(documentId: string): boolean {
@@ -46,5 +53,29 @@ export class DocumentStateService {
 
   resetDocuments(): void {
     this.uploadedDocuments.set(new Map());
+    this.saveToStorage();
+  }
+
+  private saveToStorage(): void {
+    try {
+      const docsArray = Array.from(this.uploadedDocuments().entries());
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(docsArray));
+    } catch (error) {
+      console.error('Failed to save document states to localStorage:', error);
+    }
+  }
+
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const docsArray = JSON.parse(stored) as [string, DocumentUploadStatus][];
+        const docsMap = new Map(docsArray);
+        this.uploadedDocuments.set(docsMap);
+        console.log('📦 Loaded document upload states from localStorage:', docsMap.size, 'items');
+      }
+    } catch (error) {
+      console.error('Failed to load document states from localStorage:', error);
+    }
   }
 }

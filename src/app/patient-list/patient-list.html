@@ -13,7 +13,7 @@
       <div class="flex items-center space-x-4">
         <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
           <option>All Status</option>
-          <option>AI Draft Ready</option>
+          <option>Assessment Ready</option>
           <option>In Review</option>
           <option>Completed</option>
         </select>
@@ -41,152 +41,235 @@
     </div>
   </header>
 
-  <div class="p-8 overflow-y-auto">
-    <table class="w-full text-sm text-left text-slate-500">
-      <thead class="text-xs text-slate-700 uppercase bg-slate-50">
-        <tr>
-          <th scope="col" class="px-6 py-3">Patient Name</th>
-          <th scope="col" class="px-6 py-3">MRN</th>
-          <th scope="col" class="px-6 py-3">Assessment Type</th>
-          <th scope="col" class="px-6 py-3">Documents</th>
-          <th scope="col" class="px-6 py-3">Status</th>
-          <th scope="col" class="px-6 py-3">Deadline</th>
-          <th scope="col" class="px-6 py-3">Eligibility</th>
-          <th scope="col" class="px-6 py-3"><span class="sr-only">Actions</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let patient of patients" class="bg-white border-b hover:bg-slate-50">
-          <!-- Patient Name -->
-          <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">
-            <span (click)="gotoPatientDetails(patient)"> </span>
+  <div class="p-8 overflow-y-auto bg-slate-50">
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+            <ion-icon name="document-text-outline" class="text-xl text-indigo-600"></ion-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">{{ patients.length }}</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">Total Assessments</p>
+          </div>
+        </div>
+      </div>
 
-            <button
-              (click)="gotoPatientDetails(patient)"
-              class="font-medium text-indigo-600 hover:underline"
-            >
-              {{ patient.name }}
-            </button>
-          </th>
+      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+            <ion-icon name="document-outline" class="text-xl text-yellow-600"></ion-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-yellow-700">4</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">Assessment Ready</p>
+          </div>
+        </div>
+      </div>
 
-          <!-- MRN -->
-          <td class="px-6 py-4 text-slate-600">
-            {{ patient.mrn }}
-          </td>
+      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <ion-icon name="time-outline" class="text-xl text-blue-600"></ion-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-blue-700">3</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">In Review</p>
+          </div>
+        </div>
+      </div>
 
-          <!-- Assessment Type -->
-          <td class="px-6 py-4">
-            {{ patient.assessmentType }}
-          </td>
+      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <ion-icon name="checkmark-circle-outline" class="text-xl text-green-600"></ion-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-green-700">3</p>
+            <p class="text-xs text-slate-500 uppercase tracking-wide">Completed</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <!-- Documents -->
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-1">
-              <!-- DS -->
+    <!-- Enhanced Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="person-outline" class="text-indigo-600"></ion-icon>
+                <span>Patient</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="clipboard-outline" class="text-indigo-600"></ion-icon>
+                <span>Assessment</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="folder-outline" class="text-indigo-600"></ion-icon>
+                <span>Documents</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="pulse-outline" class="text-indigo-600"></ion-icon>
+                <span>Status</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="calendar-outline" class="text-indigo-600"></ion-icon>
+                <span>Deadline</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-left">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                <ion-icon name="shield-checkmark-outline" class="text-indigo-600"></ion-icon>
+                <span>Eligibility</span>
+              </div>
+            </th>
+            <th scope="col" class="px-4 py-3 text-right">
+              <span class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let patient of patients" class="hover:bg-slate-50 transition-colors">
+            <!-- Patient Name -->
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-indigo-700 font-bold text-sm">
+                    {{ patient.name.split(' ')[0][0] }}{{ patient.name.split(' ')[1][0] }}
+                  </span>
+                </div>
+                <div>
+                  <button
+                    (click)="gotoPatientDetails(patient)"
+                    class="font-semibold text-slate-900 hover:text-indigo-600 transition-colors text-left"
+                  >
+                    {{ patient.name }}
+                  </button>
+                  <p class="text-xs text-slate-500">MRN: {{ patient.mrn }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Assessment Type -->
+            <td class="px-4 py-4 text-slate-700">
+              {{ patient.assessmentType }}
+            </td>
+
+            <!-- Documents -->
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <span
+                    class="w-7 h-7 flex items-center justify-center text-[0.65rem] font-bold rounded"
+                    [ngClass]="
+                      patient.docs.ds === 'present'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-slate-100 text-slate-400'
+                    "
+                    title="Discharge Summary"
+                  >
+                    DS
+                  </span>
+                  <span
+                    class="w-7 h-7 flex items-center justify-center text-[0.65rem] font-bold rounded"
+                    [ngClass]="
+                      patient.docs.ro === 'present'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-slate-100 text-slate-400'
+                    "
+                    title="Referral/Orders"
+                  >
+                    RO
+                  </span>
+                  <span
+                    class="w-7 h-7 flex items-center justify-center text-[0.65rem] font-bold rounded"
+                    [ngClass]="
+                      patient.docs.vn === 'present'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-slate-100 text-slate-400'
+                    "
+                    title="Visit Note"
+                  >
+                    VN
+                  </span>
+                </div>
+                <button
+                  *ngIf="
+                    patient.docs.ds === 'missing' ||
+                    patient.docs.ro === 'missing' ||
+                    patient.docs.vn === 'missing'
+                  "
+                  (click)="openUpload(patient)"
+                  class="text-indigo-600 hover:text-indigo-800"
+                  title="Upload documents"
+                >
+                  <ion-icon name="cloud-upload-outline" class="text-lg"></ion-icon>
+                </button>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td class="px-4 py-4">
               <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded"
-                [ngClass]="
-                  patient.docs.ds === 'present'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-slate-200 text-slate-500'
-                "
-                title="Discharge Summary"
+                class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full"
+                [ngClass]="patient.status.badgeClass"
               >
-                DS
+                {{ patient.status.label }}
               </span>
+            </td>
 
-              <!-- RO -->
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded"
-                [ngClass]="
-                  patient.docs.ro === 'present'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-slate-200 text-slate-500'
-                "
-                title="Referral/Orders"
-              >
-                RO
-              </span>
+            <!-- Deadline -->
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-1.5 text-slate-600">
+                <ion-icon name="time-outline" class="text-base text-slate-400"></ion-icon>
+                <span>{{ patient.deadlineLabel }}</span>
+              </div>
+            </td>
 
-              <!-- VN -->
-              <span
-                class="px-1.5 py-0.5 text-xs font-medium rounded"
-                [ngClass]="
-                  patient.docs.vn === 'present'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-slate-200 text-slate-500'
-                "
-                title="Visit Note"
-              >
-                VN
-              </span>
+            <!-- Eligibility -->
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-2">
+                <span
+                  class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full"
+                  [ngClass]="patient.eligibility.badgeClass"
+                >
+                  {{ patient.eligibility.label }}
+                </span>
+                <button
+                  *ngIf="patient.eligibility.canRecheck"
+                  (click)="openEligibility(patient)"
+                  class="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                >
+                  Re-Check
+                </button>
+              </div>
+            </td>
 
-              <!-- Upload button when something missing -->
+            <!-- Actions -->
+            <td class="px-4 py-4 text-right">
               <button
-                *ngIf="
-                  patient.docs.ds === 'missing' ||
-                  patient.docs.ro === 'missing' ||
-                  patient.docs.vn === 'missing'
-                "
-                (click)="openUpload(patient)"
-                class="text-xs text-indigo-600 hover:text-indigo-800"
-                title="Upload documents"
+                (click)="goToAssessment(patient)"
+                class="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
               >
-                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
+                <span>{{ patient.primaryActionLabel }}</span>
+                <ion-icon name="arrow-forward" class="text-base"></ion-icon>
               </button>
-            </div>
-          </td>
-
-          <!-- Status -->
-          <td class="px-6 py-4">
-            <span
-              class="px-2 py-1 text-xs font-medium rounded-full"
-              [ngClass]="patient.status.badgeClass"
-            >
-              {{ patient.status.label }}
-            </span>
-          </td>
-
-          <!-- Deadline -->
-          <td class="px-6 py-4 text-slate-600">
-            {{ patient.deadlineLabel }}
-          </td>
-
-          <!-- Eligibility -->
-          <td class="px-6 py-4">
-            <div class="flex items-center space-x-2">
-              <span
-                class="px-2 py-1 text-xs font-medium rounded-full"
-                [ngClass]="patient.eligibility.badgeClass"
-              >
-                {{ patient.eligibility.label }}
-              </span>
-
-              <button
-                *ngIf="patient.eligibility.canRecheck"
-                (click)="openEligibility(patient)"
-                class="text-xs font-medium text-indigo-600 hover:underline"
-              >
-                Re-Check
-              </button>
-            </div>
-          </td>
-
-          <!-- Actions -->
-          <td class="px-6 py-4 text-right">
-            <button
-              (click)="goToAssessment(patient)"
-              class="font-medium text-indigo-600 hover:underline"
-              [ngClass]="{
-                'text-slate-400 hover:underline': patient.primaryActionType === 'view'
-              }"
-            >
-              {{ patient.primaryActionLabel }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 

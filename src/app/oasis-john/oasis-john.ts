@@ -1144,13 +1144,15 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
           return false;
         }
 
-        // Filter 2: Only show alerts when linked recommendation is rejected
-        if (!alert.linkedRecommendationId) {
-          return false; // No linked recommendation, hide alert
+        // Filter 2: If alert has a linked recommendation, only show if that recommendation was rejected or is still pending
+        if (alert.linkedRecommendationId) {
+          const rec = this.aiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
+          // Show alert if recommendation is rejected OR still pending (user hasn't addressed it yet)
+          return rec?.status === 'rejected' || rec?.status === 'pending';
         }
 
-        const rec = this.allAiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
-        return rec?.status === 'rejected'; // Show only if recommendation exists and is rejected
+        // If no linked recommendation, always show the alert
+        return true;
       })
     );
   }
