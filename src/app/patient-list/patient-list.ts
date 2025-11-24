@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, computed, signal } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { PatientListItem, myPatients } from './data/patient-list-data';
@@ -14,7 +14,39 @@ import { PatientListItem, myPatients } from './data/patient-list-data';
 export class PatientListComponent implements OnInit {
   public router = inject(Router);
 
-  patients: PatientListItem[] = myPatients;
+  // All patients
+  allPatients = signal<PatientListItem[]>(myPatients);
+
+  // Selected status filter
+  selectedStatus = signal<string>('All Status');
+
+  // Filtered patients based on selected status
+  patients = computed(() => {
+    const status = this.selectedStatus();
+    const all = this.allPatients();
+
+    if (status === 'All Status') {
+      return all;
+    }
+
+    return all.filter(patient => patient.status.label === status);
+  });
+
+  // Computed counts for status cards
+  assessmentReadyCount = computed(() =>
+    this.allPatients().filter(p => p.status.label === 'Assessment Ready').length
+  );
+
+  inReviewCount = computed(() =>
+    this.allPatients().filter(p => p.status.label === 'In Review').length
+  );
+
+  completedCount = computed(() =>
+    this.allPatients().filter(p => p.status.label === 'Completed').length
+  );
+
+  // Eligibility check date tracking
+  lastEligibilityCheck = signal<Date>(new Date());
 
   // mirrors your original JS vars
   itemsAccepted = 0;
@@ -24,6 +56,17 @@ export class PatientListComponent implements OnInit {
   ngOnInit(): void {
     // default page is login
     this.showPage('dashboard-page');
+  }
+
+  // ======= filtering =======
+
+  onStatusFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedStatus.set(select.value);
+  }
+
+  selectStatusFilter(status: string): void {
+    this.selectedStatus.set(status);
   }
 
   // ======= page switching =======
@@ -66,18 +109,13 @@ export class PatientListComponent implements OnInit {
   }
 
   goToAssessment(patient: PatientListItem): void {
-    // later: route to patient summary / OASIS screen
-    // this.router.navigate(['/patients', patient.id]);
-    if (patient.id === 'p1') {
+    // Only patient p2 (John Smith) goes to OASIS assessment
+    if (patient.id === 'p2') {
       this.router.navigate(['/oasis']);
     } else {
-      return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
+      // For demo: other patients don't navigate anywhere yet
+      return;
     }
-    // } else if (patient.id === 'p2') {
-    //   this.router.navigate(['/patients', patient.id, 'summary']);
-    // } else {
-    //   return; //alert('Routing to Patient Summary for ' + patient.name + ' (demo only)');
-    // }
   }
 
   gotoPatientDetails(_t36: PatientListItem) {
@@ -254,9 +292,7 @@ export class PatientListComponent implements OnInit {
       this.updateEligibilityTimestamp();
 
       // Highlight feedback
-      const timestamp = document.querySelector(
-        '#eligibility-modal .text-xs.text-slate-500.text-center'
-      ) as HTMLElement | null;
+      const timestamp = document.getElementById('eligibility-timestamp') as HTMLElement | null;
 
       if (timestamp) {
         timestamp.classList.add('text-emerald-600', 'font-semibold');
@@ -268,13 +304,34 @@ export class PatientListComponent implements OnInit {
   }
 
   updateEligibilityTimestamp(): void {
-    const timestamp = document.querySelector(
-      '#eligibility-modal .text-xs.text-slate-500.text-center p'
-    ) as HTMLElement | null;
+    // Update the signal with current date
+    this.lastEligibilityCheck.set(new Date());
+  }
 
-    if (timestamp) {
-      timestamp.innerHTML = 'Last verified: Just now ✓';
+  getFormattedEligibilityDate(): string {
+    const date = this.lastEligibilityCheck();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    // Check if it's today
+    if (checkDate.getTime() === today.getTime()) {
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `Today at ${displayHours}:${minutes} ${ampm}`;
     }
+
+    // Otherwise show the full date
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${month}/${day}/${year} at ${displayHours}:${minutes} ${ampm}`;
   }
 
   acceptGGRecommendation(event: Event, ggId: string, code: string): void {

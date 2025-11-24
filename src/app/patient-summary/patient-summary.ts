@@ -1,6 +1,6 @@
 // src/app/patient-summary/patient-summary.component.ts
 
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PatientSummary, MedicalDocument, EpisodeHistory } from './data/patient-summary-data';
 import { CommonModule } from '@angular/common';
@@ -25,6 +25,9 @@ export class PatientSummaryComponent implements OnInit {
   selectedEpisode?: EpisodeHistory;
 
   patientSummary: PatientSummary = undefined as any;
+
+  // Eligibility check date tracking
+  lastEligibilityCheck = signal<Date>(new Date());
 
   selectEpisode(ep: EpisodeHistory) {
     // click again to collapse
@@ -365,14 +368,14 @@ export class PatientSummaryComponent implements OnInit {
     setTimeout(() => {
       processingOverlay.classList.add('hidden');
       processingOverlay.classList.remove('flex');
-      this.router.navigate(['/oasisnew']);
+      this.router.navigate(['/oasis']);
     }, 3500);
   }
 
   onOpenDoc(doc: MedicalDocument): void {
     if (!doc.uploaded) return;
     // Navigate to oasis-john with the document ID in state
-    this.router.navigate(['/oasisnew'], {
+    this.router.navigate(['/oasis'], {
       state: { openDocumentId: doc.id }
     });
   }
@@ -460,9 +463,7 @@ export class PatientSummaryComponent implements OnInit {
       this.updateEligibilityTimestamp();
 
       // Highlight feedback
-      const timestamp = document.querySelector(
-        '#eligibility-modal .text-xs.text-slate-500.text-center'
-      ) as HTMLElement | null;
+      const timestamp = document.getElementById('eligibility-timestamp-summary') as HTMLElement | null;
 
       if (timestamp) {
         timestamp.classList.add('text-emerald-600', 'font-semibold');
@@ -474,13 +475,34 @@ export class PatientSummaryComponent implements OnInit {
   }
 
   updateEligibilityTimestamp(): void {
-    const timestamp = document.querySelector(
-      '#eligibility-modal .text-xs.text-slate-500.text-center p'
-    ) as HTMLElement | null;
+    // Update the signal with current date
+    this.lastEligibilityCheck.set(new Date());
+  }
 
-    if (timestamp) {
-      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
+  getFormattedEligibilityDate(): string {
+    const date = this.lastEligibilityCheck();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    // Check if it's today
+    if (checkDate.getTime() === today.getTime()) {
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `Today at ${displayHours}:${minutes} ${ampm}`;
     }
+
+    // Otherwise show the full date
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${month}/${day}/${year} at ${displayHours}:${minutes} ${ampm}`;
   }
 
   onFileSelected(event: Event): void {

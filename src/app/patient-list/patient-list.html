@@ -11,7 +11,11 @@
       </div>
 
       <div class="flex items-center space-x-4">
-        <select class="px-3 py-2 border border-slate-300 rounded-lg text-sm">
+        <select
+          (change)="onStatusFilterChange($event)"
+          [value]="selectedStatus()"
+          class="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+        >
           <option>All Status</option>
           <option>Assessment Ready</option>
           <option>In Review</option>
@@ -29,14 +33,6 @@
             class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           ></ion-icon>
         </div>
-
-        <button
-          (click)="showModal('upload-modal')"
-          class="flex items-center space-x-2 bg-indigo-600 text-white py-2 px-4 rounded-lg shadow-sm hover:bg-indigo-700"
-        >
-          <ion-icon name="add-circle-outline"></ion-icon>
-          <span>New Assessment</span>
-        </button>
       </div>
     </div>
   </header>
@@ -44,49 +40,77 @@
   <div class="p-8 overflow-y-auto bg-slate-50">
     <!-- Summary Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+      <div
+        (click)="selectStatusFilter('All Status')"
+        class="bg-white rounded-lg p-4 shadow-sm border-2 transition-all cursor-pointer"
+        [ngClass]="{
+          'border-indigo-500 bg-indigo-50 shadow-md': selectedStatus() === 'All Status',
+          'border-slate-200 hover:shadow-md': selectedStatus() !== 'All Status'
+        }"
+      >
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
             <ion-icon name="document-text-outline" class="text-xl text-indigo-600"></ion-icon>
           </div>
           <div>
-            <p class="text-2xl font-bold text-slate-900">{{ patients.length }}</p>
+            <p class="text-2xl font-bold text-slate-900">{{ allPatients().length }}</p>
             <p class="text-xs text-slate-500 uppercase tracking-wide">Total Assessments</p>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+      <div
+        (click)="selectStatusFilter('Assessment Ready')"
+        class="bg-white rounded-lg p-4 shadow-sm border-2 transition-all cursor-pointer"
+        [ngClass]="{
+          'border-yellow-500 bg-yellow-50 shadow-md': selectedStatus() === 'Assessment Ready',
+          'border-slate-200 hover:shadow-md': selectedStatus() !== 'Assessment Ready'
+        }"
+      >
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
             <ion-icon name="document-outline" class="text-xl text-yellow-600"></ion-icon>
           </div>
           <div>
-            <p class="text-2xl font-bold text-yellow-700">4</p>
+            <p class="text-2xl font-bold text-yellow-700">{{ assessmentReadyCount() }}</p>
             <p class="text-xs text-slate-500 uppercase tracking-wide">Assessment Ready</p>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+      <div
+        (click)="selectStatusFilter('In Review')"
+        class="bg-white rounded-lg p-4 shadow-sm border-2 transition-all cursor-pointer"
+        [ngClass]="{
+          'border-blue-500 bg-blue-50 shadow-md': selectedStatus() === 'In Review',
+          'border-slate-200 hover:shadow-md': selectedStatus() !== 'In Review'
+        }"
+      >
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
             <ion-icon name="time-outline" class="text-xl text-blue-600"></ion-icon>
           </div>
           <div>
-            <p class="text-2xl font-bold text-blue-700">3</p>
+            <p class="text-2xl font-bold text-blue-700">{{ inReviewCount() }}</p>
             <p class="text-xs text-slate-500 uppercase tracking-wide">In Review</p>
           </div>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg p-4 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+      <div
+        (click)="selectStatusFilter('Completed')"
+        class="bg-white rounded-lg p-4 shadow-sm border-2 transition-all cursor-pointer"
+        [ngClass]="{
+          'border-green-500 bg-green-50 shadow-md': selectedStatus() === 'Completed',
+          'border-slate-200 hover:shadow-md': selectedStatus() !== 'Completed'
+        }"
+      >
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
             <ion-icon name="checkmark-circle-outline" class="text-xl text-green-600"></ion-icon>
           </div>
           <div>
-            <p class="text-2xl font-bold text-green-700">3</p>
+            <p class="text-2xl font-bold text-green-700">{{ completedCount() }}</p>
             <p class="text-xs text-slate-500 uppercase tracking-wide">Completed</p>
           </div>
         </div>
@@ -140,7 +164,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr *ngFor="let patient of patients" class="hover:bg-slate-50 transition-colors">
+          <tr *ngFor="let patient of patients()" class="hover:bg-slate-50 transition-colors">
             <!-- Patient Name -->
             <td class="px-4 py-4">
               <div class="flex items-center gap-3">
@@ -426,8 +450,8 @@
       </div>
 
       <!-- Verification Details -->
-      <div class="text-xs text-slate-500 text-center pt-2">
-        <p>Last verified: Just now ✓</p>
+      <div id="eligibility-timestamp" class="text-xs text-slate-500 text-center pt-2">
+        <p>Last verified: {{ getFormattedEligibilityDate() }} ✓</p>
       </div>
     </div>
 

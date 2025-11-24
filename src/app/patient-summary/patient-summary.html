@@ -70,7 +70,7 @@
         <div class="border border-emerald-200 bg-emerald-50 rounded-xl px-4 py-3 shadow-sm">
           <p class="text-[0.65rem] text-slate-500 tracking-wide uppercase">Estimated Payment</p>
           <p class="text-2xl font-semibold text-emerald-700 leading-tight">
-            {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
+            {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.2-2' }}
           </p>
           <p class="text-[0.7rem] text-slate-500 mt-1">
             Includes base, comorbidity, functional &amp; LUPA/LUTS adjustments
@@ -130,7 +130,7 @@
             <div class="flex flex-col">
               <span class="text-slate-600">Base Rate</span>
               <span class="font-bold text-slate-900">
-                {{ patientSummary.payment.baseRate | currency : 'USD' : 'symbol' : '1.0-2' }}
+                {{ patientSummary.payment.baseRate | currency : 'USD' : 'symbol' : '1.2-2' }}
               </span>
             </div>
             <div class="flex flex-col">
@@ -138,7 +138,7 @@
               <span class="font-bold text-emerald-700">
                 +{{
                   patientSummary.payment.comorbidityAdjustment
-                    | currency : 'USD' : 'symbol' : '1.0-2'
+                    | currency : 'USD' : 'symbol' : '1.2-2'
                 }}
               </span>
             </div>
@@ -147,14 +147,14 @@
               <span class="font-bold text-emerald-700">
                 +{{
                   patientSummary.payment.functionalLevelAdjustment
-                    | currency : 'USD' : 'symbol' : '1.0-2'
+                    | currency : 'USD' : 'symbol' : '1.2-2'
                 }}
               </span>
             </div>
             <div class="flex flex-col">
               <span class="text-slate-600">LUPA/LUTS</span>
               <span class="font-bold text-emerald-700">
-                +{{ patientSummary.payment.lutsAdjustment | currency : 'USD' : 'symbol' : '1.0-2' }}
+                +{{ patientSummary.payment.lutsAdjustment | currency : 'USD' : 'symbol' : '1.2-2' }}
               </span>
             </div>
           </div>
@@ -163,7 +163,7 @@
               HIPPS {{ patientSummary.payment.hippsCode }}
             </p>
             <p class="text-sm font-bold text-emerald-700 mt-1">
-              {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.0-2' }}
+              {{ patientSummary.payment.totalPayment | currency : 'USD' : 'symbol' : '1.2-2' }}
             </p>
           </div>
         </div>
@@ -633,8 +633,8 @@
       </div>
 
       <!-- Verification Details -->
-      <div class="text-xs text-slate-500 text-center pt-2">
-        <p>Last verified: Just now ✓</p>
+      <div id="eligibility-timestamp-summary" class="text-xs text-slate-500 text-center pt-2">
+        <p>Last verified: {{ getFormattedEligibilityDate() }} ✓</p>
       </div>
     </div>
 

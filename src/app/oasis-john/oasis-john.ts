@@ -75,6 +75,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   // Track collapsed form sections
   collapsedSections = signal<Set<string>>(new Set());
 
+  // Eligibility check date tracking
+  lastEligibilityCheck = signal<Date>(new Date());
+
   // Store the initial pre-filled count (default pre-filled fields in the form)
   private initialPrefilledCount = 18; // ~20% completion (18/89 items)
 
@@ -1263,9 +1266,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       recheckBtn.disabled = false;
       this.updateEligibilityTimestamp();
 
-      const timestamp = document.querySelector(
-        '#eligibility-modal .text-xs.text-slate-500.text-center'
-      ) as HTMLElement | null;
+      const timestamp = document.getElementById('eligibility-timestamp-oasis') as HTMLElement | null;
 
       if (timestamp) {
         timestamp.classList.add('text-emerald-600', 'font-semibold');
@@ -1277,13 +1278,34 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   }
 
   updateEligibilityTimestamp(): void {
-    const timestamp = document.querySelector(
-      '#eligibility-modal .text-xs.text-slate-500.text-center p'
-    ) as HTMLElement | null;
+    // Update the signal with current date
+    this.lastEligibilityCheck.set(new Date());
+  }
 
-    if (timestamp) {
-      timestamp.innerHTML = 'Last verified: Just now • Source: CMS Medicare Portal';
+  getFormattedEligibilityDate(): string {
+    const date = this.lastEligibilityCheck();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    // Check if it's today
+    if (checkDate.getTime() === today.getTime()) {
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `Today at ${displayHours}:${minutes} ${ampm}`;
     }
+
+    // Otherwise show the full date
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    return `${month}/${day}/${year} at ${displayHours}:${minutes} ${ampm}`;
   }
 
   exportToXML(): void {
