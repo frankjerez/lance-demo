@@ -5,18 +5,25 @@
     <div class="flex justify-between items-center">
       <!-- LEFT SIDE -->
       <div class="flex items-center space-x-4">
-        <!-- Back button -->
-        <button
-          (click)="closePanel()"
-          class="text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
-        </button>
-
         <!-- Brand -->
         <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
           LANCE AI
         </div>
+
+        <div class="w-px h-8 bg-slate-200"></div>
+
+        <!-- Navigation breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm">
+          <button
+            (click)="closePanel()"
+            class="text-slate-500 hover:text-indigo-600 transition-colors flex items-center space-x-1"
+          >
+            <ion-icon name="people-outline" class="text-base"></ion-icon>
+            <span>Patient List</span>
+          </button>
+          <ion-icon name="chevron-forward" class="text-slate-400 text-xs"></ion-icon>
+          <span class="text-slate-700 font-medium">Patient Summary</span>
+        </nav>
 
         <div class="w-px h-8 bg-slate-200"></div>
 
