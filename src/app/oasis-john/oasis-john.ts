@@ -1855,170 +1855,322 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   }
 
   /**
-   * Generate OASIS-E1 XML content from form data
+   * Generate OASIS XML content in CMS format
    */
   private generateOasisXML(): string {
-    const formData = this.collectFormData();
+    const oasisItems = this.collectOasisItems();
     const timestamp = new Date().toISOString();
+    const assessmentDate = new Date().toISOString().split('T')[0];
+    const codingResultId = this.generateUUID();
 
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<OASISAssessment xmlns="http://www.cms.gov/oasis" version="E1">\n';
-    xml += '  <Metadata>\n';
-    xml += `    <ExportDate>${timestamp}</ExportDate>\n`;
-    xml += `    <AssessmentType>Start of Care</AssessmentType>\n`;
-    xml += `    <CompletionStatus>${this.itemsAccepted()}/${this.totalItems()}</CompletionStatus>\n`;
-    xml += '  </Metadata>\n\n';
+    let xml = '<?xml version="1.0" ?>\n';
+    xml += '<OASIS xmlns="http://www.cms.gov/oasis">\n';
 
-    // Administrative Section
-    xml += '  <Administrative>\n';
-    xml += `    <M0010>${this.escapeXML(formData['M0010'] || '')}</M0010>\n`;
-    xml += `    <M0014>${this.escapeXML(formData['M0014'] || '')}</M0014>\n`;
-    xml += `    <M0016>${this.escapeXML(formData['M0016'] || '')}</M0016>\n`;
-    xml += `    <M0018>${this.escapeXML(formData['M0018'] || '')}</M0018>\n`;
-    xml += `    <M0020>${this.escapeXML(formData['M0020'] || '')}</M0020>\n`;
-    xml += `    <M0030>${this.escapeXML(formData['M0030'] || '')}</M0030>\n`;
-    xml += `    <M0064>${this.escapeXML(formData['M0064'] || '')}</M0064>\n`;
-    xml += `    <M0066>${this.escapeXML(formData['M0066'] || '')}</M0066>\n`;
-    xml += `    <M0069>${this.escapeXML(formData['M0069'] || '')}</M0069>\n`;
-    xml += `    <M0080>${this.escapeXML(formData['M0080'] || '')}</M0080>\n`;
-    xml += `    <M0090>${this.escapeXML(formData['M0090'] || '')}</M0090>\n`;
-    xml += `    <M0100>${this.escapeXML(formData['M0100'] || '')}</M0100>\n`;
-    xml += `    <M0102>${this.escapeXML(formData['M0102'] || '')}</M0102>\n`;
-    xml += `    <M0104>${this.escapeXML(formData['M0104'] || '')}</M0104>\n`;
-    xml += `    <M0150>${this.escapeXML(formData['M0150'] || '')}</M0150>\n`;
-    xml += '  </Administrative>\n\n';
+    // Submission section
+    xml += '  <Submission>\n';
+    xml += `    <SubmissionDateTime>${timestamp}</SubmissionDateTime>\n`;
+    xml += '    <SubmissionType>Assessment</SubmissionType>\n';
+    xml += '  </Submission>\n';
 
-    // Diagnoses Section
-    xml += '  <Diagnoses>\n';
-    xml += `    <I8000_Primary>${this.escapeXML(
-      formData['I8000_primary'] || ''
-    )}</I8000_Primary>\n`;
-    xml += `    <I8000_Comorbidity>${this.escapeXML(
-      formData['I8000_comorbidity'] || ''
-    )}</I8000_Comorbidity>\n`;
-    xml += `    <I8000_Other>${this.escapeXML(formData['I8000_other'] || '')}</I8000_Other>\n`;
-    xml += '  </Diagnoses>\n\n';
+    // Patient section
+    xml += '  <Patient>\n';
+    xml += `    <PatientID>pid_LANCE_${Date.now()}</PatientID>\n`;
+    xml += '  </Patient>\n';
 
-    // Functional Status - GG Items
-    xml += '  <FunctionalStatus>\n';
-    xml += '    <PriorFunctioning>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('GG0100'))
-      .forEach((key) => {
-        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '    </PriorFunctioning>\n';
-    xml += '    <SelfCare>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('GG0130'))
-      .forEach((key) => {
-        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '    </SelfCare>\n';
-    xml += '    <Mobility>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('GG0170'))
-      .forEach((key) => {
-        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '    </Mobility>\n';
-    xml += '  </FunctionalStatus>\n\n';
+    // Assessment section
+    xml += '  <Assessment>\n';
+    xml += `    <AssessmentDate>${assessmentDate}</AssessmentDate>\n`;
+    xml += '    <AssessmentType>Start of Care</AssessmentType>\n';
+    xml += '  </Assessment>\n';
 
-    // Clinical Status
-    xml += '  <ClinicalStatus>\n';
-    Object.keys(formData)
-      .filter(
-        (k) => k.startsWith('B') || k.startsWith('C') || k.startsWith('D') || k.startsWith('J')
-      )
-      .forEach((key) => {
-        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '  </ClinicalStatus>\n\n';
+    // OASISItems section
+    xml += '  <OASISItems>\n';
 
-    // Medications
-    xml += '  <Medications>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('M20') || k.startsWith('N04'))
-      .forEach((key) => {
-        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '  </Medications>\n\n';
+    oasisItems.forEach((item) => {
+      xml += '    <Item>\n';
+      xml += `      <ItemCode>${this.escapeXML(item.code)}</ItemCode>\n`;
+      xml += `      <ItemDescription>${this.escapeXML(item.description)}</ItemDescription>\n`;
+      xml += `      <ItemValue>${this.escapeXML(item.value)}</ItemValue>\n`;
+      xml += `      <CodingResultID>${codingResultId}</CodingResultID>\n`;
+      xml += `      <LastUpdated>${timestamp}Z</LastUpdated>\n`;
+      xml += '    </Item>\n';
+    });
 
-    // Other M Items
-    xml += '  <OtherClinical>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('M') && !k.startsWith('M0') && !k.startsWith('M20'))
-      .forEach((key) => {
-        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '  </OtherClinical>\n\n';
-
-    // Care Management
-    xml += '  <CareManagement>\n';
-    Object.keys(formData)
-      .filter((k) => k.startsWith('O'))
-      .forEach((key) => {
-        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-      });
-    xml += '  </CareManagement>\n';
-
-    xml += '</OASISAssessment>';
+    xml += '  </OASISItems>\n';
+    xml += '</OASIS>';
 
     return xml;
   }
 
   /**
-   * Collect all form data from the DOM
+   * Generate a UUID for CodingResultID
    */
-  private collectFormData(): Record<string, string> {
-    const data: Record<string, string> = {};
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  /**
+   * OASIS item definitions with codes and descriptions
+   */
+  private readonly OASIS_ITEM_DEFINITIONS: Record<string, string> = {
+    // Section A - Administrative
+    'A1005': 'A1005. Ethnicity',
+    'A1010': 'A1010. Race',
+    'A1110': 'A1110. Language',
+    'A1250': 'A1250. Transportation (NACHC©)',
+    'A2120': 'A2120. Provision of Current Reconciled Medication List to Subsequent Provider at Transfer',
+    'A2121': 'A2121. Provision of Current Reconciled Medication List to Subsequent Provider at Discharge',
+    'A2123': 'A2123. Provision of Current Reconciled Medication List to Patient at Discharge',
+    'A2124': 'A2124. Route of Current Reconciled Medication List Transmission to Patient',
+
+    // Section B - Hearing, Speech, Vision
+    'B0200': 'B0200. Hearing',
+    'B1000': 'B1000. Vision',
+    'B1300': 'B1300. Health Literacy',
+
+    // Section C - Cognitive Patterns
+    'C0100': 'C0100. Should Brief Interview for Mental Status (C0200-C0500) be Conducted?',
+    'C0200': 'C0200. Repetition of Three Words',
+    'C0300': 'C0300. Temporal Orientation',
+    'C0400': 'C0400. Recall',
+    'C0500': 'C0500. BIMS Summary Score',
+    'C0600': 'C0600. Should the Staff Assessment of Mental Status be Conducted?',
+    'C0700': 'C0700. Short-term Memory OK',
+    'C0800': 'C0800. Long-term Memory OK',
+    'C0900': 'C0900. Memory/Recall Ability',
+    'C1000': 'C1000. Cognitive Skills for Daily Decision Making',
+    'C1310': 'C1310. Signs and Symptoms of Delirium',
+
+    // Section D - Mood
+    'D0150': 'D0150. Patient Mood Interview (PHQ-2)',
+    'D0160': 'D0160. Total Severity Score',
+
+    // Section GG - Functional Abilities
+    'GG0100A': 'GG0100A. Prior Functioning - Self-Care',
+    'GG0100B': 'GG0100B. Prior Functioning - Indoor Mobility',
+    'GG0100C': 'GG0100C. Prior Functioning - Stairs',
+    'GG0100D': 'GG0100D. Prior Functioning - Functional Cognition',
+    'GG0130A1': 'GG0130A1. Self-Care - Eating (SOC/ROC Performance)',
+    'GG0130A2': 'GG0130A2. Self-Care - Eating (Discharge Goal)',
+    'GG0130B1': 'GG0130B1. Self-Care - Oral Hygiene (SOC/ROC Performance)',
+    'GG0130B2': 'GG0130B2. Self-Care - Oral Hygiene (Discharge Goal)',
+    'GG0130C1': 'GG0130C1. Self-Care - Toileting Hygiene (SOC/ROC Performance)',
+    'GG0130C2': 'GG0130C2. Self-Care - Toileting Hygiene (Discharge Goal)',
+    'GG0130E1': 'GG0130E1. Self-Care - Shower/Bathe Self (SOC/ROC Performance)',
+    'GG0130E2': 'GG0130E2. Self-Care - Shower/Bathe Self (Discharge Goal)',
+    'GG0130F1': 'GG0130F1. Self-Care - Upper Body Dressing (SOC/ROC Performance)',
+    'GG0130F2': 'GG0130F2. Self-Care - Upper Body Dressing (Discharge Goal)',
+    'GG0130G1': 'GG0130G1. Self-Care - Lower Body Dressing (SOC/ROC Performance)',
+    'GG0130G2': 'GG0130G2. Self-Care - Lower Body Dressing (Discharge Goal)',
+    'GG0130H1': 'GG0130H1. Self-Care - Putting On/Taking Off Footwear (SOC/ROC Performance)',
+    'GG0130H2': 'GG0130H2. Self-Care - Putting On/Taking Off Footwear (Discharge Goal)',
+    'GG0170A1': 'GG0170A1. Mobility - Roll Left and Right (SOC/ROC Performance)',
+    'GG0170A2': 'GG0170A2. Mobility - Roll Left and Right (Discharge Goal)',
+    'GG0170B1': 'GG0170B1. Mobility - Sit to Lying (SOC/ROC Performance)',
+    'GG0170B2': 'GG0170B2. Mobility - Sit to Lying (Discharge Goal)',
+    'GG0170C1': 'GG0170C1. Mobility - Lying to Sitting on Side of Bed (SOC/ROC Performance)',
+    'GG0170C2': 'GG0170C2. Mobility - Lying to Sitting on Side of Bed (Discharge Goal)',
+    'GG0170D1': 'GG0170D1. Mobility - Sit to Stand (SOC/ROC Performance)',
+    'GG0170D2': 'GG0170D2. Mobility - Sit to Stand (Discharge Goal)',
+    'GG0170E1': 'GG0170E1. Mobility - Chair/Bed-to-Chair Transfer (SOC/ROC Performance)',
+    'GG0170E2': 'GG0170E2. Mobility - Chair/Bed-to-Chair Transfer (Discharge Goal)',
+    'GG0170F1': 'GG0170F1. Mobility - Toilet Transfer (SOC/ROC Performance)',
+    'GG0170F2': 'GG0170F2. Mobility - Toilet Transfer (Discharge Goal)',
+    'GG0170G1': 'GG0170G1. Mobility - Car Transfer (SOC/ROC Performance)',
+    'GG0170G2': 'GG0170G2. Mobility - Car Transfer (Discharge Goal)',
+    'GG0170I1': 'GG0170I1. Mobility - Walk 10 Feet (SOC/ROC Performance)',
+    'GG0170I2': 'GG0170I2. Mobility - Walk 10 Feet (Discharge Goal)',
+    'GG0170J1': 'GG0170J1. Mobility - Walk 50 Feet with Two Turns (SOC/ROC Performance)',
+    'GG0170J2': 'GG0170J2. Mobility - Walk 50 Feet with Two Turns (Discharge Goal)',
+    'GG0170K1': 'GG0170K1. Mobility - Walk 150 Feet (SOC/ROC Performance)',
+    'GG0170K2': 'GG0170K2. Mobility - Walk 150 Feet (Discharge Goal)',
+    'GG0170L1': 'GG0170L1. Mobility - Walking 10 Feet on Uneven Surfaces (SOC/ROC Performance)',
+    'GG0170L2': 'GG0170L2. Mobility - Walking 10 Feet on Uneven Surfaces (Discharge Goal)',
+    'GG0170M1': 'GG0170M1. Mobility - 1 Step (Curb) (SOC/ROC Performance)',
+    'GG0170M2': 'GG0170M2. Mobility - 1 Step (Curb) (Discharge Goal)',
+    'GG0170N1': 'GG0170N1. Mobility - 4 Steps (SOC/ROC Performance)',
+    'GG0170N2': 'GG0170N2. Mobility - 4 Steps (Discharge Goal)',
+    'GG0170O1': 'GG0170O1. Mobility - 12 Steps (SOC/ROC Performance)',
+    'GG0170O2': 'GG0170O2. Mobility - 12 Steps (Discharge Goal)',
+    'GG0170P1': 'GG0170P1. Mobility - Picking Up Object (SOC/ROC Performance)',
+    'GG0170P2': 'GG0170P2. Mobility - Picking Up Object (Discharge Goal)',
+    'GG0170R1': 'GG0170R1. Mobility - Wheel 50 Feet with Two Turns (SOC/ROC Performance)',
+    'GG0170R2': 'GG0170R2. Mobility - Wheel 50 Feet with Two Turns (Discharge Goal)',
+    'GG0170S1': 'GG0170S1. Mobility - Wheel 150 Feet (SOC/ROC Performance)',
+    'GG0170S2': 'GG0170S2. Mobility - Wheel 150 Feet (Discharge Goal)',
+
+    // Section J - Health Conditions
+    'J0510': 'J0510. Pain Effect on Sleep',
+    'J1800': 'J1800. Any Falls Since SOC/ROC',
+    'J1900A': 'J1900A. Number of Falls - No Injury',
+    'J1900B': 'J1900B. Number of Falls - Injury (except major)',
+    'J1900C': 'J1900C. Number of Falls - Major Injury',
+    'J2030': 'J2030. Shortness of Breath (Dyspnea)',
+
+    // Section K - Swallowing/Nutritional Status
+    'K0520A': 'K0520A. Nutritional Approaches - Parenteral/IV Feeding',
+    'K0520B': 'K0520B. Nutritional Approaches - Feeding Tube',
+    'K0520C': 'K0520C. Nutritional Approaches - Mechanically Altered Diet',
+    'K0520D': 'K0520D. Nutritional Approaches - Therapeutic Diet',
+    'K0520Z': 'K0520Z. Nutritional Approaches - None of the Above',
+
+    // Section M - Skin Conditions
+    'M1306': 'M1306. Unhealed Pressure Ulcer(s) Present',
+    'M1324': 'M1324. Stage of Most Problematic Unhealed Pressure Ulcer',
+    'M1330': 'M1330. Does this Patient have a Stasis Ulcer?',
+    'M1334': 'M1334. Status of Most Problematic Stasis Ulcer',
+    'M1340': 'M1340. Does this Patient have a Surgical Wound?',
+    'M1342': 'M1342. Status of Most Problematic Surgical Wound',
+    'M1350': 'M1350. Skin Lesion or Open Wound',
+    'M1400': 'M1400. When is the Patient Dyspneic?',
+    'M1600': 'M1600. Has this patient been treated for a Urinary Tract Infection in the past 14 days?',
+    'M1610': 'M1610. Urinary Incontinence or Urinary Catheter Presence',
+    'M1620': 'M1620. Bowel Incontinence Frequency',
+    'M1630': 'M1630. Ostomy for Bowel Elimination',
+    'M2001': 'M2001. Drug Regimen Review',
+    'M2003': 'M2003. Medication Follow-up',
+    'M2005': 'M2005. Medication Intervention',
+    'M2010': 'M2010. Patient/Caregiver High Risk Drug Education',
+    'M2020': 'M2020. Management of Oral Medications',
+    'M2030': 'M2030. Management of Injectable Medications',
+    'M2102ADL': 'M2102. Types and Sources of Assistance - ADL',
+    'M2102IADL': 'M2102. Types and Sources of Assistance - IADL',
+    'M2102Med': 'M2102. Types and Sources of Assistance - Medication',
+    'M2102Proc': 'M2102. Types and Sources of Assistance - Procedures',
+    'M2102Equip': 'M2102. Types and Sources of Assistance - Equipment',
+    'M2102Advocacy': 'M2102. Types and Sources of Assistance - Advocacy',
+    'M2102Financial': 'M2102. Types and Sources of Assistance - Financial',
+    'M2102Emotional': 'M2102. Types and Sources of Assistance - Emotional',
+    'M2102None': 'M2102. Types and Sources of Assistance - None',
+    'M2250Med': 'M2250. Plan of Care Synopsis - Medication',
+    'M2250Nutrition': 'M2250. Plan of Care Synopsis - Nutrition',
+    'M2250Skin': 'M2250. Plan of Care Synopsis - Skin',
+    'M2250Pain': 'M2250. Plan of Care Synopsis - Pain',
+    'M2250Behavioral': 'M2250. Plan of Care Synopsis - Behavioral',
+
+    // Section N - Medications
+    'N0415A': 'N0415A. High-Risk Drug Classes - Antipsychotic',
+    'N0415B': 'N0415B. High-Risk Drug Classes - Anticoagulant',
+    'N0415C': 'N0415C. High-Risk Drug Classes - Antibiotic',
+    'N0415D': 'N0415D. High-Risk Drug Classes - Opioid',
+    'N0415E': 'N0415E. High-Risk Drug Classes - Antiplatelet',
+    'N0415F': 'N0415F. High-Risk Drug Classes - Hypoglycemic',
+
+    // Administrative M Items
+    'M0010': 'M0010. CMS Certification Number',
+    'M0014': 'M0014. Branch State',
+    'M0016': 'M0016. Branch ID Number',
+    'M0018': 'M0018. National Provider Identifier (NPI)',
+    'M0020': 'M0020. Patient ID Number',
+    'M0030': 'M0030. Start of Care Date',
+    'M0064': 'M0064. Social Security Number',
+    'M0066': 'M0066. Birth Date',
+    'M0069': 'M0069. Gender',
+    'M0080': 'M0080. Discipline of Person Completing Assessment',
+    'M0090': 'M0090. Date Assessment Completed',
+    'M0100': 'M0100. Reason for Assessment',
+    'M0102': 'M0102. Date of Physician-Ordered SOC',
+    'M0104': 'M0104. Date of Referral',
+    'M0150': 'M0150. Current Payment Sources for Home Care',
+
+    // Diagnoses
+    'I8000_primary': 'I8000. Primary Diagnosis',
+    'I8000_comorbidity': 'I8000. Comorbidity Diagnosis',
+    'I8000_other': 'I8000. Other Diagnosis',
+  };
+
+  /**
+   * Collect all OASIS items from the form with codes, descriptions, and values
+   */
+  private collectOasisItems(): Array<{ code: string; description: string; value: string }> {
+    const items: Array<{ code: string; description: string; value: string }> = [];
+    const processedCodes = new Set<string>();
+
+    // Helper to extract item code from element ID
+    const extractItemCode = (id: string): string => {
+      // Remove suffixes like -select, -input, etc.
+      return id.replace(/-(select|input|checkbox)$/i, '').replace(/-/g, '');
+    };
+
+    // Helper to get description for an item code
+    const getDescription = (code: string): string => {
+      return this.OASIS_ITEM_DEFINITIONS[code] || `${code}. Unknown Item`;
+    };
+
+    // Helper to add item if not already processed
+    const addItem = (code: string, value: string) => {
+      if (!processedCodes.has(code)) {
+        processedCodes.add(code);
+        items.push({
+          code,
+          description: getDescription(code),
+          value: value || '',
+        });
+      }
+    };
 
     // Collect all select values
     document.querySelectorAll('select').forEach((select) => {
-      const id = (select as HTMLSelectElement).id;
-      const value = (select as HTMLSelectElement).value;
-      if (id && value) {
-        data[id] = value;
+      const selectEl = select as HTMLSelectElement;
+      const id = selectEl.id;
+      if (id) {
+        const code = extractItemCode(id);
+        const value = selectEl.value;
+        // Get selected option text for more meaningful value
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        const displayValue = selectedOption && value ? selectedOption.text : '';
+        addItem(code, displayValue);
       }
     });
 
     // Collect all text inputs
     document.querySelectorAll('input[type="text"]').forEach((input) => {
-      const id = (input as HTMLInputElement).id;
-      const value = (input as HTMLInputElement).value;
-      if (id && value) {
-        data[id] = value;
+      const inputEl = input as HTMLInputElement;
+      const id = inputEl.id;
+      if (id) {
+        const code = extractItemCode(id);
+        addItem(code, inputEl.value);
       }
     });
 
     // Collect all date inputs
     document.querySelectorAll('input[type="date"]').forEach((input) => {
-      const id = (input as HTMLInputElement).id;
-      const value = (input as HTMLInputElement).value;
-      if (id && value) {
-        data[id] = value;
+      const inputEl = input as HTMLInputElement;
+      const id = inputEl.id;
+      if (id) {
+        const code = extractItemCode(id);
+        addItem(code, inputEl.value);
       }
     });
 
     // Collect all number inputs
     document.querySelectorAll('input[type="number"]').forEach((input) => {
-      const id = (input as HTMLInputElement).id;
-      const value = (input as HTMLInputElement).value;
-      if (id && value) {
-        data[id] = value;
-      }
-    });
-
-    // Collect checked checkboxes
-    document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
-      const id = (checkbox as HTMLInputElement).id;
+      const inputEl = input as HTMLInputElement;
+      const id = inputEl.id;
       if (id) {
-        const currentValue = data[id] || '';
-        data[id] = currentValue ? `${currentValue},checked` : 'checked';
+        const code = extractItemCode(id);
+        addItem(code, inputEl.value);
       }
     });
 
-    return data;
+    // Collect checkbox states
+    document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+      const checkboxEl = checkbox as HTMLInputElement;
+      const id = checkboxEl.id;
+      if (id) {
+        const code = extractItemCode(id);
+        addItem(code, checkboxEl.checked ? 'Yes' : 'No');
+      }
+    });
+
+    // Sort items by code for consistent output
+    items.sort((a, b) => a.code.localeCompare(b.code));
+
+    return items;
   }
 
   /**

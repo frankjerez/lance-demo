@@ -356,7 +356,7 @@ export class PatientSummaryComponent implements OnInit {
     this.router.navigate(['/patients']);
   }
 
-  startAIProcessing() {
+  startAIProcessing(openDocumentId?: string) {
     this.hideModal('upload-modal');
 
     const processingOverlay = document.getElementById('processing-overlay');
@@ -368,7 +368,10 @@ export class PatientSummaryComponent implements OnInit {
     setTimeout(() => {
       processingOverlay.classList.add('hidden');
       processingOverlay.classList.remove('flex');
-      this.router.navigate(['/oasis']);
+      // Navigate with the uploaded document ID so the viewer shows it
+      this.router.navigate(['/oasis'], {
+        state: openDocumentId ? { openDocumentId } : undefined
+      });
     }, 3500);
   }
 
@@ -589,7 +592,7 @@ export class PatientSummaryComponent implements OnInit {
     // Reset input so selecting same file again still triggers change
     input.value = '';
 
-    this.startAIProcessing();
+    this.startAIProcessing('doc1');
   }
 
   onVisitNoteFileSelected(event: Event): void {
@@ -606,7 +609,7 @@ export class PatientSummaryComponent implements OnInit {
     // Reset input so selecting same file again still triggers change
     input.value = '';
 
-    this.startAIProcessing();
+    this.startAIProcessing('doc5');
   }
 
   onVisitRecordingFileSelected(event: Event): void {
@@ -623,7 +626,7 @@ export class PatientSummaryComponent implements OnInit {
     // Reset input so selecting same file again still triggers change
     input.value = '';
 
-    this.startAIProcessing();
+    this.startAIProcessing('doc8');
   }
 
   private buildMockSummary(id: string): PatientSummary {
