@@ -283,7 +283,7 @@
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-1">
                     <ion-icon
-                      [name]="doc.uploaded ? 'document-text' : 'alert-circle'"
+                      [name]="doc.type === 'Audio' ? 'volume-high' : (doc.uploaded ? 'document-text' : 'alert-circle')"
                       class="text-base"
                       [ngClass]="doc.uploaded ? 'text-slate-600' : 'text-indigo-600'"
                     ></ion-icon>
@@ -324,7 +324,7 @@
 
                 <!-- Action Button -->
                 <button
-                  *ngIf="doc.uploaded"
+                  *ngIf="doc.uploaded && doc.type !== 'Audio'"
                   type="button"
                   (click)="onOpenDoc(doc); $event.stopPropagation()"
                   class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-md transition-colors text-xs font-medium"
@@ -332,6 +332,16 @@
                   <ion-icon name="eye-outline" class="text-base"></ion-icon>
                   <span>View</span>
                 </button>
+                <!-- Audio Player for Visit Recording -->
+                <audio
+                  *ngIf="doc.uploaded && doc.type === 'Audio' && doc.audioUrl"
+                  controls
+                  class="h-8 w-48"
+                  (click)="$event.stopPropagation()"
+                >
+                  <source [src]="doc.audioUrl" type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
                 <button
                   *ngIf="!doc.uploaded"
                   type="button"

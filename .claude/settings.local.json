@@ -5,7 +5,9 @@
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(move \"c:\\FrankDev\\KainCapital\\lance-demo\\lance-demo\\src\\assets\\johnSmith_Nurse_Visit.mp3\" \"c:\\FrankDev\\KainCapital\\lance-demo\\lance-demo\\public\\johnSmith_Nurse_Visit.mp3\")",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

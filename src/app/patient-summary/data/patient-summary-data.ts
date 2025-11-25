@@ -22,12 +22,13 @@ export interface EpisodeHistoryItem {
 
 export interface MedicalDocument {
   id: string;
-  type: 'DS' | 'RO' | 'VN' | 'H&P' | 'Labs' | 'Other';
+  type: 'DS' | 'RO' | 'VN' | 'H&P' | 'Labs' | 'Audio' | 'Other';
   displayLabel: string;
   uploaded: boolean;
   uploadedAt?: string;
   fileName?: string;
   missingReason?: string;
+  audioUrl?: string;
 }
 
 export interface PDGMPaymentBreakdown {

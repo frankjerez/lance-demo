@@ -627,6 +627,15 @@ export class PatientSummaryComponent implements OnInit {
           uploaded: false,
           missingReason: 'External provider delays',
         },
+        {
+          id: 'doc8',
+          type: 'Audio',
+          displayLabel: 'Visit Recording',
+          uploaded: true,
+          uploadedAt: '2024-10-03 2:30 PM',
+          fileName: 'johnSmith_Nurse_Visit.mp3',
+          audioUrl: '/johnSmith_Nurse_Visit.mp3',
+        },
       ],
       payment: {
         hippsCode: '2CB21',
