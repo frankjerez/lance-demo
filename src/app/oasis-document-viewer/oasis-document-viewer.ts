@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, input, output, ViewChild, effect, AfterContentInit } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  ElementRef,
+  input,
+  output,
+  ViewChild,
+  effect,
+  AfterContentInit,
+} from '@angular/core';
 
 export interface DocumentTab {
   id: 'discharge-doc' | 'referral-doc' | 'visit-doc';
@@ -25,7 +34,9 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
   // Inputs from parent
   activeDocId = input<'discharge-doc' | 'referral-doc' | 'visit-doc'>('discharge-doc');
   highlightEvidence = input<EvidenceHighlight | null>(null);
-  availableDocs = input<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(new Set(['discharge-doc', 'referral-doc', 'visit-doc']));
+  availableDocs = input<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(
+    new Set(['discharge-doc', 'referral-doc', 'visit-doc'])
+  );
 
   // Outputs to parent
   onTabChange = output<'discharge-doc' | 'referral-doc' | 'visit-doc'>();
@@ -42,72 +53,39 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
   private contentInitialized = false;
 
   constructor() {
-    console.log('🟣 Document viewer constructor called');
-    console.log('🟣 Initial activeDocId value:', this.activeDocId());
-
     // Filter tabs based on available documents
     effect(() => {
       const available = this.availableDocs();
-      console.log('🟣 Available docs changed:', Array.from(available));
       this.tabs = this.allTabs.filter((tab) => available.has(tab.id));
-      console.log('🟣 Filtered tabs:', this.tabs.map(t => t.id));
     });
 
-    // TEST: Simple effect that should always run
-    try {
-      effect(() => {
-        console.log('🔴 TEST EFFECT IS RUNNING!');
-      });
-      console.log('🟣 Test effect created successfully');
-    } catch (error) {
-      console.error('🔴 Error creating test effect:', error);
-    }
-
     // React to activeDocId changes from parent (after content is initialized)
-    try {
-      effect(() => {
-        const docId = this.activeDocId();
-        console.log('🟢 Document viewer effect triggered. activeDocId:', docId, 'contentInitialized:', this.contentInitialized);
-        if (docId && this.contentInitialized) {
-          console.log('🟢 Calling switchTab with:', docId);
-          this.switchTab(docId);
-        }
-      });
-      console.log('🟣 ActiveDocId effect created successfully');
-    } catch (error) {
-      console.error('🔴 Error creating activeDocId effect:', error);
-    }
+    effect(() => {
+      const docId = this.activeDocId();
+      if (docId && this.contentInitialized) {
+        this.switchTab(docId);
+      }
+    });
 
     // React to highlight evidence changes from parent
-    try {
-      effect(() => {
-        const highlight = this.highlightEvidence();
-        if (highlight) {
-          this.applyEvidenceHighlight(highlight);
-        }
-      });
-      console.log('🟣 Highlight effect created successfully');
-    } catch (error) {
-      console.error('🔴 Error creating highlight effect:', error);
-    }
-
-    console.log('🟣 Effects registered');
+    effect(() => {
+      const highlight = this.highlightEvidence();
+      if (highlight) {
+        this.applyEvidenceHighlight(highlight);
+      }
+    });
   }
 
   ngAfterContentInit(): void {
-    console.log('🟣 ngAfterContentInit called');
     // Wait for ng-content to be projected into the DOM
     this.contentInitialized = true;
-    console.log('🟣 contentInitialized set to true');
     // Initialize with the default active document
     setTimeout(() => {
-      console.log('🟣 setTimeout executing, calling switchTab');
       this.switchTab(this.activeDocId());
     }, 0);
   }
 
   switchTab(tabId: 'discharge-doc' | 'referral-doc' | 'visit-doc'): void {
-    console.log('🟡 switchTab called with:', tabId);
     this.activeTabId = tabId;
     this.tabs.forEach((tab) => (tab.active = tab.id === tabId));
 
@@ -115,19 +93,15 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
     const allDocs = ['discharge-doc', 'referral-doc', 'visit-doc'];
     allDocs.forEach((docId) => {
       const docElement = document.getElementById(docId);
-      console.log('🟡 Looking for element:', docId, 'Found:', !!docElement);
       if (docElement) {
         if (docId === tabId) {
-          console.log('🟡 Showing document:', docId);
           docElement.classList.remove('hidden');
         } else {
-          console.log('🟡 Hiding document:', docId);
           docElement.classList.add('hidden');
         }
       }
     });
 
-    console.log('🟡 Tab state after switch:', this.tabs.map(t => ({ id: t.id, active: t.active })));
     this.onTabChange.emit(tabId);
   }
 
@@ -146,26 +120,80 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
       el.outerHTML = el.innerHTML;
     });
 
-    // Apply new highlights
-    const evidenceElements = viewer.querySelectorAll(
-      `[data-evidence-for="${highlight.oasisId}"]`
-    ) as NodeListOf<HTMLElement>;
+    // Small delay to ensure tab switch completes and DOM is ready
+    setTimeout(() => {
+      // Apply new highlights
+      const evidenceElements = viewer.querySelectorAll(
+        `[data-evidence-for="${highlight.oasisId}"]`
+      ) as NodeListOf<HTMLElement>;
 
-    evidenceElements.forEach((evidenceEl) => {
-      evidenceEl.innerHTML = `
-        <mark class="evidence-highlight" data-category="${highlight.category}">
-          ${evidenceEl.innerHTML}
-        </mark>
-      `;
-    });
-
-    // Scroll to first evidence
-    if (evidenceElements.length > 0) {
-      evidenceElements[0].scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      evidenceElements.forEach((evidenceEl) => {
+        // Force re-render by removing and re-adding class for animation restart
+        evidenceEl.innerHTML = `
+          <mark class="evidence-highlight" data-category="${highlight.category}">
+            ${evidenceEl.innerHTML}
+          </mark>
+        `;
       });
-    }
+
+      // Scroll to first evidence with enhanced behavior
+      if (evidenceElements.length > 0) {
+        const firstEvidence = evidenceElements[0];
+        const markElement = firstEvidence.querySelector('.evidence-highlight') as HTMLElement;
+        const targetElement = markElement || firstEvidence;
+
+        // Use scrollIntoView for reliable centering regardless of container height
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest',
+        });
+
+        // Show indicator after scroll completes
+        setTimeout(() => {
+          this.showScrollIndicator(targetElement);
+        }, 500);
+      }
+    }, 100);
+  }
+
+  private showScrollIndicator(element: HTMLElement): void {
+    // Get fresh position after scroll
+    const rect = element.getBoundingClientRect();
+
+    // Create a temporary pointing indicator
+    const indicator = document.createElement('div');
+    indicator.className = 'evidence-scroll-indicator';
+    indicator.innerHTML = `
+      <div style="
+        position: fixed;
+        left: ${rect.left - 50}px;
+        top: ${rect.top + rect.height / 2 - 12}px;
+        z-index: 9999;
+        animation: scroll-indicator 1.5s ease-in-out forwards;
+        pointer-events: none;
+      ">
+        <span style="
+          display: inline-flex;
+          align-items: center;
+          background: #dc2626;
+          color: white;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 600;
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        ">
+          → Evidence
+        </span>
+      </div>
+    `;
+    document.body.appendChild(indicator);
+
+    // Remove indicator after animation
+    setTimeout(() => {
+      indicator.remove();
+    }, 1500);
   }
 
   clearHighlights(): void {

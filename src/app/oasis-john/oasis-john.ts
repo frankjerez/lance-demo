@@ -197,6 +197,83 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       progressIncrement: 0,
       status: 'pending',
     },
+    // ===== VISIT NOTE RECOMMENDATIONS =====
+    {
+      id: 'rec-pad',
+      kind: 'icd',
+      headerLabel: 'Additional Comorbidity • I8000',
+      title: 'I73.9 – Peripheral arterial disease, unspecified',
+      rationaleHtml:
+        'Visit note documents <span class="font-semibold">peripheral arterial disease</span> with claudication pattern (pain relieved by rest), diminished pedal pulses, cool extremities bilaterally, and concerning right great toe discoloration suggestive of ischemia. This supports adding I73.9 as a comorbidity.',
+      contextLabel: 'Comorbidity adjustment',
+      evidenceDocLabel: 'Visit Note',
+      badgeLabel: 'High impact',
+      badgeClass: 'bg-blue-50 text-blue-700',
+      selectionOasisKey: 'I8000-pad',
+      evidenceDocId: 'visit-doc',
+      formFieldId: 'form-I8000-other-diagnoses-container',
+      oasisTargetId: 'I8000-pad',
+      acceptValue: 'I73.9 - Peripheral arterial disease, unspecified',
+      triggersPdgmUpdate: true,
+      progressIncrement: 5,
+      status: 'pending',
+    },
+    {
+      id: 'rec-falls',
+      kind: 'gg',
+      headerLabel: 'Fall Risk • J1800',
+      title: '1 – Yes, patient has had falls since SOC/ROC',
+      rationaleHtml:
+        'Visit note documents <span class="font-semibold">near-fall in bathroom</span> last week where patient grabbed towel bar. Nurse assessment notes high fall risk with unsteady gait and inconsistent walker use. This supports coding J1800 as "Yes" for falls.',
+      contextLabel: 'Patient Safety',
+      evidenceDocLabel: 'Visit Note',
+      badgeLabel: 'Safety alert',
+      badgeClass: 'bg-red-50 text-red-700',
+      selectionOasisKey: 'J1800-falls',
+      evidenceDocId: 'visit-doc',
+      formFieldId: 'J1800-select',
+      oasisTargetId: 'J1800',
+      ggValue: '1',
+      triggersPdgmUpdate: false,
+      progressIncrement: 0,
+      status: 'pending',
+    },
+    {
+      id: 'rec-dyspnea',
+      kind: 'gg',
+      headerLabel: 'Respiratory Status • J2030',
+      title: '1 – Shortness of breath when walking more than 20 feet, climbing stairs',
+      rationaleHtml:
+        'Visit note documents <span class="font-semibold">shortness of breath with stairs</span> requiring patient to stop halfway. Also notes orthopnea requiring 3 pillows (increased from 1) and possible volume overload. This supports coding J2030 at level 1.',
+      contextLabel: 'Functional limitation',
+      evidenceDocLabel: 'Visit Note',
+      selectionOasisKey: 'M1400-dyspnea',
+      evidenceDocId: 'visit-doc',
+      formFieldId: 'J2030-select',
+      oasisTargetId: 'J2030',
+      ggValue: '1',
+      triggersPdgmUpdate: false,
+      progressIncrement: 0,
+      status: 'pending',
+    },
+    {
+      id: 'rec-bathing',
+      kind: 'gg',
+      headerLabel: 'Self-Care • GG0130E',
+      title: '02 – Substantial/maximal assistance for showering/bathing',
+      rationaleHtml:
+        'Visit note documents patient <span class="font-semibold">uses shower chair and requires assistance from daughter for safety</span> during bathing. This supports coding GG0130E at substantial/maximal assistance level (02).',
+      contextLabel: 'Functional Status',
+      evidenceDocLabel: 'Visit Note',
+      selectionOasisKey: 'GG0130-bathing',
+      evidenceDocId: 'visit-doc',
+      formFieldId: 'form-GG0130E-answer',
+      oasisTargetId: 'GG0130E',
+      ggValue: '02',
+      triggersPdgmUpdate: false,
+      progressIncrement: 0,
+      status: 'pending',
+    },
   ]);
 
   // Filtered recommendations based on available documents
@@ -376,6 +453,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       sectionsToExpand.forEach(sectionId => this.expandSection(sectionId));
 
       // Populate fields after a brief delay to allow sections to expand
+      // Note: We do NOT increment itemsAccepted here because the count is already
+      // persisted in localStorage and restored. Only increment when newly accepting.
       setTimeout(() => {
         this.aiRecommendations().forEach((rec) => {
           const savedState = savedStates.get(rec.id);
@@ -389,10 +468,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
               isOtherDiagnosis
             );
 
-            // Update items accepted count
-            this.oasisStateService.updateItemsAccepted(this.itemsAccepted() + 1);
-
-            // Update payment if applicable
+            // Update payment if applicable (visual only, no count increment)
             if (rec.triggersPdgmUpdate) {
               this.updatePaymentDisplay(rec);
             }
@@ -949,14 +1025,33 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Small delay to ensure section expansion animation completes before populating
     setTimeout(() => {
-      // Populate form field
+      const value = recommendation.acceptValue || recommendation.ggValue || '';
       const isOtherDiagnosis = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
+      const isSelectField = recommendation.formFieldId.endsWith('-select');
 
-      this.oasisFormComponent.populateField(
-        recommendation.formFieldId,
-        recommendation.acceptValue || recommendation.ggValue || '',
-        isOtherDiagnosis
-      );
+      if (isSelectField) {
+        // Handle select elements directly
+        const selectEl = document.getElementById(recommendation.formFieldId) as HTMLSelectElement | null;
+        if (selectEl) {
+          selectEl.value = value;
+          // Add highlight animation
+          selectEl.classList.add('ring-2', 'ring-emerald-400', 'ring-offset-2');
+          setTimeout(() => {
+            selectEl.classList.remove('ring-2', 'ring-emerald-400', 'ring-offset-2');
+          }, 1500);
+          // Scroll to field
+          selectEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Persist to state service
+          this.oasisStateService.updateFormField(recommendation.formFieldId, value);
+        }
+      } else {
+        // Populate form field via component (for div-based fields)
+        this.oasisFormComponent.populateField(
+          recommendation.formFieldId,
+          value,
+          isOtherDiagnosis
+        );
+      }
 
       // Update progress
       this.oasisStateService.updateItemsAccepted(this.itemsAccepted() + 1);
@@ -1028,7 +1123,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     if (formFieldId.includes('D')) {
       return 'mood';
     }
-    if (formFieldId.includes('J1') || formFieldId.includes('J0')) {
+    if (formFieldId.includes('J1') || formFieldId.includes('J0') || formFieldId.includes('J2')) {
       return 'health-conditions';
     }
     if (formFieldId.includes('K')) {
@@ -1137,36 +1232,45 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // If recommendation was accepted, we need to revert changes
     if (recommendation.status === 'accepted') {
-      // Revert form field - clear the field value
-      const formField = document.getElementById(recommendation.formFieldId) as HTMLElement | null;
-      if (formField) {
-        const isMultiDiagnosisContainer = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
+      const isSelectField = recommendation.formFieldId.endsWith('-select');
+      const isMultiDiagnosisContainer = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
 
-        if (isMultiDiagnosisContainer) {
-          // For multi-diagnosis containers, restore placeholder
-          formField.innerHTML = `
-            <div class="p-2 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs">
-              Click 'Accept' on a diagnosis recommendation to add here
-            </div>
-          `;
-        } else {
-          // For single-value fields, restore placeholder style and content
-          const placeholderText = formField.dataset['placeholder'] || 'Click Accept to fill';
-          formField.innerHTML = placeholderText;
-          formField.classList.remove(
-            'form-field-value',
-            'border-emerald-400',
-            'bg-emerald-50',
-            'border-solid'
-          );
-          formField.classList.add(
-            'form-field-placeholder',
-            'border-dashed',
-            'border-yellow-400',
-            'bg-yellow-50',
-            'text-slate-600',
-            'justify-center'
-          );
+      if (isSelectField) {
+        // Revert select field to empty/default value
+        const selectEl = document.getElementById(recommendation.formFieldId) as HTMLSelectElement | null;
+        if (selectEl) {
+          selectEl.value = '';
+        }
+      } else {
+        // Revert div-based form field
+        const formField = document.getElementById(recommendation.formFieldId) as HTMLElement | null;
+        if (formField) {
+          if (isMultiDiagnosisContainer) {
+            // For multi-diagnosis containers, restore placeholder
+            formField.innerHTML = `
+              <div class="p-2 border-2 border-dashed border-yellow-400 rounded min-h-[40px] flex items-center justify-center text-slate-600 text-xs">
+                Click 'Accept' on a diagnosis recommendation to add here
+              </div>
+            `;
+          } else {
+            // For single-value fields, restore placeholder style and content
+            const placeholderText = formField.dataset['placeholder'] || 'Click Accept to fill';
+            formField.innerHTML = placeholderText;
+            formField.classList.remove(
+              'form-field-value',
+              'border-emerald-400',
+              'bg-emerald-50',
+              'border-solid'
+            );
+            formField.classList.add(
+              'form-field-placeholder',
+              'border-dashed',
+              'border-yellow-400',
+              'bg-yellow-50',
+              'text-slate-600',
+              'justify-center'
+            );
+          }
         }
       }
 
@@ -2114,10 +2218,25 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       this.recommendationStateService.updateRecommendationStatus(rec.id, 'accepted');
     });
 
-    // Recompute analyzer alerts to hide any linked to accepted recommendations
-    this.computeAnalyzerAlerts();
+    // Mark assessment as saved to enable analyzer alerts
+    this.hasBeenSaved.set(true);
+
+    // Show all analyzer alerts and mark them as reviewed (completed)
+    const available = this.availableDocs();
+    this.analyzerAlerts.set(
+      this.allAnalyzerAlerts()
+        .filter((alert) => available.has(alert.evidenceDocId))
+        .map((alert) => ({
+          ...alert,
+          status: 'reviewed' as AnalyzerAlertStatus,
+        }))
+    );
+
+    // Show the analyzer panel
+    this.showAnalyzer.set(true);
 
     console.log('✅ All AI recommendations accepted during demo autofill');
+    console.log('✅ All analyzer alerts marked as reviewed');
   }
 
   private showAutofillNotification(): void {

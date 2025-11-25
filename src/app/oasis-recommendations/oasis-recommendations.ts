@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output, signal } from '@angular/core';
 
 export type AnalyzerAlertType = 'coding_opportunity' | 'inconsistency';
 export type AnalyzerAlertSeverity = 'low' | 'medium' | 'high';
@@ -59,6 +59,18 @@ export class OasisRecommendationsComponent {
   analyzerAlerts = input<AnalyzerAlert[]>([]);
   showAnalyzer = input<boolean>(false);
   selectedAlertId = input<string | null>(null);
+
+  // Collapse state for sections
+  isAlertsCollapsed = signal(false);
+  isRecsCollapsed = signal(false);
+
+  toggleAlertsCollapsed(): void {
+    this.isAlertsCollapsed.update(v => !v);
+  }
+
+  toggleRecsCollapsed(): void {
+    this.isRecsCollapsed.update(v => !v);
+  }
 
   // Outputs to parent
   onRecommendationSelect = output<{

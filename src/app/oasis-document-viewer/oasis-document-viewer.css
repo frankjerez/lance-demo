@@ -13,6 +13,59 @@
   border-radius: 4px;
   border: 2px solid;
   font-weight: 500;
+  animation: evidence-pulse 2s ease-in-out;
+}
+
+/* Pulse animation keyframes */
+@keyframes evidence-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  15% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  30% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+  }
+  45% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+  60% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3);
+  }
+  75% {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Scroll indicator animation */
+@keyframes scroll-indicator {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
 
 .evidence-highlight[data-category='diagnosis'] {
@@ -25,12 +78,66 @@
   background-color: #faf5ff;
   border-color: #9333ea;
   color: #6b21a8;
+  animation: evidence-pulse-purple 2s ease-in-out;
+}
+
+@keyframes evidence-pulse-purple {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.7);
+  }
+  15% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(147, 51, 234, 0);
+  }
+  30% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.5);
+  }
+  45% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(147, 51, 234, 0);
+  }
+  60% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 .evidence-highlight[data-category='gg-mobility'] {
   background-color: #eef2ff;
   border-color: #6366f1;
   color: #4338ca;
+  animation: evidence-pulse-indigo 2s ease-in-out;
+}
+
+@keyframes evidence-pulse-indigo {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  15% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+  }
+  30% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5);
+  }
+  45% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+  60% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 .pdf-page {

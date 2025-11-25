@@ -45,22 +45,6 @@
 
       <div class="w-px h-8 bg-slate-200"></div>
 
-      <!-- OASIS Analyzer Button -->
-      <button
-        type="button"
-        (click)="handleOpenAnalyzer()"
-        class="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 border border-amber-700 shadow-sm transition-all relative"
-      >
-        <ion-icon name="analytics-outline" class="text-sm"></ion-icon>
-        <span>OASIS Analyzer</span>
-        <span
-          *ngIf="hasAnalyzerAlerts() && newAnalyzerAlertCount() > 0"
-          class="absolute -top-1 -right-1 bg-red-500 text-white text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center"
-        >
-          {{ newAnalyzerAlertCount() }}
-        </span>
-      </button>
-
       <!-- Save Button -->
       <button
         type="button"
@@ -77,6 +61,22 @@
           <ion-icon name="hourglass-outline" class="text-sm animate-spin"></ion-icon>
           <span>Saving &amp; Running Analyzer...</span>
         </ng-container>
+      </button>
+
+      <!-- OASIS Analyzer Button -->
+      <button
+        type="button"
+        (click)="handleOpenAnalyzer()"
+        class="flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 border border-amber-700 shadow-sm transition-all relative"
+      >
+        <ion-icon name="analytics-outline" class="text-sm"></ion-icon>
+        <span>OASIS Analyzer</span>
+        <span
+          *ngIf="hasAnalyzerAlerts() && newAnalyzerAlertCount() > 0"
+          class="absolute -top-1 -right-1 bg-red-500 text-white text-[0.6rem] font-bold rounded-full w-5 h-5 flex items-center justify-center"
+        >
+          {{ newAnalyzerAlertCount() }}
+        </span>
       </button>
 
       <!-- Reset Button -->
