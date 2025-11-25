@@ -47,9 +47,16 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
   availableDocs = input<Set<DocumentTabId>>(
     new Set(['discharge-doc', 'referral-doc', 'visit-doc', 'audio-doc'])
   );
+  isVisitNoteAvailable = input<boolean>(false);
+
+  // Visit Note generation state
+  isGeneratingVisitNote = signal(false);
+  generationProgress = signal(0);
+  generationStatus = signal('');
 
   // Outputs to parent
   onTabChange = output<DocumentTabId>();
+  onVisitNoteGenerated = output<void>();
 
   private allTabs: DocumentTab[] = [
     { id: 'discharge-doc', label: 'Discharge Summary', active: true },
@@ -275,5 +282,44 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
     const duration = this.audioDuration();
     if (!duration) return 0;
     return (this.audioCurrentTime() / duration) * 100;
+  }
+
+  // Visit Note generation methods
+  startVisitNoteGeneration(): void {
+    this.isGeneratingVisitNote.set(true);
+    this.generationProgress.set(0);
+    this.generationStatus.set('Analyzing transcript...');
+
+    // Simulate the generation process
+    const steps = [
+      { progress: 15, status: 'Extracting patient information...' },
+      { progress: 30, status: 'Identifying clinical findings...' },
+      { progress: 45, status: 'Processing vital signs...' },
+      { progress: 60, status: 'Documenting assessment details...' },
+      { progress: 75, status: 'Generating care plan...' },
+      { progress: 90, status: 'Formatting visit note...' },
+      { progress: 100, status: 'Complete!' },
+    ];
+
+    let stepIndex = 0;
+    const interval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        this.generationProgress.set(steps[stepIndex].progress);
+        this.generationStatus.set(steps[stepIndex].status);
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => {
+          this.isGeneratingVisitNote.set(false);
+          this.onVisitNoteGenerated.emit();
+        }, 500);
+      }
+    }, 600);
+  }
+
+  cancelVisitNoteGeneration(): void {
+    this.isGeneratingVisitNote.set(false);
+    this.generationProgress.set(0);
+    this.generationStatus.set('');
   }
 }

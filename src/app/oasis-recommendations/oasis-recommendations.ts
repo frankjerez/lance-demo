@@ -12,9 +12,10 @@ export interface AnalyzerAlert {
   status: AnalyzerAlertStatus;
   title: string;
   description: string;
-  evidenceDocId: 'discharge-doc' | 'referral-doc' | 'visit-doc';
+  evidenceDocId: 'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc';
   evidenceAnchorId?: string;
   relatedOasisItem?: string;
+  oasisFormFieldId?: string; // ID of the OASIS form field to highlight/navigate to
   hippsImpact?: {
     delta: number;
     description: string;
@@ -97,6 +98,10 @@ export class OasisRecommendationsComponent {
 
   get newAnalyzerAlertCount(): number {
     return this.analyzerAlerts().filter((a) => a.status === 'new').length;
+  }
+
+  get addressedRecommendationsCount(): number {
+    return this.recommendations().filter((r) => r.status === 'accepted' || r.status === 'rejected').length;
   }
 
   handleRecommendationSelect(recommendation: AiRecommendation, event: Event): void {

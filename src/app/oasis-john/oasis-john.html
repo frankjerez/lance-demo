@@ -45,7 +45,9 @@
       [activeDocId]="activeDocId()"
       [highlightEvidence]="highlightEvidence()"
       [availableDocs]="availableDocs()"
-      [audioUrl]="'/johnSmith_Nurse_Visit.mp3'"
+      [audioUrl]="audioUrl()"
+      [isVisitNoteAvailable]="isVisitNoteAvailable()"
+      (onVisitNoteGenerated)="handleVisitNoteGenerated()"
     >
       <!--
         NOTE: Insert the document content here from the original oasis-john.html

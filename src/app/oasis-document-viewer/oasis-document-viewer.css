@@ -174,3 +174,33 @@ span[data-evidence-for^='GG0170']:hover {
   overflow: scroll;
   max-height: 1050px;
 }
+
+/* Visit Note Generation Modal Animations */
+.animate-in {
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Shimmer effect for progress bar */
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

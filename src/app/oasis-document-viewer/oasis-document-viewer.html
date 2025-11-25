@@ -57,13 +57,12 @@
     <ng-content></ng-content>
 
     <!-- Audio Player Section -->
-    <div
-      id="audio-doc"
-      class="hidden"
-    >
+    <div id="audio-doc" class="hidden">
       <div class="bg-white rounded-xl border border-slate-200 p-8 max-w-2xl mx-auto">
         <div class="text-center mb-8">
-          <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div
+            class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
             <ion-icon name="mic" class="text-4xl text-indigo-600"></ion-icon>
           </div>
           <h3 class="text-lg font-semibold text-slate-800">Visit Recording</h3>
@@ -74,7 +73,9 @@
         <div class="flex flex-col items-center gap-6" *ngIf="audioUrl()">
           <!-- Progress Bar -->
           <div class="w-full flex items-center gap-4">
-            <span class="text-sm text-slate-600 font-medium w-12 text-right">{{ formatTime(audioCurrentTime()) }}</span>
+            <span class="text-sm text-slate-600 font-medium w-12 text-right">{{
+              formatTime(audioCurrentTime())
+            }}</span>
             <div
               (click)="seekAudio($event)"
               class="flex-1 h-2 bg-slate-200 rounded-full cursor-pointer hover:h-2.5 transition-all relative group"
@@ -88,7 +89,9 @@
                 [style.left.%]="getProgressPercent()"
               ></div>
             </div>
-            <span class="text-sm text-slate-600 font-medium w-12">{{ formatTime(audioDuration()) }}</span>
+            <span class="text-sm text-slate-600 font-medium w-12">{{
+              formatTime(audioDuration())
+            }}</span>
           </div>
 
           <!-- Playback Controls -->
@@ -135,6 +138,308 @@
           ></audio>
         </div>
 
+        <!-- Transcript Section -->
+        <div class="mt-8 border-t border-slate-200 pt-6" *ngIf="audioUrl()">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <ion-icon name="document-text-outline" class="text-lg text-indigo-600"></ion-icon>
+              Transcript
+            </h4>
+            <!-- Generate Visit Note Button - only visible when visit note is not available -->
+            <button
+              *ngIf="!isVisitNoteAvailable()"
+              (click)="startVisitNoteGeneration()"
+              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+            >
+              <!-- <ion-icon name="sparkles" class="text-base"></ion-icon> -->
+              <span>Generate Visit Note</span>
+            </button>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+            <div class="text-sm text-slate-600 leading-relaxed space-y-4">
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Good morning, Mr. Smith.
+                It's Maria from Riverside Home Care.
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> Oh, hello Maria. Come on
+                in. Sorry, it takes me a minute to get to the door these days.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Take your time, John. I
+                noticed you were holding onto the wall there. Do you have your walker nearby?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> It's... it's over there
+                by the recliner. I forget to use it sometimes inside the house.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> I see. We're going to talk
+                about that in a bit, but let's get you seated first so I can check your vitals.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Before we start, I just
+                need to verify your information for the system. Can you confirm your full name and
+                date of birth?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> Samuel... or, well, John
+                Smith. March 15th, 1945.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Thank you. And I see your
+                Medicare number here ends in 3847?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> That's the one... yes.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Great. Okay, I'm going to
+                put the blood pressure cuff on your arm. Just relax for me.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> ...Okay. John, your
+                pressure is high today. It's 158 over 92. Your pulse is 88, and it's skipping a beat
+                here and there. Have you been taking your Lisinopril every morning?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> To be honest, Maria... I
+                think I missed a day or two this week. Maybe Tuesday? I just... I forget sometimes.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Thank you for being honest
+                with me. But that medication is crucial to keep that number down. How about the
+                Metformin for your sugar?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> That one I take. Twice a
+                day, just like the bottle says.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> And the water pill? The
+                Furosemide?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> I take it, but look at my
+                legs, Maria. They're still swollen. It doesn't feel like it's working.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Let me take a look. I'm
+                going to roll your pant legs up.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Okay... I see you're
+                wearing two pairs of socks?
+              </p>
+              <!-- Lower Extremity Findings Evidence Block -->
+              <div
+                id="transcript-edema"
+                data-evidence-for="transcript-edema"
+                class="relative rounded-xl transition-all duration-300 p-4 my-4 bg-white border-2 border-slate-200 space-y-3"
+              >
+                <div
+                  class="absolute -top-3 left-4 bg-slate-100 px-2 py-0.5 rounded text-xs font-medium text-slate-500"
+                >
+                  Lower Extremity Assessment
+                </div>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> My feet are freezing.
+                  They always feel cold.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> I'm going to take these
+                  off gently. Your feet are very cold to the touch. I'm pressing on your ankle
+                  here...
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> Yeah, that indentation
+                  is staying there for a few seconds. That's
+                  <span class="bg-red-100 text-red-700 font-bold px-1 rounded"
+                    >+2 pitting edema</span
+                  >. The fluid isn't moving. John, I need to ask you about this right big toe. When
+                  did you notice this color change?
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> The toe? I don't know,
+                  maybe about a week ago? It hurts more at night. It just throbs. Keeps me up.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> John, this is serious.
+                  The toe is
+                  <span class="bg-red-100 text-red-700 font-bold px-1 rounded"
+                    >dusky—it looks almost bluish-black</span
+                  >. With your history of peripheral arterial disease and diabetes, this means the
+                  blood isn't getting there. This is an
+                  <span class="bg-red-100 text-red-700 font-bold px-1 rounded">urgent finding</span
+                  >.
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> Is it... is it bad?
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> It's concerning for
+                  <span class="bg-red-100 text-red-700 font-bold px-1 rounded">ischemia</span>. If
+                  we don't treat this, you are at risk for
+                  <span class="bg-red-100 text-red-700 font-bold px-1 rounded">necrosis</span>. I am
+                  going to call Dr. Ramirez's office immediately after we finish to get you an
+                  expedited appointment this week. We cannot wait for your scheduled visit next
+                  month.
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> Okay. I didn't realize.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> While I'm down here, let
+                  me check that wound on your ankle.
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> That one opened up more
+                  about two days ago.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> Yes, it's definitely
+                  larger. It's draining clear fluid, mostly because of the swelling. No smell, which
+                  is good, but it's deteriorating.
+                </p>
+              </div>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Let's talk about your
+                breathing. You sounded a bit winded just walking from the door.
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> The stairs are the worst.
+                I have to stop halfway up. And my chest feels tight if I do too much.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> And sleeping? I see three
+                pillows on the bed.
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> Yeah. If I lay flat, I
+                feel like I'm drowning. I need the pillows to breathe.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> That's called orthopnea.
+                Combined with the swelling, it tells me you might be retaining too much fluid. I'm
+                noting all of this for the doctor.
+              </p>
+              <!-- Hearing Assessment Evidence Block -->
+              <div
+                id="transcript-hearing"
+                data-evidence-for="transcript-hearing"
+                class="relative rounded-xl transition-all duration-300 p-4 my-4 bg-white border-2 border-slate-200 space-y-3"
+              >
+                <div
+                  class="absolute -top-3 left-4 bg-slate-100 px-2 py-0.5 rounded text-xs font-medium text-slate-500"
+                >
+                  Hearing Assessment
+                </div>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> John, I need to ask you
+                  about your hearing. I've noticed I've had to
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >repeat myself a few times</span
+                  >
+                  today.
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> What's that? ...Oh,
+                  sorry. Yes, my hearing has
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >gotten worse lately</span
+                  >. Especially in this ear.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> (Speaking louder) Do you
+                  have hearing aids, John?
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span> I have them somewhere...
+                  in the drawer I think. But they
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >hurt my ears</span
+                  >
+                  so I don't wear them much.
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> I see. When I'm speaking
+                  at
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >normal volume</span
+                  >, can you hear me clearly?
+                </p>
+                <p>
+                  <span class="font-semibold text-slate-800">Patient:</span>
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >Not really</span
+                  >. It sounds muffled. Can you speak up?
+                </p>
+                <p>
+                  <span class="font-semibold text-indigo-600">Nurse:</span> (Speaking louder) That's
+                  important to note. Your
+                  <span class="bg-amber-100 text-amber-700 font-bold px-1 rounded"
+                    >hearing difficulty</span
+                  >
+                  could affect your ability to hear alarms, doorbells, or phone calls. I'm going to
+                  document this.
+                </p>
+              </div>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Now, about your safety...
+                you told me last time you almost fell in the bathroom?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> I grabbed the towel bar.
+                I was okay.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> John, a towel bar will rip
+                right out of the wall. You are at a high fall risk. I'm putting in a referral for
+                Physical Therapy. They can help you with gait training and safe mobility so you
+                don't fall.
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> I guess that's a good
+                idea.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> And food? What have you
+                eaten today?
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> Just toast and coffee.
+                I'm not really hungry. Jennifer brings me those microwave meals twice a week.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> We need to get your
+                nutrition up to help that ankle heal. I'm going to have a Dietitian call you within
+                24 hours.
+              </p>
+              <p><span class="font-semibold text-slate-800">Patient:</span> Okay.</p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> Alright, here is the plan.
+                One: I am calling Dr. Ramirez about your toe immediately. Two: I'm increasing my
+                visits to three times a week. I'll be back Friday at 10:00 AM. Three: Please take
+                your Lisinopril today.
+              </p>
+              <p><span class="font-semibold text-slate-800">Patient:</span> I will.</p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> I'm leaving these written
+                instructions on the table. John, listen carefully: If that toe turns black, or you
+                have chest pain or severe shortness of breath, you call 911. Do not wait.
+              </p>
+              <p>
+                <span class="font-semibold text-slate-800">Patient:</span> I understand. Thank you,
+                Maria.
+              </p>
+              <p>
+                <span class="font-semibold text-indigo-600">Nurse:</span> You're welcome. Please use
+                that walker when you get up to lock the door behind me. Have a good day!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- No Audio Available -->
         <div *ngIf="!audioUrl()" class="text-center py-8">
           <ion-icon name="volume-mute-outline" class="text-5xl text-slate-300 mb-3"></ion-icon>
@@ -144,3 +449,123 @@
     </div>
   </div>
 </main>
+
+<!-- Visit Note Generation Modal Overlay -->
+<div
+  *ngIf="isGeneratingVisitNote()"
+  class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center"
+>
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform animate-in">
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <div
+        class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+      >
+        <ion-icon name="document-text" class="text-3xl text-white"></ion-icon>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900">Generating Visit Note</h3>
+      <p class="text-sm text-slate-500 mt-1">
+        AI is analyzing the transcript to create a comprehensive visit note
+      </p>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="mb-6">
+      <!-- Progress Bar -->
+      <div class="relative h-3 bg-slate-100 rounded-full overflow-hidden mb-3">
+        <div
+          class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out"
+          [style.width.%]="generationProgress()"
+        ></div>
+        <!-- Shimmer effect -->
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+        ></div>
+      </div>
+
+      <!-- Progress Text -->
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-600 font-medium">{{ generationStatus() }}</span>
+        <span class="text-indigo-600 font-bold">{{ generationProgress() }}%</span>
+      </div>
+    </div>
+
+    <!-- Processing Steps Animation -->
+    <div class="bg-slate-50 rounded-xl p-4 mb-6">
+      <div class="space-y-3">
+        <div class="flex items-center gap-3" [class.opacity-50]="generationProgress() < 15">
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center"
+            [class]="
+              generationProgress() >= 15
+                ? 'bg-emerald-100 text-emerald-600'
+                : 'bg-slate-200 text-slate-400'
+            "
+          >
+            <ion-icon
+              [name]="generationProgress() >= 15 ? 'checkmark' : 'ellipsis-horizontal'"
+              class="text-sm"
+            ></ion-icon>
+          </div>
+          <span class="text-sm text-slate-700">Extract patient information</span>
+        </div>
+        <div class="flex items-center gap-3" [class.opacity-50]="generationProgress() < 45">
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center"
+            [class]="
+              generationProgress() >= 45
+                ? 'bg-emerald-100 text-emerald-600'
+                : 'bg-slate-200 text-slate-400'
+            "
+          >
+            <ion-icon
+              [name]="generationProgress() >= 45 ? 'checkmark' : 'ellipsis-horizontal'"
+              class="text-sm"
+            ></ion-icon>
+          </div>
+          <span class="text-sm text-slate-700">Identify clinical findings</span>
+        </div>
+        <div class="flex items-center gap-3" [class.opacity-50]="generationProgress() < 75">
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center"
+            [class]="
+              generationProgress() >= 75
+                ? 'bg-emerald-100 text-emerald-600'
+                : 'bg-slate-200 text-slate-400'
+            "
+          >
+            <ion-icon
+              [name]="generationProgress() >= 75 ? 'checkmark' : 'ellipsis-horizontal'"
+              class="text-sm"
+            ></ion-icon>
+          </div>
+          <span class="text-sm text-slate-700">Generate care plan</span>
+        </div>
+        <div class="flex items-center gap-3" [class.opacity-50]="generationProgress() < 100">
+          <div
+            class="w-6 h-6 rounded-full flex items-center justify-center"
+            [class]="
+              generationProgress() >= 100
+                ? 'bg-emerald-100 text-emerald-600'
+                : 'bg-slate-200 text-slate-400'
+            "
+          >
+            <ion-icon
+              [name]="generationProgress() >= 100 ? 'checkmark' : 'ellipsis-horizontal'"
+              class="text-sm"
+            ></ion-icon>
+          </div>
+          <span class="text-sm text-slate-700">Format visit note</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Button -->
+    <button
+      (click)="cancelVisitNoteGeneration()"
+      class="w-full py-2.5 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+    >
+      Cancel
+    </button>
+  </div>
+</div>

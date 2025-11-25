@@ -382,6 +382,7 @@ export class PatientSummaryComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('visitNoteFileInput') visitNoteFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('visitRecordingFileInput') visitRecordingFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
 
   isAudioPlaying = signal(false);
@@ -455,6 +456,12 @@ export class PatientSummaryComponent implements OnInit {
   triggerVisitNoteUpload(): void {
     if (this.visitNoteFileInput) {
       this.visitNoteFileInput.nativeElement.click();
+    }
+  }
+
+  triggerVisitRecordingUpload(): void {
+    if (this.visitRecordingFileInput) {
+      this.visitRecordingFileInput.nativeElement.click();
     }
   }
 
@@ -602,6 +609,23 @@ export class PatientSummaryComponent implements OnInit {
     this.startAIProcessing();
   }
 
+  onVisitRecordingFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // Mark the visit recording as uploaded in the shared service
+    this.documentStateService.markDocumentAsUploaded('doc8', file.name);
+
+    // Reset input so selecting same file again still triggers change
+    input.value = '';
+
+    this.startAIProcessing();
+  }
+
   private buildMockSummary(id: string): PatientSummary {
     // You can switch over id later if you want per-patient mock data
     return {
@@ -691,15 +715,29 @@ export class PatientSummaryComponent implements OnInit {
           uploaded: false,
           missingReason: 'External provider delays',
         },
-        {
-          id: 'doc8',
-          type: 'Audio',
-          displayLabel: 'Visit Recording',
-          uploaded: true,
-          uploadedAt: '2024-10-03 2:30 PM',
-          fileName: 'johnSmith_Nurse_Visit.mp3',
-          audioUrl: '/johnSmith_Nurse_Visit.mp3',
-        },
+        // Check if visit recording was uploaded
+        (() => {
+          const docStatus = this.documentStateService.getDocumentStatus('doc8');
+          if (docStatus) {
+            return {
+              id: 'doc8',
+              type: 'Audio' as const,
+              displayLabel: 'Visit Recording',
+              uploaded: true,
+              uploadedAt: docStatus.uploadedAt,
+              fileName: docStatus.fileName,
+              audioUrl: '/johnSmith_Nurse_Visit.mp3',
+            };
+          }
+          return {
+            id: 'doc8',
+            type: 'Audio' as const,
+            displayLabel: 'Visit Recording',
+            uploaded: false,
+            missingReason: 'Pending upload',
+            fileName: 'visit_recording.mp3',
+          };
+        })(),
       ],
       payment: {
         hippsCode: '2CB21',

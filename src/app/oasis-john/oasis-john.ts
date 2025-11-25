@@ -53,6 +53,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     doc1: 'discharge-doc' as const,
     doc2: 'referral-doc' as const,
     doc5: 'visit-doc' as const,
+    doc8: 'audio-doc' as const,
   };
 
   @ViewChild(OasisFormComponent) oasisFormComponent!: OasisFormComponent;
@@ -67,14 +68,30 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   isSavingAssessment = signal(false);
   hasBeenSaved = signal(false); // Track if assessment has been saved
   selectedAlertId = signal<string | null>(null);
-  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc'>('referral-doc'); // Default to referral since it's the only one uploaded initially
+  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc'>('referral-doc'); // Default to referral since it's the only one uploaded initially
   highlightEvidence = signal<EvidenceHighlight | null>(null);
 
   // Computed from OasisStateService
   itemsAccepted = computed(() => this.oasisStateService.form().itemsAccepted);
   availableDocs = computed(() => {
-    const docs = this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc')[];
-    return new Set([...docs, 'audio-doc'] as const);
+    const docs = this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc')[];
+    // Only include audio-doc if the visit recording has been uploaded
+    const audioUploaded = this.documentStateService.getDocumentStatus('doc8');
+    if (audioUploaded) {
+      return new Set([...docs, 'audio-doc'] as const);
+    }
+    return new Set(docs);
+  });
+
+  // Audio URL - only available if visit recording was uploaded
+  audioUrl = computed(() => {
+    const audioUploaded = this.documentStateService.getDocumentStatus('doc8');
+    return audioUploaded ? '/johnSmith_Nurse_Visit.mp3' : null;
+  });
+
+  // Visit Note availability - check if doc5 (visit note) is uploaded
+  isVisitNoteAvailable = computed(() => {
+    return !!this.documentStateService.getDocumentStatus('doc5');
   });
 
   // Track collapsed form sections
@@ -308,13 +325,27 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       type: 'inconsistency',
       severity: 'medium',
       status: 'new',
-      title: 'Lower extremity findings in visit note not reflected in OASIS',
+      title: 'Lower extremity findings in visit recording not reflected in OASIS',
       description:
-        'Visit note documents +2 pitting edema, cool feet, faint pedal pulses, dark discoloration of the right great toe, and pain with walking relieved by rest. The current OASIS submission does not show any active wound, ulcer, or lower extremity perfusion issue. Please double-check for consistency.',
-      evidenceDocId: 'visit-doc',
-      evidenceAnchorId: 'analyzer-toe',
+        'Visit recording documents +2 pitting edema, cool feet, faint pedal pulses, dark discoloration of the right great toe, and pain with walking relieved by rest. The current OASIS submission does not show any active wound, ulcer, or lower extremity perfusion issue. Please review the transcript and update the OASIS form.',
+      evidenceDocId: 'audio-doc',
+      evidenceAnchorId: 'transcript-edema',
       relatedOasisItem: 'Skin/ulcers or vascular status',
-      linkedRecommendationId: undefined,
+      oasisFormFieldId: 'form-I8000-other-diagnoses-container',
+      linkedRecommendationId: 'rec-pad',
+    },
+    {
+      id: 'alert-hearing-inconsistent',
+      type: 'inconsistency',
+      severity: 'medium',
+      status: 'new',
+      title: 'Hearing impairment documented in visit but not captured in OASIS',
+      description:
+        'Visit recording indicates patient has difficulty hearing, requiring nurse to speak louder and repeat questions multiple times. Patient states hearing has "gotten worse" and mentions not wearing hearing aids. This functional limitation is not currently documented in the OASIS assessment.',
+      evidenceDocId: 'audio-doc',
+      evidenceAnchorId: 'transcript-hearing',
+      relatedOasisItem: 'Sensory Status / B1000',
+      oasisFormFieldId: 'form-I8000-other-diagnoses-container',
     },
   ]);
 
@@ -369,7 +400,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
    * Check which documents are available (uploaded) and update the availableDocs signal
    */
   private initializeAvailableDocuments(): void {
-    const available = new Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>();
+    const available = new Set<'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc'>();
 
     // Check each document using the DocumentStateService
     Object.entries(this.DOC_MAPPING).forEach(([patientSummaryDocId, oasisDocId]) => {
@@ -507,6 +538,43 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
   navigateToPatientList(): void {
     this.router.navigate(['/patients']);
+  }
+
+  handleVisitNoteGenerated(): void {
+    // Mark the visit note as uploaded in the document state service
+    this.documentStateService.markDocumentAsUploaded('doc5', 'AI_Generated_Visit_Note.pdf');
+
+    // Update available docs to include visit-doc
+    this.oasisStateService.addAvailableDocument('visit-doc');
+
+    // Show a success notification
+    this.showNotification('Visit Note generated successfully!', 'success');
+
+    // Optionally switch to the visit note tab
+    setTimeout(() => {
+      this.activeDocId.set('visit-doc');
+    }, 500);
+  }
+
+  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transition-all transform ${
+      type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
+    }`;
+    notification.innerHTML = `
+      <div class="flex items-center gap-2">
+        <ion-icon name="${type === 'success' ? 'checkmark-circle' : 'alert-circle'}" class="text-xl"></ion-icon>
+        <span>${message}</span>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(20px)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 
   handleQuickEligibilityCheck(event: Event): void {
@@ -1379,13 +1447,52 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
           setTimeout(() => {
             el.classList.remove('evidence-alert-highlight');
             console.log('✨ Animation complete');
+
+            // After showing evidence, highlight the OASIS form field
+            if (data.alert.oasisFormFieldId) {
+              this.highlightOasisFormField(data.alert.oasisFormFieldId);
+            }
           }, 2000);
         } else {
           console.warn('⚠️ Evidence element not found for anchor:', data.alert.evidenceAnchorId);
+          // Still try to highlight the form field even if evidence not found
+          if (data.alert.oasisFormFieldId) {
+            this.highlightOasisFormField(data.alert.oasisFormFieldId);
+          }
         }
       }, 100); // Small delay to allow tab switch animation to complete
     } else {
       console.log('ℹ️ Alert has no evidenceAnchorId');
+      // If no evidence anchor, directly highlight the form field
+      if (data.alert.oasisFormFieldId) {
+        setTimeout(() => {
+          this.highlightOasisFormField(data.alert.oasisFormFieldId!);
+        }, 500);
+      }
+    }
+  }
+
+  /**
+   * Highlight and scroll to an OASIS form field
+   */
+  private highlightOasisFormField(formFieldId: string): void {
+    console.log('📝 Highlighting OASIS form field:', formFieldId);
+
+    const formField = document.getElementById(formFieldId);
+    if (formField) {
+      // Scroll to the form field
+      formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Add highlight animation
+      formField.classList.add('form-field-alert-highlight');
+
+      // Remove highlight after animation
+      setTimeout(() => {
+        formField.classList.remove('form-field-alert-highlight');
+        console.log('✨ Form field highlight complete');
+      }, 3000);
+    } else {
+      console.warn('⚠️ OASIS form field not found:', formFieldId);
     }
   }
 
