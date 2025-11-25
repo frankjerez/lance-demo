@@ -13,6 +13,8 @@
     [showAnalyzer]="showAnalyzer()"
     [isSavingAssessment]="isSavingAssessment()"
     (onBackToDashboard)="handleBackToDashboard()"
+    (onPatientClick)="navigateToPatientSummary()"
+    (onLogoClick)="navigateToPatientList()"
     (onQuickEligibilityCheck)="handleQuickEligibilityCheck($event)"
     (onToggleAnalyzer)="handleToggleAnalyzer()"
     (onOpenAnalyzer)="openAnalyzerOverlay()"
@@ -43,6 +45,7 @@
       [activeDocId]="activeDocId()"
       [highlightEvidence]="highlightEvidence()"
       [availableDocs]="availableDocs()"
+      [audioUrl]="'/johnSmith_Nurse_Visit.mp3'"
     >
       <!--
         NOTE: Insert the document content here from the original oasis-john.html
@@ -4252,7 +4255,7 @@
             <div class="space-y-2 text-xs">
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Items Completed:</span>
-                <span id="summary-items-completed" class="font-bold text-slate-900">0 / 89</span>
+                <span id="summary-items-completed" class="font-bold text-slate-900">{{ itemsAccepted() }} / {{ totalItems() }}</span>
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">PDGM Clinical Group:</span>
@@ -4260,16 +4263,16 @@
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Comorbidity Tier:</span>
-                <span id="summary-comorbidity-tier" class="font-bold text-slate-900">None</span>
+                <span id="summary-comorbidity-tier" class="font-bold text-slate-900">{{ comorbidityTier() }}</span>
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Functional Level:</span>
-                <span class="font-bold text-slate-900">Low</span>
+                <span class="font-bold text-slate-900">{{ functionalLevel() }}</span>
               </div>
               <div class="flex justify-between pt-2 mt-2 border-t-2 border-emerald-400">
                 <span class="text-slate-700 font-bold">30-Day Payment Estimate:</span>
                 <span id="payment-estimate" class="font-bold text-xl text-emerald-600"
-                  >$2,875.50</span
+                  >{{ currentPayment() | currency:'USD':'symbol':'1.2-2' }}</span
                 >
               </div>
               <p class="text-[10px] text-slate-500 italic mt-2">

@@ -35,7 +35,7 @@ export interface PDGMPaymentBreakdown {
   hippsCode: string;
   baseRate: number;
   comorbidityAdjustment: number;
-  functionalLevelAdjustment: number;
+  // functionalLevelAdjustment: number;  // Commented out
   lutsAdjustment: number;
   totalPayment: number;
 }
@@ -127,14 +127,15 @@ export const myPatientSummary: PatientSummary = {
       uploaded: false,
       missingReason: 'Clinician did not complete documentation',
     },
-    {
-      id: 'doc6',
-      type: 'H&P',
-      displayLabel: 'History & Physical',
-      uploaded: true,
-      uploadedAt: '2024-10-02 9:50 AM',
-      fileName: 'hp.pdf',
-    },
+    // History & Physical - Commented out
+    // {
+    //   id: 'doc6',
+    //   type: 'H&P',
+    //   displayLabel: 'History & Physical',
+    //   uploaded: true,
+    //   uploadedAt: '2024-10-02 9:50 AM',
+    //   fileName: 'hp.pdf',
+    // },
     {
       id: 'doc7',
       type: 'Labs',
@@ -148,7 +149,7 @@ export const myPatientSummary: PatientSummary = {
     hippsCode: '2CB21',
     baseRate: 2753.5,
     comorbidityAdjustment: 0, // Will increase by +$287 when high comorbidity is added
-    functionalLevelAdjustment: 122.0,
+    // functionalLevelAdjustment: 122.0,  // Commented out
     lutsAdjustment: 0,
     totalPayment: 2875.5, // Matches initial oasis-john component payment
   },

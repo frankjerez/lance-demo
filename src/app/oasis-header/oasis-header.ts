@@ -23,6 +23,8 @@ export class OasisHeaderComponent {
 
   // Outputs to parent
   onBackToDashboard = output<void>();
+  onPatientClick = output<void>();
+  onLogoClick = output<void>();
   onQuickEligibilityCheck = output<Event>();
   onToggleAnalyzer = output<void>();
   onOpenAnalyzer = output<void>();
@@ -33,6 +35,14 @@ export class OasisHeaderComponent {
 
   handleBackClick(): void {
     this.onBackToDashboard.emit();
+  }
+
+  handlePatientClick(): void {
+    this.onPatientClick.emit();
+  }
+
+  handleLogoClick(): void {
+    this.onLogoClick.emit();
   }
 
   handleEligibilityClick(event: Event): void {

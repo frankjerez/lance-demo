@@ -33,6 +33,16 @@
             class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           ></ion-icon>
         </div>
+
+        <div class="w-px h-8 bg-slate-200"></div>
+
+        <button
+          (click)="logout()"
+          class="flex items-center space-x-2 px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          <ion-icon name="log-out-outline" class="text-lg"></ion-icon>
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   </header>

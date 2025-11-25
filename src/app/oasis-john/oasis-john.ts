@@ -61,6 +61,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   // Signals for shared state
   totalItems = signal(89);
   currentPayment = signal(2875.5);
+  comorbidityTier = signal('None');
+  functionalLevel = signal('Low');
   showAnalyzer = signal(false);
   isSavingAssessment = signal(false);
   hasBeenSaved = signal(false); // Track if assessment has been saved
@@ -70,7 +72,10 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
   // Computed from OasisStateService
   itemsAccepted = computed(() => this.oasisStateService.form().itemsAccepted);
-  availableDocs = computed(() => new Set(this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc')[]));
+  availableDocs = computed(() => {
+    const docs = this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc')[];
+    return new Set([...docs, 'audio-doc'] as const);
+  });
 
   // Track collapsed form sections
   collapsedSections = signal<Set<string>>(new Set());
@@ -494,6 +499,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
   handleBackToDashboard(): void {
     this.router.navigate(['/patients', 'p1', 'summary']);
+  }
+
+  navigateToPatientSummary(): void {
+    this.router.navigate(['/patients', 'p1', 'summary']);
+  }
+
+  navigateToPatientList(): void {
+    this.router.navigate(['/patients']);
   }
 
   handleQuickEligibilityCheck(event: Event): void {
@@ -1078,9 +1091,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // Update Summary Card comorbidity tier if needed
       if (recommendation.oasisTargetId === 'I8000-comorbidity') {
+        this.comorbidityTier.set('High');
         const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
         if (summaryComorbidityEl) {
-          summaryComorbidityEl.innerText = 'High';
           summaryComorbidityEl.classList.add('form-field-highlight');
           setTimeout(() => summaryComorbidityEl.classList.remove('form-field-highlight'), 1500);
         }
@@ -1300,10 +1313,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // If it was comorbidity recommendation, reset tier display
       if (recommendation.oasisTargetId === 'I8000-comorbidity') {
-        const summaryComorbidityEl = document.getElementById('summary-comorbidity-tier');
-        if (summaryComorbidityEl) {
-          summaryComorbidityEl.innerText = 'None';
-        }
+        this.comorbidityTier.set('None');
       }
     }
 

@@ -675,14 +675,15 @@ export class PatientSummaryComponent implements OnInit {
             fileName: 'visit_note.pdf',
           };
         })(),
-        {
-          id: 'doc6',
-          type: 'H&P',
-          displayLabel: 'History & Physical',
-          uploaded: true,
-          uploadedAt: '2024-10-02 9:50 AM',
-          fileName: 'hp.pdf',
-        },
+        // History & Physical - Commented out
+        // {
+        //   id: 'doc6',
+        //   type: 'H&P',
+        //   displayLabel: 'History & Physical',
+        //   uploaded: true,
+        //   uploadedAt: '2024-10-02 9:50 AM',
+        //   fileName: 'hp.pdf',
+        // },
         {
           id: 'doc7',
           type: 'Labs',
@@ -704,7 +705,7 @@ export class PatientSummaryComponent implements OnInit {
         hippsCode: '2CB21',
         baseRate: 2753.5,
         comorbidityAdjustment: this.paymentStateService.payment().comorbidityAdjustment,
-        functionalLevelAdjustment: 122.0,
+        // functionalLevelAdjustment: 122.0,  // Commented out
         lutsAdjustment: 0,
         totalPayment: this.paymentStateService.payment().totalPayment,
       },

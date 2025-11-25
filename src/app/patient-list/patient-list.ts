@@ -3,6 +3,10 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, computed, signal } f
 
 import { Router } from '@angular/router';
 import { PatientListItem, myPatients } from './data/patient-list-data';
+import { OasisStateService } from '../services/oasis-state.service';
+import { DocumentStateService } from '../services/document-state.service';
+import { PaymentStateService } from '../services/payment-state.service';
+import { RecommendationStateService } from '../services/recommendation-state.service';
 
 @Component({
   selector: 'app-patient-list',
@@ -13,6 +17,10 @@ import { PatientListItem, myPatients } from './data/patient-list-data';
 })
 export class PatientListComponent implements OnInit {
   public router = inject(Router);
+  private oasisStateService = inject(OasisStateService);
+  private documentStateService = inject(DocumentStateService);
+  private paymentStateService = inject(PaymentStateService);
+  private recommendationStateService = inject(RecommendationStateService);
 
   // All patients
   allPatients = signal<PatientListItem[]>(myPatients);
@@ -438,5 +446,18 @@ export class PatientListComponent implements OnInit {
     setTimeout(() => {
       notification.remove();
     }, 4000);
+  }
+
+  // ======= logout =======
+
+  logout(): void {
+    // Reset all application state
+    this.oasisStateService.resetAll();
+    this.documentStateService.resetDocuments();
+    this.paymentStateService.resetPayment();
+    this.recommendationStateService.resetRecommendations();
+
+    // Navigate to login
+    this.router.navigate(['/login']);
   }
 }

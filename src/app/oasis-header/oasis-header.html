@@ -11,13 +11,19 @@
         <ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon>
       </button>
       <div class="flex items-center space-x-3">
-        <div class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+        <div
+          (click)="handleLogoClick()"
+          class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded cursor-pointer hover:bg-indigo-100 transition-colors"
+        >
           LANCE AI
         </div>
         <div class="w-px h-8 bg-slate-200"></div>
         <div>
           <div class="flex items-center space-x-2">
-            <h1 class="text-base font-semibold text-slate-900">{{ patientName() }}</h1>
+            <h1
+              (click)="handlePatientClick()"
+              class="text-base font-semibold text-slate-900 hover:text-indigo-600 cursor-pointer transition-colors"
+            >{{ patientName() }}</h1>
             <button
               (click)="handleEligibilityClick($event)"
               class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"

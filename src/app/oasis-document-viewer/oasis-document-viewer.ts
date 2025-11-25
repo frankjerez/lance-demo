@@ -8,10 +8,13 @@ import {
   ViewChild,
   effect,
   AfterContentInit,
+  signal,
 } from '@angular/core';
 
+export type DocumentTabId = 'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc';
+
 export interface DocumentTab {
-  id: 'discharge-doc' | 'referral-doc' | 'visit-doc';
+  id: DocumentTabId;
   label: string;
   active: boolean;
 }
@@ -30,26 +33,34 @@ export interface EvidenceHighlight {
 })
 export class OasisDocumentViewerComponent implements AfterContentInit {
   @ViewChild('documentViewer', { static: false }) documentViewerRef!: ElementRef;
+  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+
+  // Audio player state
+  isAudioPlaying = signal(false);
+  audioCurrentTime = signal(0);
+  audioDuration = signal(0);
 
   // Inputs from parent
-  activeDocId = input<'discharge-doc' | 'referral-doc' | 'visit-doc'>('discharge-doc');
+  activeDocId = input<DocumentTabId>('discharge-doc');
+  audioUrl = input<string | null>(null);
   highlightEvidence = input<EvidenceHighlight | null>(null);
-  availableDocs = input<Set<'discharge-doc' | 'referral-doc' | 'visit-doc'>>(
-    new Set(['discharge-doc', 'referral-doc', 'visit-doc'])
+  availableDocs = input<Set<DocumentTabId>>(
+    new Set(['discharge-doc', 'referral-doc', 'visit-doc', 'audio-doc'])
   );
 
   // Outputs to parent
-  onTabChange = output<'discharge-doc' | 'referral-doc' | 'visit-doc'>();
+  onTabChange = output<DocumentTabId>();
 
   private allTabs: DocumentTab[] = [
     { id: 'discharge-doc', label: 'Discharge Summary', active: true },
     { id: 'referral-doc', label: 'Referral/Orders', active: false },
     { id: 'visit-doc', label: 'Visit Note', active: false },
+    { id: 'audio-doc', label: 'Visit Recording', active: false },
   ];
 
   tabs: DocumentTab[] = [];
 
-  activeTabId: 'discharge-doc' | 'referral-doc' | 'visit-doc' = 'discharge-doc';
+  activeTabId: DocumentTabId = 'discharge-doc';
   private contentInitialized = false;
 
   constructor() {
@@ -85,12 +96,12 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
     }, 0);
   }
 
-  switchTab(tabId: 'discharge-doc' | 'referral-doc' | 'visit-doc'): void {
+  switchTab(tabId: DocumentTabId): void {
     this.activeTabId = tabId;
     this.tabs.forEach((tab) => (tab.active = tab.id === tabId));
 
     // Show/hide document sections
-    const allDocs = ['discharge-doc', 'referral-doc', 'visit-doc'];
+    const allDocs: DocumentTabId[] = ['discharge-doc', 'referral-doc', 'visit-doc', 'audio-doc'];
     allDocs.forEach((docId) => {
       const docElement = document.getElementById(docId);
       if (docElement) {
@@ -105,7 +116,7 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
     this.onTabChange.emit(tabId);
   }
 
-  handleTabClick(tabId: 'discharge-doc' | 'referral-doc' | 'visit-doc'): void {
+  handleTabClick(tabId: DocumentTabId): void {
     this.switchTab(tabId);
   }
 
@@ -205,5 +216,64 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
     highlighted.forEach((el) => {
       el.outerHTML = el.innerHTML;
     });
+  }
+
+  // Audio player methods
+  toggleAudioPlayback(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play();
+      this.isAudioPlaying.set(true);
+    } else {
+      audio.pause();
+      this.isAudioPlaying.set(false);
+    }
+  }
+
+  skipAudio(seconds: number): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
+  }
+
+  onAudioEnded(): void {
+    this.isAudioPlaying.set(false);
+  }
+
+  onAudioTimeUpdate(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    this.audioCurrentTime.set(audio.currentTime);
+  }
+
+  onAudioLoadedMetadata(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    this.audioDuration.set(audio.duration);
+  }
+
+  seekAudio(event: MouseEvent): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio || !audio.duration) return;
+
+    const progressBar = event.currentTarget as HTMLElement;
+    const rect = progressBar.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+  }
+
+  formatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  getProgressPercent(): number {
+    const duration = this.audioDuration();
+    if (!duration) return 0;
+    return (this.audioCurrentTime() / duration) * 100;
   }
 }
