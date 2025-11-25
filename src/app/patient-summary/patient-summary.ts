@@ -382,6 +382,69 @@ export class PatientSummaryComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('visitNoteFileInput') visitNoteFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+
+  isAudioPlaying = signal(false);
+  audioCurrentTime = signal(0);
+  audioDuration = signal(0);
+
+  toggleAudioPlayback(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play();
+      this.isAudioPlaying.set(true);
+    } else {
+      audio.pause();
+      this.isAudioPlaying.set(false);
+    }
+  }
+
+  skipAudio(seconds: number): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds));
+  }
+
+  onAudioEnded(): void {
+    this.isAudioPlaying.set(false);
+  }
+
+  onAudioTimeUpdate(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    this.audioCurrentTime.set(audio.currentTime);
+  }
+
+  onAudioLoadedMetadata(): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio) return;
+    this.audioDuration.set(audio.duration);
+  }
+
+  seekAudio(event: MouseEvent): void {
+    const audio = this.audioPlayer?.nativeElement;
+    if (!audio || !audio.duration) return;
+
+    const progressBar = event.currentTarget as HTMLElement;
+    const rect = progressBar.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+  }
+
+  formatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  getProgressPercent(): number {
+    const duration = this.audioDuration();
+    if (!duration) return 0;
+    return (this.audioCurrentTime() / duration) * 100;
+  }
 
   triggerFileUpload(): void {
     if (this.fileInput) {

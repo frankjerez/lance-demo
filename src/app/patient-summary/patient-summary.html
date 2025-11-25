@@ -332,16 +332,68 @@
                   <ion-icon name="eye-outline" class="text-base"></ion-icon>
                   <span>View</span>
                 </button>
-                <!-- Audio Player for Visit Recording -->
-                <audio
+                <!-- Custom Audio Player for Visit Recording -->
+                <div
                   *ngIf="doc.uploaded && doc.type === 'Audio' && doc.audioUrl"
-                  controls
-                  class="h-8 w-48"
+                  class="flex items-center gap-2"
                   (click)="$event.stopPropagation()"
                 >
-                  <source [src]="doc.audioUrl" type="audio/mpeg" />
-                  Your browser does not support the audio element.
-                </audio>
+                  <!-- Rewind 10s -->
+                  <button
+                    type="button"
+                    (click)="skipAudio(-10)"
+                    class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition-colors"
+                    title="Rewind 10 seconds"
+                  >
+                    <ion-icon name="play-back" class="text-xs"></ion-icon>
+                  </button>
+
+                  <!-- Play/Pause -->
+                  <button
+                    type="button"
+                    (click)="toggleAudioPlayback()"
+                    class="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+                    title="{{ isAudioPlaying() ? 'Pause' : 'Play' }}"
+                  >
+                    <ion-icon [name]="isAudioPlaying() ? 'pause' : 'play'" class="text-base"></ion-icon>
+                  </button>
+
+                  <!-- Fast Forward 10s -->
+                  <button
+                    type="button"
+                    (click)="skipAudio(10)"
+                    class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 transition-colors"
+                    title="Forward 10 seconds"
+                  >
+                    <ion-icon name="play-forward" class="text-xs"></ion-icon>
+                  </button>
+
+                  <!-- Progress Bar & Time -->
+                  <div class="flex items-center gap-2 ml-1">
+                    <span class="text-[0.6rem] text-slate-500 w-8 text-right">{{ formatTime(audioCurrentTime()) }}</span>
+                    <div
+                      (click)="seekAudio($event)"
+                      class="w-24 h-1.5 bg-slate-200 rounded-full cursor-pointer hover:h-2 transition-all"
+                    >
+                      <div
+                        class="h-full bg-indigo-600 rounded-full transition-all"
+                        [style.width.%]="getProgressPercent()"
+                      ></div>
+                    </div>
+                    <span class="text-[0.6rem] text-slate-500 w-8">{{ formatTime(audioDuration()) }}</span>
+                  </div>
+
+                  <!-- Hidden audio element -->
+                  <audio
+                    #audioPlayer
+                    (ended)="onAudioEnded()"
+                    (timeupdate)="onAudioTimeUpdate()"
+                    (loadedmetadata)="onAudioLoadedMetadata()"
+                    class="hidden"
+                  >
+                    <source [src]="doc.audioUrl" type="audio/mpeg" />
+                  </audio>
+                </div>
                 <button
                   *ngIf="!doc.uploaded"
                   type="button"
