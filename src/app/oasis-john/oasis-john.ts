@@ -68,13 +68,20 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   isSavingAssessment = signal(false);
   hasBeenSaved = signal(false); // Track if assessment has been saved
   selectedAlertId = signal<string | null>(null);
-  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc'>('referral-doc'); // Default to referral since it's the only one uploaded initially
+  activeDocId = signal<'discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc'>(
+    'referral-doc'
+  ); // Default to referral since it's the only one uploaded initially
   highlightEvidence = signal<EvidenceHighlight | null>(null);
 
   // Computed from OasisStateService
   itemsAccepted = computed(() => this.oasisStateService.form().itemsAccepted);
   availableDocs = computed(() => {
-    const docs = this.oasisStateService.documents() as ('discharge-doc' | 'referral-doc' | 'visit-doc' | 'audio-doc')[];
+    const docs = this.oasisStateService.documents() as (
+      | 'discharge-doc'
+      | 'referral-doc'
+      | 'visit-doc'
+      | 'audio-doc'
+    )[];
     // Only include audio-doc if the visit recording has been uploaded
     const audioUploaded = this.documentStateService.getDocumentStatus('doc8');
     if (audioUploaded) {
@@ -304,37 +311,6 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   // Analyzer alerts state
   private allAnalyzerAlerts = signal<AnalyzerAlert[]>([
     {
-      id: 'alert-aspiration-missed',
-      type: 'coding_opportunity',
-      severity: 'high',
-      status: 'new',
-      title: 'Aspiration pneumonia documented but not present in OASIS I8000',
-      description:
-        'Discharge Summary documents aspiration pneumonia (J69.0). This diagnosis is not currently captured in I8000 comorbidity fields. Please double-check whether this was intentionally excluded.',
-      evidenceDocId: 'discharge-doc',
-      evidenceAnchorId: 'I8000-aspiration',
-      relatedOasisItem: 'I8000-comorbidity',
-      hippsImpact: {
-        delta: 287,
-        description: 'Potential comorbidity tier increase (+$287 illustrative).',
-      },
-      linkedRecommendationId: 'rec-aspiration',
-    },
-    {
-      id: 'alert-limb-findings-inconsistent',
-      type: 'inconsistency',
-      severity: 'medium',
-      status: 'new',
-      title: 'Lower extremity findings in visit recording not reflected in OASIS',
-      description:
-        'Visit recording documents +2 pitting edema, cool feet, faint pedal pulses, dark discoloration of the right great toe, and pain with walking relieved by rest. The current OASIS submission does not show any active wound, ulcer, or lower extremity perfusion issue. Please review the transcript and update the OASIS form.',
-      evidenceDocId: 'audio-doc',
-      evidenceAnchorId: 'transcript-edema',
-      relatedOasisItem: 'Skin/ulcers or vascular status',
-      oasisFormFieldId: 'form-I8000-other-diagnoses-container',
-      linkedRecommendationId: 'rec-pad',
-    },
-    {
       id: 'alert-hearing-inconsistent',
       type: 'inconsistency',
       severity: 'medium',
@@ -345,7 +321,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       evidenceDocId: 'audio-doc',
       evidenceAnchorId: 'transcript-hearing',
       relatedOasisItem: 'Sensory Status / B1000',
-      oasisFormFieldId: 'form-I8000-other-diagnoses-container',
+      oasisFormFieldId: 'form-B1000-Vision-container',
     },
   ]);
 
@@ -413,8 +389,20 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     available.add('referral-doc');
 
     // Update OasisStateService with available documents
-    available.forEach(docId => this.oasisStateService.addAvailableDocument(docId));
+    available.forEach((docId) => this.oasisStateService.addAvailableDocument(docId));
     console.log('📄 Available documents:', Array.from(available));
+  }
+
+  /**
+   * Keep pending recommendations at the top for clearer triage.
+   */
+  private sortRecommendationsByStatus(recs: AiRecommendation[]): AiRecommendation[] {
+    const order: Record<AiRecommendationStatus, number> = {
+      pending: 0,
+      accepted: 1,
+      rejected: 2,
+    };
+    return [...recs].sort((a, b) => order[a.status] - order[b.status]);
   }
 
   /**
@@ -427,15 +415,25 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const filteredRecs = this.allAiRecommendations().filter((rec) =>
       available.has(rec.evidenceDocId)
     );
-    this.aiRecommendations.set(filteredRecs);
-    console.log('📋 Filtered recommendations:', filteredRecs.length, 'of', this.allAiRecommendations().length);
+    this.aiRecommendations.set(this.sortRecommendationsByStatus(filteredRecs));
+    console.log(
+      '📋 Filtered recommendations:',
+      filteredRecs.length,
+      'of',
+      this.allAiRecommendations().length
+    );
 
     // Filter analyzer alerts to only show those with available evidence documents
     const filteredAlerts = this.allAnalyzerAlerts().filter((alert) =>
       available.has(alert.evidenceDocId)
     );
     this.analyzerAlerts.set(filteredAlerts);
-    console.log('⚠️ Filtered analyzer alerts:', filteredAlerts.length, 'of', this.allAnalyzerAlerts().length);
+    console.log(
+      '⚠️ Filtered analyzer alerts:',
+      filteredAlerts.length,
+      'of',
+      this.allAnalyzerAlerts().length
+    );
   }
 
   /**
@@ -451,14 +449,16 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Update recommendations with saved statuses
     this.aiRecommendations.update((recs) =>
-      recs.map((rec) => {
-        const savedState = savedStates.get(rec.id);
-        if (savedState) {
-          console.log(`💾 Restoring ${rec.id} status: ${savedState.status}`);
-          return { ...rec, status: savedState.status };
-        }
-        return rec;
-      })
+      this.sortRecommendationsByStatus(
+        recs.map((rec) => {
+          const savedState = savedStates.get(rec.id);
+          if (savedState) {
+            console.log(`💾 Restoring ${rec.id} status: ${savedState.status}`);
+            return { ...rec, status: savedState.status };
+          }
+          return rec;
+        })
+      )
     );
 
     // Recompute analyzer alerts after restoring states
@@ -486,7 +486,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // Expand all sections with accepted recommendations
-      sectionsToExpand.forEach(sectionId => this.expandSection(sectionId));
+      sectionsToExpand.forEach((sectionId) => this.expandSection(sectionId));
 
       // Populate fields after a brief delay to allow sections to expand
       // Note: We do NOT increment itemsAccepted here because the count is already
@@ -519,9 +519,17 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       const currentCount = this.itemsAccepted();
       if (currentCount === 0) {
         this.oasisStateService.updateItemsAccepted(this.initialPrefilledCount);
-        console.log(`💾 Set initial pre-filled count: ${this.initialPrefilledCount} items (${Math.round((this.initialPrefilledCount / this.totalItems()) * 100)}%)`);
+        console.log(
+          `💾 Set initial pre-filled count: ${this.initialPrefilledCount} items (${Math.round(
+            (this.initialPrefilledCount / this.totalItems()) * 100
+          )}%)`
+        );
       } else {
-        console.log(`💾 Restored from saved state: ${currentCount} items (${Math.round((currentCount / this.totalItems()) * 100)}%)`);
+        console.log(
+          `💾 Restored from saved state: ${currentCount} items (${Math.round(
+            (currentCount / this.totalItems()) * 100
+          )}%)`
+        );
       }
     }, 500);
   }
@@ -563,7 +571,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     }`;
     notification.innerHTML = `
       <div class="flex items-center gap-2">
-        <ion-icon name="${type === 'success' ? 'checkmark-circle' : 'alert-circle'}" class="text-xl"></ion-icon>
+        <ion-icon name="${
+          type === 'success' ? 'checkmark-circle' : 'alert-circle'
+        }" class="text-xl"></ion-icon>
         <span>${message}</span>
       </div>
     `;
@@ -616,9 +626,21 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     // Analysis steps with messages and progress
     const steps = [
       { message: 'Validating OASIS data fields • Checking required items', progress: 25, delay: 0 },
-      { message: 'Running PDGM calculations • Computing payment grouping', progress: 50, delay: 800 },
-      { message: 'Analyzing diagnosis codes • Checking comorbidity tiers', progress: 75, delay: 1600 },
-      { message: 'Generating compliance alerts • Finalizing assessment', progress: 100, delay: 2400 },
+      {
+        message: 'Running PDGM calculations • Computing payment grouping',
+        progress: 50,
+        delay: 800,
+      },
+      {
+        message: 'Analyzing diagnosis codes • Checking comorbidity tiers',
+        progress: 75,
+        delay: 1600,
+      },
+      {
+        message: 'Generating compliance alerts • Finalizing assessment',
+        progress: 100,
+        delay: 2400,
+      },
     ];
 
     // Animate through each step
@@ -696,7 +718,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     // Restore items count to initial pre-filled value
     this.oasisStateService.updateItemsAccepted(this.initialPrefilledCount);
     const percentage = Math.round((this.initialPrefilledCount / this.totalItems()) * 100);
-    console.log(`🔄 Form reset complete. Restored to initial pre-filled state: ${this.initialPrefilledCount} items (${percentage}%)`);
+    console.log(
+      `🔄 Form reset complete. Restored to initial pre-filled state: ${this.initialPrefilledCount} items (${percentage}%)`
+    );
     console.log('📄 Available documents reset to: referral-doc only');
 
     // State changes automatically save to localStorage via OasisStateService
@@ -710,7 +734,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Reset all selects to their default state
     const allSelects = document.querySelectorAll('select');
-    allSelects.forEach(select => {
+    allSelects.forEach((select) => {
       const selectEl = select as HTMLSelectElement;
 
       // Find the option with the 'selected' attribute in HTML
@@ -732,7 +756,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Clear form fields that were populated by AI recommendations
     const formFields = document.querySelectorAll('.form-field-value, .border-emerald-400');
-    formFields.forEach(field => {
+    formFields.forEach((field) => {
       const fieldEl = field as HTMLElement;
       // Restore to placeholder state
       if (fieldEl.classList.contains('form-field-value')) {
@@ -759,12 +783,13 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     if (otherDiagnosesContainer) {
       // Remove all dynamically added diagnosis entries
       const diagnosisEntries = otherDiagnosesContainer.querySelectorAll('.border-emerald-400');
-      diagnosisEntries.forEach(entry => entry.remove());
+      diagnosisEntries.forEach((entry) => entry.remove());
 
       // Restore the placeholder if it was removed
       if (otherDiagnosesContainer.children.length === 0) {
         const placeholder = document.createElement('div');
-        placeholder.className = 'p-2 border-2 border-dashed border-slate-300 rounded min-h-[40px] flex items-center justify-center text-xs text-slate-500';
+        placeholder.className =
+          'p-2 border-2 border-dashed border-slate-300 rounded min-h-[40px] flex items-center justify-center text-xs text-slate-500';
         placeholder.textContent = 'Additional diagnoses will appear here';
         otherDiagnosesContainer.appendChild(placeholder);
       }
@@ -772,14 +797,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Reset all checkboxes to their default state
     const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-    allCheckboxes.forEach(checkbox => {
+    allCheckboxes.forEach((checkbox) => {
       const checkboxEl = checkbox as HTMLInputElement;
       checkboxEl.checked = checkboxEl.defaultChecked;
     });
 
     // Reset text inputs to their default values (keep pre-filled ones)
     const textInputs = document.querySelectorAll('input[type="text"]');
-    textInputs.forEach(input => {
+    textInputs.forEach((input) => {
       const inputEl = input as HTMLInputElement;
       if (!inputEl.readOnly) {
         inputEl.value = inputEl.defaultValue;
@@ -788,14 +813,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Reset date inputs to their default values
     const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(input => {
+    dateInputs.forEach((input) => {
       const inputEl = input as HTMLInputElement;
       inputEl.value = inputEl.defaultValue;
     });
 
     // Reset number inputs to their default values
     const numberInputs = document.querySelectorAll('input[type="number"]');
-    numberInputs.forEach(input => {
+    numberInputs.forEach((input) => {
       const inputEl = input as HTMLInputElement;
       if (!inputEl.readOnly) {
         inputEl.value = inputEl.defaultValue;
@@ -813,7 +838,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const totalItems = this.totalItems();
 
     if (completionPercentage < requiredPercentage) {
-      this.showCompletionPercentageError(completionPercentage, requiredPercentage, currentItems, totalItems);
+      this.showCompletionPercentageError(
+        completionPercentage,
+        requiredPercentage,
+        currentItems,
+        totalItems
+      );
       return;
     }
 
@@ -829,7 +859,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.showModal('export-modal');
   }
 
-  private validateFormCompleteness(): { isComplete: boolean; missingFields: string[]; emptyCount: number } {
+  private validateFormCompleteness(): {
+    isComplete: boolean;
+    missingFields: string[];
+    emptyCount: number;
+  } {
     const missingFields: string[] = [];
 
     // Helper function to check if an element is visible
@@ -863,7 +897,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Check all select elements (only visible ones)
     const allSelects = document.querySelectorAll('select');
-    allSelects.forEach(select => {
+    allSelects.forEach((select) => {
       const selectEl = select as HTMLSelectElement;
 
       // Skip if element is not visible, disabled, or in a collapsed section
@@ -872,16 +906,19 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       }
 
       if (!selectEl.value || selectEl.value === '') {
-        const label = selectEl.previousElementSibling?.textContent ||
-                     selectEl.closest('div')?.querySelector('label')?.textContent ||
-                     'Unnamed field';
+        const label =
+          selectEl.previousElementSibling?.textContent ||
+          selectEl.closest('div')?.querySelector('label')?.textContent ||
+          'Unnamed field';
         missingFields.push(label.trim());
       }
     });
 
     // Check required text inputs (exclude optional fields like SSN)
-    const requiredTextInputs = document.querySelectorAll('input[type="text"]:not([placeholder*="###"])');
-    requiredTextInputs.forEach(input => {
+    const requiredTextInputs = document.querySelectorAll(
+      'input[type="text"]:not([placeholder*="###"])'
+    );
+    requiredTextInputs.forEach((input) => {
       const inputEl = input as HTMLInputElement;
 
       // Skip if element is not visible, disabled, or readonly
@@ -890,16 +927,17 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       }
 
       if (!inputEl.value || inputEl.value === '') {
-        const label = inputEl.previousElementSibling?.textContent ||
-                     inputEl.closest('div')?.querySelector('label')?.textContent ||
-                     'Unnamed field';
+        const label =
+          inputEl.previousElementSibling?.textContent ||
+          inputEl.closest('div')?.querySelector('label')?.textContent ||
+          'Unnamed field';
         missingFields.push(label.trim());
       }
     });
 
     // Check date inputs
     const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(input => {
+    dateInputs.forEach((input) => {
       const inputEl = input as HTMLInputElement;
 
       // Skip if element is not visible or disabled
@@ -908,9 +946,10 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       }
 
       if (!inputEl.value || inputEl.value === '') {
-        const label = inputEl.previousElementSibling?.textContent ||
-                     inputEl.closest('div')?.querySelector('label')?.textContent ||
-                     'Unnamed date field';
+        const label =
+          inputEl.previousElementSibling?.textContent ||
+          inputEl.closest('div')?.querySelector('label')?.textContent ||
+          'Unnamed date field';
         missingFields.push(label.trim());
       }
     });
@@ -918,13 +957,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     return {
       isComplete: missingFields.length === 0,
       missingFields: missingFields.slice(0, 10), // Limit to first 10 for display
-      emptyCount: missingFields.length
+      emptyCount: missingFields.length,
     };
   }
 
   private showValidationError(validation: { missingFields: string[]; emptyCount: number }): void {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
+    modal.className =
+      'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
       <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
         <div class="flex items-start gap-4 mb-6">
@@ -934,7 +974,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
           <div class="flex-1">
             <h2 class="text-xl font-semibold text-slate-900 mb-2">Incomplete Assessment</h2>
             <p class="text-sm text-slate-600">
-              ${validation.emptyCount} item${validation.emptyCount > 1 ? 's' : ''} must be completed before exporting.
+              ${validation.emptyCount} item${
+      validation.emptyCount > 1 ? 's' : ''
+    } must be completed before exporting.
             </p>
           </div>
         </div>
@@ -942,11 +984,21 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         <div class="bg-red-50 rounded-lg p-4 mb-6 max-h-64 overflow-y-auto">
           <p class="text-xs font-semibold text-red-900 mb-2 uppercase">Missing Items:</p>
           <ul class="text-sm text-red-800 space-y-1">
-            ${validation.missingFields.map(field => `<li class="flex items-start gap-2">
+            ${validation.missingFields
+              .map(
+                (field) => `<li class="flex items-start gap-2">
               <ion-icon name="chevron-forward" class="text-red-600 flex-shrink-0 mt-0.5"></ion-icon>
               <span>${field}</span>
-            </li>`).join('')}
-            ${validation.emptyCount > 10 ? `<li class="text-xs text-red-600 italic">...and ${validation.emptyCount - 10} more</li>` : ''}
+            </li>`
+              )
+              .join('')}
+            ${
+              validation.emptyCount > 10
+                ? `<li class="text-xs text-red-600 italic">...and ${
+                    validation.emptyCount - 10
+                  } more</li>`
+                : ''
+            }
           </ul>
         </div>
 
@@ -985,7 +1037,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   ): void {
     const remainingItems = totalItems - currentItems;
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
+    modal.className =
+      'fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
       <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
         <div class="flex items-start gap-4 mb-6">
@@ -1031,7 +1084,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
         <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
           <p class="text-sm text-blue-900">
-            <span class="font-semibold">💡 Tip:</span> Complete at least ${Math.ceil((requiredPercentage / 100) * totalItems) - currentItems} more OASIS item${Math.ceil((requiredPercentage / 100) * totalItems) - currentItems !== 1 ? 's' : ''} to reach ${requiredPercentage}% and enable export.
+            <span class="font-semibold">💡 Tip:</span> Complete at least ${
+              Math.ceil((requiredPercentage / 100) * totalItems) - currentItems
+            } more OASIS item${
+      Math.ceil((requiredPercentage / 100) * totalItems) - currentItems !== 1 ? 's' : ''
+    } to reach ${requiredPercentage}% and enable export.
           </p>
         </div>
 
@@ -1107,12 +1164,15 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     // Small delay to ensure section expansion animation completes before populating
     setTimeout(() => {
       const value = recommendation.acceptValue || recommendation.ggValue || '';
-      const isOtherDiagnosis = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
+      const isOtherDiagnosis =
+        recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
       const isSelectField = recommendation.formFieldId.endsWith('-select');
 
       if (isSelectField) {
         // Handle select elements directly
-        const selectEl = document.getElementById(recommendation.formFieldId) as HTMLSelectElement | null;
+        const selectEl = document.getElementById(
+          recommendation.formFieldId
+        ) as HTMLSelectElement | null;
         if (selectEl) {
           selectEl.value = value;
           // Add highlight animation
@@ -1127,11 +1187,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         }
       } else {
         // Populate form field via component (for div-based fields)
-        this.oasisFormComponent.populateField(
-          recommendation.formFieldId,
-          value,
-          isOtherDiagnosis
-        );
+        this.oasisFormComponent.populateField(recommendation.formFieldId, value, isOtherDiagnosis);
       }
 
       // Update progress
@@ -1144,10 +1200,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // Mark recommendation as accepted
       this.aiRecommendations.update((recs) =>
-        recs.map((rec) =>
-          rec.id === recommendation.id
-            ? { ...rec, status: 'accepted' as AiRecommendationStatus }
-            : rec
+        this.sortRecommendationsByStatus(
+          recs.map((rec) =>
+            rec.id === recommendation.id
+              ? { ...rec, status: 'accepted' as AiRecommendationStatus }
+              : rec
+          )
         )
       );
 
@@ -1225,7 +1283,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     if (formFieldId.includes('N04') || formFieldId.includes('high-risk')) {
       return 'high-risk-drugs';
     }
-    if (formFieldId.includes('M21') || formFieldId.includes('M22') || formFieldId.includes('care-mgmt')) {
+    if (
+      formFieldId.includes('M21') ||
+      formFieldId.includes('M22') ||
+      formFieldId.includes('care-mgmt')
+    ) {
       return 'care-management';
     }
     if (formFieldId.includes('O0') || formFieldId.includes('special')) {
@@ -1239,7 +1301,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
    * Expand a specific section
    */
   private expandSection(sectionId: string): void {
-    this.collapsedSections.update(sections => {
+    this.collapsedSections.update((sections) => {
       const newSections = new Set(sections);
       newSections.delete(sectionId);
       return newSections;
@@ -1283,10 +1345,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Mark as rejected
     this.aiRecommendations.update((recs) =>
-      recs.map((rec) =>
-        rec.id === this.pendingRejectRecommendation?.id
-          ? { ...rec, status: 'rejected' as AiRecommendationStatus }
-          : rec
+      this.sortRecommendationsByStatus(
+        recs.map((rec) =>
+          rec.id === this.pendingRejectRecommendation?.id
+            ? { ...rec, status: 'rejected' as AiRecommendationStatus }
+            : rec
+        )
       )
     );
 
@@ -1309,16 +1373,24 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     data.event.stopPropagation();
     const { recommendation } = data;
 
-    console.log('↩️ Undoing recommendation:', recommendation.id, 'Previous status:', recommendation.status);
+    console.log(
+      '↩️ Undoing recommendation:',
+      recommendation.id,
+      'Previous status:',
+      recommendation.status
+    );
 
     // If recommendation was accepted, we need to revert changes
     if (recommendation.status === 'accepted') {
       const isSelectField = recommendation.formFieldId.endsWith('-select');
-      const isMultiDiagnosisContainer = recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
+      const isMultiDiagnosisContainer =
+        recommendation.formFieldId === 'form-I8000-other-diagnoses-container';
 
       if (isSelectField) {
         // Revert select field to empty/default value
-        const selectEl = document.getElementById(recommendation.formFieldId) as HTMLSelectElement | null;
+        const selectEl = document.getElementById(
+          recommendation.formFieldId
+        ) as HTMLSelectElement | null;
         if (selectEl) {
           selectEl.value = '';
         }
@@ -1387,10 +1459,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Reset recommendation status to pending
     this.aiRecommendations.update((recs) =>
-      recs.map((rec) =>
-        rec.id === recommendation.id
-          ? { ...rec, status: 'pending' as AiRecommendationStatus }
-          : rec
+      this.sortRecommendationsByStatus(
+        recs.map((rec) =>
+          rec.id === recommendation.id
+            ? { ...rec, status: 'pending' as AiRecommendationStatus }
+            : rec
+        )
       )
     );
 
@@ -1476,26 +1550,30 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
    * Highlight and scroll to an OASIS form field
    */
   private highlightOasisFormField(formFieldId: string): void {
-    console.log('📝 Highlighting OASIS form field:', formFieldId);
+    console.log('dY"? Highlighting OASIS form field:', formFieldId);
 
-    const formField = document.getElementById(formFieldId);
-    if (formField) {
-      // Scroll to the form field
-      formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Add highlight animation
-      formField.classList.add('form-field-alert-highlight');
-
-      // Remove highlight after animation
-      setTimeout(() => {
-        formField.classList.remove('form-field-alert-highlight');
-        console.log('✨ Form field highlight complete');
-      }, 3000);
-    } else {
-      console.warn('⚠️ OASIS form field not found:', formFieldId);
+    // Expand the section so the target field is rendered
+    const sectionId = this.getSectionIdForField(formFieldId);
+    if (sectionId) {
+      this.expandSection(sectionId);
     }
-  }
 
+    // Wait briefly for the DOM to render the field after expanding
+    setTimeout(() => {
+      const formField = document.getElementById(formFieldId);
+      if (formField) {
+        formField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        formField.classList.add('form-field-alert-highlight');
+
+        setTimeout(() => {
+          formField.classList.remove('form-field-alert-highlight');
+          console.log('\uFFFDo" Form field highlight complete');
+        }, 3000);
+      } else {
+        console.warn('\uFFFDs\uFFFD\uFFFD,? OASIS form field not found:', formFieldId);
+      }
+    }, 150);
+  }
   handleAlertStatusChange(data: { alert: AnalyzerAlert; status: AnalyzerAlertStatus }): void {
     this.analyzerAlerts.update((alerts) =>
       alerts.map((a) => (a.id === data.alert.id ? { ...a, status: data.status } : a))
@@ -1530,7 +1608,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       this.currentPayment.update((v) => v + 287);
 
       // Determine comorbidity adjustment based on which recommendation
-      const comorbidityAdjustment = recommendation.oasisTargetId === 'I8000-comorbidity' ? 287.0 : 0;
+      const comorbidityAdjustment =
+        recommendation.oasisTargetId === 'I8000-comorbidity' ? 287.0 : 0;
 
       // Update shared payment state for patient-summary
       this.paymentStateService.updatePayment(this.currentPayment(), comorbidityAdjustment);
@@ -1698,7 +1777,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       recheckBtn.disabled = false;
       this.updateEligibilityTimestamp();
 
-      const timestamp = document.getElementById('eligibility-timestamp-oasis') as HTMLElement | null;
+      const timestamp = document.getElementById(
+        'eligibility-timestamp-oasis'
+      ) as HTMLElement | null;
 
       if (timestamp) {
         timestamp.classList.add('text-emerald-600', 'font-semibold');
@@ -1809,56 +1890,76 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Diagnoses Section
     xml += '  <Diagnoses>\n';
-    xml += `    <I8000_Primary>${this.escapeXML(formData['I8000_primary'] || '')}</I8000_Primary>\n`;
-    xml += `    <I8000_Comorbidity>${this.escapeXML(formData['I8000_comorbidity'] || '')}</I8000_Comorbidity>\n`;
+    xml += `    <I8000_Primary>${this.escapeXML(
+      formData['I8000_primary'] || ''
+    )}</I8000_Primary>\n`;
+    xml += `    <I8000_Comorbidity>${this.escapeXML(
+      formData['I8000_comorbidity'] || ''
+    )}</I8000_Comorbidity>\n`;
     xml += `    <I8000_Other>${this.escapeXML(formData['I8000_other'] || '')}</I8000_Other>\n`;
     xml += '  </Diagnoses>\n\n';
 
     // Functional Status - GG Items
     xml += '  <FunctionalStatus>\n';
     xml += '    <PriorFunctioning>\n';
-    Object.keys(formData).filter(k => k.startsWith('GG0100')).forEach(key => {
-      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('GG0100'))
+      .forEach((key) => {
+        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '    </PriorFunctioning>\n';
     xml += '    <SelfCare>\n';
-    Object.keys(formData).filter(k => k.startsWith('GG0130')).forEach(key => {
-      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('GG0130'))
+      .forEach((key) => {
+        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '    </SelfCare>\n';
     xml += '    <Mobility>\n';
-    Object.keys(formData).filter(k => k.startsWith('GG0170')).forEach(key => {
-      xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('GG0170'))
+      .forEach((key) => {
+        xml += `      <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '    </Mobility>\n';
     xml += '  </FunctionalStatus>\n\n';
 
     // Clinical Status
     xml += '  <ClinicalStatus>\n';
-    Object.keys(formData).filter(k => k.startsWith('B') || k.startsWith('C') || k.startsWith('D') || k.startsWith('J')).forEach(key => {
-      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter(
+        (k) => k.startsWith('B') || k.startsWith('C') || k.startsWith('D') || k.startsWith('J')
+      )
+      .forEach((key) => {
+        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '  </ClinicalStatus>\n\n';
 
     // Medications
     xml += '  <Medications>\n';
-    Object.keys(formData).filter(k => k.startsWith('M20') || k.startsWith('N04')).forEach(key => {
-      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('M20') || k.startsWith('N04'))
+      .forEach((key) => {
+        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '  </Medications>\n\n';
 
     // Other M Items
     xml += '  <OtherClinical>\n';
-    Object.keys(formData).filter(k => k.startsWith('M') && !k.startsWith('M0') && !k.startsWith('M20')).forEach(key => {
-      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('M') && !k.startsWith('M0') && !k.startsWith('M20'))
+      .forEach((key) => {
+        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '  </OtherClinical>\n\n';
 
     // Care Management
     xml += '  <CareManagement>\n';
-    Object.keys(formData).filter(k => k.startsWith('O')).forEach(key => {
-      xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
-    });
+    Object.keys(formData)
+      .filter((k) => k.startsWith('O'))
+      .forEach((key) => {
+        xml += `    <${key}>${this.escapeXML(formData[key] || '')}</${key}>\n`;
+      });
     xml += '  </CareManagement>\n';
 
     xml += '</OASISAssessment>';
@@ -1873,7 +1974,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const data: Record<string, string> = {};
 
     // Collect all select values
-    document.querySelectorAll('select').forEach(select => {
+    document.querySelectorAll('select').forEach((select) => {
       const id = (select as HTMLSelectElement).id;
       const value = (select as HTMLSelectElement).value;
       if (id && value) {
@@ -1882,7 +1983,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     });
 
     // Collect all text inputs
-    document.querySelectorAll('input[type="text"]').forEach(input => {
+    document.querySelectorAll('input[type="text"]').forEach((input) => {
       const id = (input as HTMLInputElement).id;
       const value = (input as HTMLInputElement).value;
       if (id && value) {
@@ -1891,7 +1992,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     });
 
     // Collect all date inputs
-    document.querySelectorAll('input[type="date"]').forEach(input => {
+    document.querySelectorAll('input[type="date"]').forEach((input) => {
       const id = (input as HTMLInputElement).id;
       const value = (input as HTMLInputElement).value;
       if (id && value) {
@@ -1900,7 +2001,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     });
 
     // Collect all number inputs
-    document.querySelectorAll('input[type="number"]').forEach(input => {
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
       const id = (input as HTMLInputElement).id;
       const value = (input as HTMLInputElement).value;
       if (id && value) {
@@ -1909,7 +2010,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     });
 
     // Collect checked checkboxes
-    document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach((checkbox) => {
       const id = (checkbox as HTMLInputElement).id;
       if (id) {
         const currentValue = data[id] || '';
@@ -2055,10 +2156,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       // Helper to select option by value or text
       const selectOption = (selectElement: HTMLSelectElement, valueOrText: string) => {
         const options = Array.from(selectElement.options);
-        const option = options.find(opt =>
-          opt.value === valueOrText ||
-          opt.text.includes(valueOrText) ||
-          opt.value.includes(valueOrText)
+        const option = options.find(
+          (opt) =>
+            opt.value === valueOrText ||
+            opt.text.includes(valueOrText) ||
+            opt.value.includes(valueOrText)
         );
         if (option) {
           selectElement.value = option.value;
@@ -2076,7 +2178,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // 3. SENSORY STATUS (2 items)
       const allSelects = document.querySelectorAll('select');
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const label = select.previousElementSibling?.textContent || '';
         if (label.includes('B1000') || label.includes('Vision')) {
           selectOption(select, '0'); // Sees adequately
@@ -2088,7 +2190,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // 4. COGNITIVE PATTERNS (8 items) - BIMS Assessment
       // C0100
-      document.querySelectorAll('select').forEach(select => {
+      document.querySelectorAll('select').forEach((select) => {
         if (select.previousElementSibling?.textContent?.includes('C0100')) {
           selectOption(select, '1'); // Yes, conduct BIMS
         }
@@ -2104,7 +2206,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       filledCount += 3;
 
       // 7. HEALTH CONDITIONS - J Items (4 items)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const prevText = select.previousElementSibling?.textContent || '';
         if (prevText.includes('J0510')) {
           selectOption(select, '1'); // Pain affects sleep
@@ -2118,7 +2220,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // 8. GG0100 PRIOR FUNCTIONING (3 items)
-      document.querySelectorAll('select').forEach(select => {
+      document.querySelectorAll('select').forEach((select) => {
         const id = select.id || '';
         if (id.includes('GG0100A')) selectOption(select, '0'); // Independent
         if (id.includes('GG0100B')) selectOption(select, '0'); // Independent
@@ -2127,7 +2229,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // 9. GG0110 PRIOR DEVICE USE (1 item with checkboxes)
       const deviceCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-      deviceCheckboxes.forEach(checkbox => {
+      deviceCheckboxes.forEach((checkbox) => {
         const label = checkbox.parentElement?.textContent || '';
         if (label.toLowerCase().includes('walker')) {
           (checkbox as HTMLInputElement).checked = true;
@@ -2144,7 +2246,25 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // 11. GG0170 MOBILITY (17 items - includes all mobility sub-items)
-      const mobilityValues = ['06', '05', '04', '03', '02', '03', '03', '04', '02', '03', '04', '03', '02', '03', '04', '02', '03'];
+      const mobilityValues = [
+        '06',
+        '05',
+        '04',
+        '03',
+        '02',
+        '03',
+        '03',
+        '04',
+        '02',
+        '03',
+        '04',
+        '03',
+        '02',
+        '03',
+        '04',
+        '02',
+        '03',
+      ];
       const mobilitySelects = document.querySelectorAll('select[id^="GG0170"]');
       mobilitySelects.forEach((select, index) => {
         const val = mobilityValues[index] || '03';
@@ -2153,7 +2273,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // 12. NUTRITIONAL - K0520 (1 item with checkboxes)
       const nutritionCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-      nutritionCheckboxes.forEach(checkbox => {
+      nutritionCheckboxes.forEach((checkbox) => {
         const label = checkbox.parentElement?.textContent || '';
         if (label.toLowerCase().includes('therapeutic diet')) {
           (checkbox as HTMLInputElement).checked = true;
@@ -2162,7 +2282,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // 13. INTEGUMENTARY - M Items (7 items)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const prevText = select.previousElementSibling?.textContent || '';
         if (prevText.includes('M1306')) selectOption(select, '0'); // No pressure ulcers
         if (prevText.includes('M1330')) selectOption(select, '0'); // No stasis ulcers
@@ -2171,14 +2291,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // 14. RESPIRATORY - M1400 (1 item)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         if (select.previousElementSibling?.textContent?.includes('M1400')) {
           selectOption(select, '1'); // Mild dyspnea
         }
       });
 
       // 15. ELIMINATION - M Items (4 items)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const prevText = select.previousElementSibling?.textContent || '';
         if (prevText.includes('M1600')) selectOption(select, '0'); // No UTI
         if (prevText.includes('M1610')) selectOption(select, '0'); // No incontinence
@@ -2187,7 +2307,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       });
 
       // 16. MEDICATIONS - M Items (6 items)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const prevText = select.previousElementSibling?.textContent || '';
         if (prevText.includes('M2001')) selectOption(select, '0'); // Drug review completed
         if (prevText.includes('M2003')) selectOption(select, 'NA'); // No follow-up needed
@@ -2208,7 +2328,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       // 18. CARE MANAGEMENT - M Items (4 items)
       // M2102, M2250 are checkbox groups
       const careCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-      careCheckboxes.forEach(checkbox => {
+      careCheckboxes.forEach((checkbox) => {
         const label = checkbox.parentElement?.textContent || '';
         if (label.toLowerCase().includes('adl')) {
           (checkbox as HTMLInputElement).checked = true;
@@ -2220,14 +2340,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       filledCount += 2;
 
       // 19. SPECIAL TREATMENTS - O Items (2 items)
-      allSelects.forEach(select => {
+      allSelects.forEach((select) => {
         const prevText = select.previousElementSibling?.textContent || '';
         if (prevText.includes('O0350')) {
           selectOption(select, '1'); // COVID vaccination up to date
         }
       });
       const treatmentCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-      treatmentCheckboxes.forEach(checkbox => {
+      treatmentCheckboxes.forEach((checkbox) => {
         const label = checkbox.parentElement?.textContent || '';
         if (label.toLowerCase().includes('physical therapy')) {
           (checkbox as HTMLInputElement).checked = true;
@@ -2238,7 +2358,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       // FINAL PASS: Fill any remaining empty selects with smart defaults
       setTimeout(() => {
         const allSelectsForFinalPass = document.querySelectorAll('select');
-        allSelectsForFinalPass.forEach(select => {
+        allSelectsForFinalPass.forEach((select) => {
           const selectEl = select as HTMLSelectElement;
 
           // Skip if already has a value selected
@@ -2254,8 +2374,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
           // Smart defaults based on context
           if (contextText.includes('na') || contextText.includes('not applicable')) {
             // If NA is an option, select it
-            const naOption = Array.from(selectEl.options).find(opt =>
-              opt.value === 'NA' || opt.text.includes('NA') || opt.text.includes('Not applicable')
+            const naOption = Array.from(selectEl.options).find(
+              (opt) =>
+                opt.value === 'NA' || opt.text.includes('NA') || opt.text.includes('Not applicable')
             );
             if (naOption) {
               selectEl.value = naOption.value;
@@ -2265,8 +2386,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
           // For yes/no questions, default to "No" (0) unless it's negative
           if (contextText.includes('yes') || contextText.includes('no')) {
-            const noOption = Array.from(selectEl.options).find(opt =>
-              opt.value === '0' || opt.text.toLowerCase().includes('no')
+            const noOption = Array.from(selectEl.options).find(
+              (opt) => opt.value === '0' || opt.text.toLowerCase().includes('no')
             );
             if (noOption) {
               selectEl.value = noOption.value;
@@ -2276,8 +2397,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
           // For medication/intervention questions, default to appropriate value
           if (contextText.includes('medication') || contextText.includes('intervention')) {
-            const firstReasonableOption = Array.from(selectEl.options).find(opt =>
-              opt.value === '0' || opt.value === 'NA' || opt.text.includes('No')
+            const firstReasonableOption = Array.from(selectEl.options).find(
+              (opt) => opt.value === '0' || opt.value === 'NA' || opt.text.includes('No')
             );
             if (firstReasonableOption) {
               selectEl.value = firstReasonableOption.value;
@@ -2297,7 +2418,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         });
 
         // Fill any empty number inputs with reasonable defaults
-        document.querySelectorAll('input[type="number"]').forEach(input => {
+        document.querySelectorAll('input[type="number"]').forEach((input) => {
           const inputEl = input as HTMLInputElement;
           if (!inputEl.value || inputEl.value === '') {
             const min = parseInt(inputEl.min) || 0;
@@ -2383,3 +2504,4 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     }, 3000);
   }
 }
+

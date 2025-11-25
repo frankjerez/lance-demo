@@ -59,7 +59,11 @@
         These large document sections should be copied from the original template
         into this ng-content slot to keep this file manageable.
       -->
-      <div id="discharge-doc" class="document-content space-y-6" *ngIf="availableDocs().has('discharge-doc')">
+      <div
+        id="discharge-doc"
+        class="document-content space-y-6"
+        *ngIf="availableDocs().has('discharge-doc')"
+      >
         <!-- PDF Page 1 -->
         <div
           class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
@@ -287,7 +291,6 @@
                 aspiration precautions.
               </p>
             </div>
-
           </div>
         </div>
 
@@ -324,8 +327,12 @@
               <table class="w-full text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-100">
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Test</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Result</th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Test
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Result
+                    </th>
                     <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
                       Reference Range
                     </th>
@@ -437,8 +444,12 @@
                     <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
                       Medication
                     </th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Dose</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Route</th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Dose
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Route
+                    </th>
                     <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
                       Frequency
                     </th>
@@ -514,7 +525,9 @@
                     <td class="border border-slate-300 px-2 py-1.5">Per sliding scale</td>
                     <td class="border border-slate-300 px-2 py-1.5">SubQ</td>
                     <td class="border border-slate-300 px-2 py-1.5">Before meals</td>
-                    <td class="border border-slate-300 px-2 py-1.5">As directed by sliding scale</td>
+                    <td class="border border-slate-300 px-2 py-1.5">
+                      As directed by sliding scale
+                    </td>
                   </tr>
                   <tr>
                     <td class="border border-slate-300 px-2 py-1.5">Pantoprazole</td>
@@ -552,20 +565,22 @@
 
             <!-- Medication Changes Summary -->
             <div class="mb-4">
-              <h3 class="text-sm font-bold text-slate-900 mb-2">MEDICATION CHANGES FROM ADMISSION:</h3>
+              <h3 class="text-sm font-bold text-slate-900 mb-2">
+                MEDICATION CHANGES FROM ADMISSION:
+              </h3>
               <ul class="list-disc pl-6 space-y-1 text-xs">
                 <li>
-                  <strong>ADDED:</strong> Aspirin 325mg daily (for 21 days) and Clopidogrel 75mg daily (for
-                  21 days) for dual antiplatelet therapy
+                  <strong>ADDED:</strong> Aspirin 325mg daily (for 21 days) and Clopidogrel 75mg
+                  daily (for 21 days) for dual antiplatelet therapy
                 </li>
                 <li><strong>ADDED:</strong> Metoprolol XL 50mg daily for blood pressure control</li>
                 <li>
-                  <strong>INCREASED:</strong> Atorvastatin from 40mg to 80mg nightly for high-intensity
-                  statin therapy
+                  <strong>INCREASED:</strong> Atorvastatin from 40mg to 80mg nightly for
+                  high-intensity statin therapy
                 </li>
                 <li>
-                  <strong>DISCONTINUED:</strong> Metformin 1000mg BID (temporarily due to reduced oral
-                  intake; may restart per PCP)
+                  <strong>DISCONTINUED:</strong> Metformin 1000mg BID (temporarily due to reduced
+                  oral intake; may restart per PCP)
                 </li>
               </ul>
             </div>
@@ -590,11 +605,13 @@
               <div class="mb-4">
                 <p class="font-bold text-slate-900 mb-2 text-sm">DIET:</p>
                 <div class="bg-red-50 p-3 rounded border-l-4 border-red-600">
-                  <p class="text-sm font-bold text-red-900 mb-2">⚠️ CRITICAL DYSPHAGIA PRECAUTIONS:</p>
+                  <p class="text-sm font-bold text-red-900 mb-2">
+                    ⚠️ CRITICAL DYSPHAGIA PRECAUTIONS:
+                  </p>
                   <ul class="list-disc pl-5 space-y-1 text-xs text-red-900">
                     <li>
-                      <strong>Pureed solids ONLY</strong> - no regular texture foods, no chunks, no mixed
-                      textures
+                      <strong>Pureed solids ONLY</strong> - no regular texture foods, no chunks, no
+                      mixed textures
                     </li>
                     <li>
                       <strong>Nectar-thick liquids ONLY</strong> - use commercial thickener for ALL
@@ -607,7 +624,10 @@
                     <li>Upright positioning (90 degrees) for all meals and 30 minutes after</li>
                     <li>Small bites, slow pace, no talking while eating</li>
                     <li>Supervision required for ALL meals and snacks</li>
-                    <li>Watch for coughing, choking, or wet voice - STOP eating and notify nurse/doctor</li>
+                    <li>
+                      Watch for coughing, choking, or wet voice - STOP eating and notify
+                      nurse/doctor
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -617,19 +637,21 @@
                 <p class="font-bold text-slate-900 mb-2 text-sm">ACTIVITY:</p>
                 <ul class="list-disc pl-5 space-y-1 text-xs">
                   <li>
-                    Patient requires <strong>moderate to maximal assistance</strong> for all transfers and
-                    mobility
+                    Patient requires <strong>moderate to maximal assistance</strong> for all
+                    transfers and mobility
                   </li>
                   <li>Use rolling walker for ambulation - DO NOT attempt to walk without walker</li>
                   <li>
-                    <strong>Constant supervision required</strong> - HIGH FALL RISK due to left-sided
-                    weakness and neglect
+                    <strong>Constant supervision required</strong> - HIGH FALL RISK due to
+                    left-sided weakness and neglect
                   </li>
                   <li>No driving until cleared by neurologist (minimum 6 months post-stroke)</li>
-                  <li>Gradually increase activity as tolerated per physical therapy recommendations</li>
                   <li>
-                    Participate in home health therapy sessions (PT, OT, Speech) as scheduled - critical
-                    for recovery
+                    Gradually increase activity as tolerated per physical therapy recommendations
+                  </li>
+                  <li>
+                    Participate in home health therapy sessions (PT, OT, Speech) as scheduled -
+                    critical for recovery
                   </li>
                 </ul>
               </div>
@@ -639,31 +661,33 @@
                 <p class="font-bold text-slate-900 mb-2 text-sm">DAILY MONITORING:</p>
                 <ul class="list-disc pl-5 space-y-1 text-xs">
                   <li>
-                    <strong>Blood Pressure:</strong> Check daily, target &lt;140/90 mmHg. Log all readings
-                    for home health nurse.
+                    <strong>Blood Pressure:</strong> Check daily, target &lt;140/90 mmHg. Log all
+                    readings for home health nurse.
                   </li>
                   <li>
-                    <strong>Blood Glucose:</strong> Check fasting and before meals. Target 80-130 mg/dL
-                    fasting, &lt;180 mg/dL 2 hours after meals.
+                    <strong>Blood Glucose:</strong> Check fasting and before meals. Target 80-130
+                    mg/dL fasting, &lt;180 mg/dL 2 hours after meals.
                   </li>
                   <li>
-                    <strong>Weight:</strong> Check 2-3 times per week. Report weight loss &gt;5 lbs or gain
-                    &gt;3 lbs in one week.
+                    <strong>Weight:</strong> Check 2-3 times per week. Report weight loss &gt;5 lbs
+                    or gain &gt;3 lbs in one week.
                   </li>
                   <li>
-                    <strong>Intake/Output:</strong> Ensure adequate hydration with thickened liquids (at
-                    least 1500 mL/day).
+                    <strong>Intake/Output:</strong> Ensure adequate hydration with thickened liquids
+                    (at least 1500 mL/day).
                   </li>
                   <li>
-                    <strong>Skin:</strong> Daily skin checks for pressure areas (buttocks, heels, elbows) -
-                    reposition every 2 hours.
+                    <strong>Skin:</strong> Daily skin checks for pressure areas (buttocks, heels,
+                    elbows) - reposition every 2 hours.
                   </li>
                 </ul>
               </div>
 
               <!-- Warning Signs -->
               <div class="mb-4 bg-red-50 p-3 rounded border-l-4 border-red-600">
-                <p class="font-bold text-red-900 mb-2">⚠️ WARNING SIGNS - Call 911 or go to Emergency Department if:</p>
+                <p class="font-bold text-red-900 mb-2">
+                  ⚠️ WARNING SIGNS - Call 911 or go to Emergency Department if:
+                </p>
                 <ul class="list-disc pl-5 space-y-1 text-sm text-red-900">
                   <li>Sudden worsening of weakness on either side of body</li>
                   <li>New facial droop or speech difficulty</li>
@@ -680,24 +704,27 @@
                 <p class="font-bold text-amber-900 mb-2">⚠️ Call your physician if:</p>
                 <ul class="list-disc pl-5 space-y-1 text-xs text-amber-900">
                   <li>
-                    Temperature &gt;100.4°F, persistent cough, increased shortness of breath (possible
-                    pneumonia)
+                    Temperature &gt;100.4°F, persistent cough, increased shortness of breath
+                    (possible pneumonia)
                   </li>
                   <li>
-                    Persistent coughing during meals, wet voice, or difficulty swallowing (aspiration risk)
+                    Persistent coughing during meals, wet voice, or difficulty swallowing
+                    (aspiration risk)
                   </li>
                   <li>
-                    Blood pressure consistently &gt;160/100 mmHg or &lt;100/60 mmHg despite medications
+                    Blood pressure consistently &gt;160/100 mmHg or &lt;100/60 mmHg despite
+                    medications
                   </li>
                   <li>Blood glucose consistently &gt;250 mg/dL or &lt;70 mg/dL</li>
                   <li>
-                    Signs of bleeding: black tarry stools, blood in urine, unusual bruising (antiplatelet
-                    therapy)
+                    Signs of bleeding: black tarry stools, blood in urine, unusual bruising
+                    (antiplatelet therapy)
                   </li>
                   <li>Persistent nausea/vomiting preventing medication or nutrition intake</li>
                   <li>New or worsening depression, anxiety, or emotional lability</li>
                   <li>
-                    Skin breakdown or pressure sores (redness that doesn't blanch, open wounds, blisters)
+                    Skin breakdown or pressure sores (redness that doesn't blanch, open wounds,
+                    blisters)
                   </li>
                 </ul>
               </div>
@@ -710,7 +737,9 @@
               </h3>
 
               <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-600 mb-3">
-                <p class="text-xs font-semibold text-blue-900">Agency: Sunrise Home Health Agency</p>
+                <p class="text-xs font-semibold text-blue-900">
+                  Agency: Sunrise Home Health Agency
+                </p>
                 <p class="text-xs text-blue-900">Phone: (305) 555-7890</p>
                 <p class="text-xs text-blue-900">Start of Care: 10/02/2024</p>
               </div>
@@ -721,12 +750,16 @@
                 <ul class="list-disc pl-5 space-y-0.5 text-xs">
                   <li>3x/week initially, then taper based on patient stability</li>
                   <li>Vital signs monitoring and cardiovascular assessment</li>
-                  <li>Medication management and education (especially dual antiplatelet therapy)</li>
-                  <li>Blood pressure and blood glucose monitoring and management</li>
-                  <li>Neurological assessment - monitor for changes in strength, speech, cognition</li>
                   <li>
-                    Aspiration precautions - ensure compliance with modified diet, monitor for signs of
-                    aspiration
+                    Medication management and education (especially dual antiplatelet therapy)
+                  </li>
+                  <li>Blood pressure and blood glucose monitoring and management</li>
+                  <li>
+                    Neurological assessment - monitor for changes in strength, speech, cognition
+                  </li>
+                  <li>
+                    Aspiration precautions - ensure compliance with modified diet, monitor for signs
+                    of aspiration
                   </li>
                   <li>Skin assessment and pressure injury prevention</li>
                   <li>Coordination with PT, OT, and Speech Therapy</li>
@@ -764,7 +797,9 @@
 
               <!-- Speech Therapy -->
               <div class="mb-3">
-                <p class="font-bold text-sm text-slate-900 mb-1">Speech-Language Pathology (SLP):</p>
+                <p class="font-bold text-sm text-slate-900 mb-1">
+                  Speech-Language Pathology (SLP):
+                </p>
                 <ul class="list-disc pl-5 space-y-0.5 text-xs">
                   <li>2x/week for 8 weeks (may extend based on swallowing safety)</li>
                   <li>Dysphagia therapy - swallowing exercises and strategies</li>
@@ -791,11 +826,13 @@
               <h3 class="text-base font-bold text-slate-900 mb-3 border-b-2 border-slate-300 pb-1">
                 DURABLE MEDICAL EQUIPMENT (DME)
               </h3>
-              <p class="mb-2 text-slate-700">The following equipment has been ordered for home use:</p>
+              <p class="mb-2 text-slate-700">
+                The following equipment has been ordered for home use:
+              </p>
               <ul class="list-disc pl-6 space-y-1.5 text-sm">
                 <li>
-                  <span class="font-semibold">Hospital Bed</span> - Semi-electric with side rails for
-                  safety and positioning
+                  <span class="font-semibold">Hospital Bed</span> - Semi-electric with side rails
+                  for safety and positioning
                 </li>
                 <li>
                   <span class="font-semibold">Wheelchair</span> - Standard with elevating legrests
@@ -820,11 +857,21 @@
               <table class="w-full text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-100">
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Date</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Time</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Provider</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Specialty</th>
-                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">Location</th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Date
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Time
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Provider
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Specialty
+                    </th>
+                    <th class="border border-slate-300 px-2 py-1.5 text-left font-semibold">
+                      Location
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -867,8 +914,9 @@
               </table>
               <div class="mt-3 bg-blue-50 p-3 rounded border-l-4 border-blue-600">
                 <p class="text-xs text-blue-900">
-                  <span class="font-bold">📅 Important:</span> Please confirm all appointments 24-48 hours
-                  in advance. Bring a list of current medications and any questions to each visit.
+                  <span class="font-bold">📅 Important:</span> Please confirm all appointments 24-48
+                  hours in advance. Bring a list of current medications and any questions to each
+                  visit.
                 </p>
               </div>
             </div>
@@ -897,8 +945,8 @@
                 <li>Caregiver stress management and respite care resources</li>
               </ul>
               <div class="mt-3 bg-emerald-50 p-2 rounded text-xs text-emerald-900">
-                <span class="font-bold">✓ Comprehension Verified:</span> Patient and daughter demonstrated
-                understanding through teach-back method.
+                <span class="font-bold">✓ Comprehension Verified:</span> Patient and daughter
+                demonstrated understanding through teach-back method.
               </div>
             </div>
 
@@ -908,17 +956,18 @@
                 SOCIAL SITUATION
               </h3>
               <p class="text-sm text-slate-800 leading-relaxed">
-                Mr. Patterson is a 72-year-old widower who lives alone in a two-story home. His daughter,
-                Elizabeth Patterson, lives approximately 15 minutes away and has been very involved in his
-                care throughout hospitalization. She has taken a temporary leave from work to assist with
-                his transition home and coordinate home health services. The home has stairs to enter,
-                which may pose challenges for mobility. Daughter reports she is working with contractor to
-                install temporary ramp. Patient has Medicare Parts A & B with supplemental insurance. Prior
-                to stroke, patient was independent with all ADLs and drove independently. He is retired
-                from career as an accountant. Patient expresses strong motivation to regain independence
-                and return to community activities including volunteering at local senior center. Case
-                management has arranged home health services and DME delivery. Social work provided
-                daughter with information regarding caregiver support groups and community resources for
+                Mr. Patterson is a 72-year-old widower who lives alone in a two-story home. His
+                daughter, Elizabeth Patterson, lives approximately 15 minutes away and has been very
+                involved in his care throughout hospitalization. She has taken a temporary leave
+                from work to assist with his transition home and coordinate home health services.
+                The home has stairs to enter, which may pose challenges for mobility. Daughter
+                reports she is working with contractor to install temporary ramp. Patient has
+                Medicare Parts A & B with supplemental insurance. Prior to stroke, patient was
+                independent with all ADLs and drove independently. He is retired from career as an
+                accountant. Patient expresses strong motivation to regain independence and return to
+                community activities including volunteering at local senior center. Case management
+                has arranged home health services and DME delivery. Social work provided daughter
+                with information regarding caregiver support groups and community resources for
                 stroke survivors.
               </p>
             </div>
@@ -940,16 +989,16 @@
               </h3>
               <div class="space-y-2">
                 <p>
-                  <span class="font-semibold text-slate-900">Primary:</span> Acute ischemic stroke, right
-                  MCA territory with successful mechanical thrombectomy; left hemiparesis; dysphagia with
-                  aspiration risk
+                  <span class="font-semibold text-slate-900">Primary:</span> Acute ischemic stroke,
+                  right MCA territory with successful mechanical thrombectomy; left hemiparesis;
+                  dysphagia with aspiration risk
                 </p>
                 <p>
                   <span class="font-semibold text-slate-900">Secondary:</span> Aspiration pneumonia
-                  (resolved), hypertension (improved with medication adjustment), diabetes mellitus type 2
-                  (improved on insulin regimen), hyperlipidemia (on intensified statin therapy), coronary
-                  artery disease (stable), chronic kidney disease stage 2 (stable), benign prostatic
-                  hyperplasia (stable)
+                  (resolved), hypertension (improved with medication adjustment), diabetes mellitus
+                  type 2 (improved on insulin regimen), hyperlipidemia (on intensified statin
+                  therapy), coronary artery disease (stable), chronic kidney disease stage 2
+                  (stable), benign prostatic hyperplasia (stable)
                 </p>
               </div>
             </div>
@@ -962,9 +1011,9 @@
 
               <p class="mb-3">
                 Patient's prognosis for neurological recovery is fair to good given successful
-                thrombectomy within therapeutic window and patient's relatively young age (66 years).
-                Expected trajectory is continued improvement in strength and function over 3-6 months with
-                intensive rehabilitation. Key factors affecting prognosis include:
+                thrombectomy within therapeutic window and patient's relatively young age (66
+                years). Expected trajectory is continued improvement in strength and function over
+                3-6 months with intensive rehabilitation. Key factors affecting prognosis include:
               </p>
 
               <ul class="list-disc pl-6 space-y-1 text-sm mb-4">
@@ -978,7 +1027,8 @@
               <p class="mb-2 font-semibold">However, patient faces several challenges:</p>
               <ul class="list-disc pl-6 space-y-1 text-sm mb-4">
                 <li>
-                  Moderate-to-severe dysphagia with ongoing aspiration risk requiring diet modification
+                  Moderate-to-severe dysphagia with ongoing aspiration risk requiring diet
+                  modification
                 </li>
                 <li>Significant functional impairment requiring assistance with most ADLs</li>
                 <li>Left-sided neglect affecting safety awareness</li>
@@ -989,30 +1039,30 @@
               <p class="mb-2 font-semibold text-slate-900">Critical Success Factors:</p>
               <ul class="list-disc pl-6 space-y-1.5 text-sm mb-4">
                 <li>
-                  Strict adherence to dual antiplatelet therapy for 21 days (critically important for
-                  stroke prevention)
+                  Strict adherence to dual antiplatelet therapy for 21 days (critically important
+                  for stroke prevention)
                 </li>
                 <li>
-                  Aggressive cardiovascular risk factor modification (BP control, diabetes management,
-                  high-intensity statin)
+                  Aggressive cardiovascular risk factor modification (BP control, diabetes
+                  management, high-intensity statin)
                 </li>
                 <li>Consistent participation in home health therapy (PT, OT, Speech)</li>
                 <li>Strict adherence to modified diet and aspiration precautions</li>
                 <li>
-                  Prevention of complications: falls, pressure ulcers, depression, learned non-use of left
-                  side
+                  Prevention of complications: falls, pressure ulcers, depression, learned non-use
+                  of left side
                 </li>
                 <li>Regular follow-up with neurology, PCP, and endocrinology</li>
                 <li>Caregiver support and education to prevent burnout</li>
               </ul>
 
               <p class="text-sm mb-4">
-                Home health services are essential during this acute recovery phase to ensure safety,
-                prevent complications, and maximize functional recovery. Patient will likely require
-                outpatient therapy after home health discharge. Driving evaluation should occur no sooner
-                than 6 months post-stroke per neurologist. Return to work unlikely given age, severity of
-                stroke, and physical demands of previous occupation; however, focus should be on maximizing
-                independence in ADLs and community mobility.
+                Home health services are essential during this acute recovery phase to ensure
+                safety, prevent complications, and maximize functional recovery. Patient will likely
+                require outpatient therapy after home health discharge. Driving evaluation should
+                occur no sooner than 6 months post-stroke per neurologist. Return to work unlikely
+                given age, severity of stroke, and physical demands of previous occupation; however,
+                focus should be on maximizing independence in ADLs and community mobility.
               </p>
             </div>
           </div>
@@ -1037,26 +1087,27 @@
                   <div>
                     <p class="font-bold text-rose-900 mb-1">🩺 STROKE PREVENTION:</p>
                     <p class="text-rose-900">
-                      Ensure strict compliance with dual antiplatelet therapy (Aspirin 325mg + Clopidogrel
-                      75mg) for full 21 days - educate on bleeding precautions and importance of not
-                      missing doses
+                      Ensure strict compliance with dual antiplatelet therapy (Aspirin 325mg +
+                      Clopidogrel 75mg) for full 21 days - educate on bleeding precautions and
+                      importance of not missing doses
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">🍽️ ASPIRATION PREVENTION:</p>
                     <p class="text-rose-900">
-                      Reinforce modified diet requirements (pureed solids, nectar-thick liquids ONLY) -
-                      assess compliance, educate on thickener use, monitor for signs of aspiration
-                      (coughing during meals, wet voice, recurrent pneumonia)
+                      Reinforce modified diet requirements (pureed solids, nectar-thick liquids
+                      ONLY) - assess compliance, educate on thickener use, monitor for signs of
+                      aspiration (coughing during meals, wet voice, recurrent pneumonia)
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">⚠️ FALL PREVENTION:</p>
                     <p class="text-rose-900">
-                      Patient has multiple fall risk factors - assess home safety, ensure appropriate DME
-                      use, educate on need for constant supervision during transfers/ambulation
+                      Patient has multiple fall risk factors - assess home safety, ensure
+                      appropriate DME use, educate on need for constant supervision during
+                      transfers/ambulation
                     </p>
                   </div>
 
@@ -1064,41 +1115,42 @@
                     <p class="font-bold text-rose-900 mb-1">💉 INSULIN MANAGEMENT:</p>
                     <p class="text-rose-900">
                       Teach patient/wife insulin administration technique, blood glucose monitoring,
-                      hypoglycemia recognition and treatment - ensure competency before decreasing visit
-                      frequency
+                      hypoglycemia recognition and treatment - ensure competency before decreasing
+                      visit frequency
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">🧠 NEUROLOGICAL MONITORING:</p>
                     <p class="text-rose-900">
-                      Assess for any changes in weakness, speech, cognition, or development of new symptoms
-                      that could indicate recurrent stroke or complications
+                      Assess for any changes in weakness, speech, cognition, or development of new
+                      symptoms that could indicate recurrent stroke or complications
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">💊 MEDICATION RECONCILIATION:</p>
                     <p class="text-rose-900">
-                      Multiple medication changes - ensure patient has all medications, understands dosing,
-                      and has system for compliance. Coordinate transition from dual antiplatelet to single
-                      agent at day 21.
+                      Multiple medication changes - ensure patient has all medications, understands
+                      dosing, and has system for compliance. Coordinate transition from dual
+                      antiplatelet to single agent at day 21.
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">🏃 FUNCTIONAL IMPROVEMENT:</p>
                     <p class="text-rose-900">
-                      Work with PT/OT to maximize recovery - encourage active participation in therapy,
-                      prevent learned non-use of left side, address left neglect
+                      Work with PT/OT to maximize recovery - encourage active participation in
+                      therapy, prevent learned non-use of left side, address left neglect
                     </p>
                   </div>
 
                   <div>
                     <p class="font-bold text-rose-900 mb-1">👥 CAREGIVER SUPPORT:</p>
                     <p class="text-rose-900">
-                      Assess wife's coping and ability to provide care - watch for caregiver burnout,
-                      ensure she has support from family, consider social work referral if needed
+                      Assess wife's coping and ability to provide care - watch for caregiver
+                      burnout, ensure she has support from family, consider social work referral if
+                      needed
                     </p>
                   </div>
                 </div>
@@ -1156,7 +1208,11 @@
       </div>
 
       <!-- Referral/Orders (Hidden initially) -->
-      <div id="referral-doc" class="document-content hidden space-y-6" *ngIf="availableDocs().has('referral-doc')">
+      <div
+        id="referral-doc"
+        class="document-content hidden space-y-6"
+        *ngIf="availableDocs().has('referral-doc')"
+      >
         <!-- PDF Page 1 -->
         <div
           class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
@@ -1347,7 +1403,11 @@
       </div>
 
       <!-- First Visit Note (Hidden initially) -->
-      <div id="visit-doc" class="document-content hidden space-y-6" *ngIf="availableDocs().has('visit-doc')">
+      <div
+        id="visit-doc"
+        class="document-content hidden space-y-6"
+        *ngIf="availableDocs().has('visit-doc')"
+      >
         <!-- PDF Page 1 -->
         <div
           class="pdf-page bg-white shadow-lg mx-auto p-12 border border-slate-300"
@@ -1605,7 +1665,9 @@
                   >
                 </p>
                 <p class="text-red-700 mt-2 font-semibold">
-                  <span data-evidence-for="analyzer-toe" class="hover:bg-yellow-100 transition-colors"
+                  <span
+                    data-evidence-for="analyzer-toe"
+                    class="hover:bg-yellow-100 transition-colors"
                     >CLINICAL SIGNIFICANCE: Concerning for ischemia given PAD + diabetes. Risk for
                     tissue necrosis/amputation if not addressed promptly.</span
                   >
@@ -1932,7 +1994,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('admin')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div
+            *ngIf="!isSectionCollapsed('admin')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
             <div>
               <label class="text-[11px] font-bold text-slate-700"
                 >M0010. CMS Certification Number</label
@@ -2107,8 +2172,7 @@
                   <input type="checkbox" class="mr-2" /> 2 - Medicare (HMO/managed care/Advantage)
                 </label>
                 <label class="flex items-center text-xs">
-                  <input type="checkbox" class="mr-2" /> 3 - Medicaid (traditional
-                  fee-for-service)
+                  <input type="checkbox" class="mr-2" /> 3 - Medicaid (traditional fee-for-service)
                 </label>
                 <label class="flex items-center text-xs">
                   <input type="checkbox" class="mr-2" /> 4 - Medicaid (HMO/managed care)
@@ -2140,7 +2204,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('demographics')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div
+            *ngIf="!isSectionCollapsed('demographics')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
             <div>
               <label class="text-[11px] font-bold text-slate-700">A1005. Ethnicity</label>
               <select
@@ -2176,9 +2243,7 @@
             </div>
 
             <div>
-              <label class="text-[11px] font-bold text-slate-700"
-                >A1110A. Preferred Language</label
-              >
+              <label class="text-[11px] font-bold text-slate-700">A1110A. Preferred Language</label>
               <select
                 class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
               >
@@ -2269,8 +2334,11 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('sensory')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
-            <div>
+          <div
+            *ngIf="!isSectionCollapsed('sensory')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
+            <div id="form-B1000-Vision-container">
               <label class="text-[11px] font-bold text-slate-700">B1000. Vision</label>
               <p class="text-[10px] text-slate-600 mt-1 mb-1">
                 Ability to see in adequate light (with glasses if used)
@@ -2302,9 +2370,7 @@
                 <option selected>
                   0 - No difficulty in normal conversation, social interaction, listening to TV
                 </option>
-                <option>
-                  1 - Difficulty in some situations (e.g., when not facing speaker)
-                </option>
+                <option>1 - Difficulty in some situations (e.g., when not facing speaker)</option>
                 <option>
                   2 - Difficulty in many situations (speaker must increase volume and speak
                   distinctly)
@@ -2332,7 +2398,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('cognitive')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div
+            *ngIf="!isSectionCollapsed('cognitive')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
             <div>
               <label class="text-[11px] font-bold text-slate-700"
                 >C0100. Should Brief Interview for Mental Status (BIMS) be Conducted?</label
@@ -2526,7 +2595,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('mood')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div
+            *ngIf="!isSectionCollapsed('mood')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
             <div>
               <label class="text-[11px] font-bold text-slate-700"
                 >D0150. Patient Health Questionnaire (PHQ-2 to 9)</label
@@ -2536,12 +2608,14 @@
               </p>
               <div class="bg-slate-50 p-3 rounded space-y-2">
                 <div class="text-[10px] text-slate-600 mb-2">
-                  <strong>Scoring:</strong> 0=Not at all, 1=Several days, 2=More than half the
-                  days, 3=Nearly every day
+                  <strong>Scoring:</strong> 0=Not at all, 1=Several days, 2=More than half the days,
+                  3=Nearly every day
                 </div>
                 <div class="grid grid-cols-1 gap-2">
                   <div>
-                    <label class="text-[10px] text-slate-700">D0150A1. Little interest or pleasure in doing things</label>
+                    <label class="text-[10px] text-slate-700"
+                      >D0150A1. Little interest or pleasure in doing things</label
+                    >
                     <input
                       type="number"
                       min="0"
@@ -2551,7 +2625,9 @@
                     />
                   </div>
                   <div>
-                    <label class="text-[10px] text-slate-700">D0150A2. Feeling down, depressed, or hopeless</label>
+                    <label class="text-[10px] text-slate-700"
+                      >D0150A2. Feeling down, depressed, or hopeless</label
+                    >
                     <input
                       type="number"
                       min="0"
@@ -2561,7 +2637,9 @@
                     />
                   </div>
                   <div>
-                    <label class="text-[10px] text-slate-700">D0150B3. Trouble falling or staying asleep</label>
+                    <label class="text-[10px] text-slate-700"
+                      >D0150B3. Trouble falling or staying asleep</label
+                    >
                     <input
                       type="number"
                       min="0"
@@ -2571,7 +2649,9 @@
                     />
                   </div>
                   <div>
-                    <label class="text-[10px] text-slate-700">D0150B4. Feeling tired or having little energy</label>
+                    <label class="text-[10px] text-slate-700"
+                      >D0150B4. Feeling tired or having little energy</label
+                    >
                     <input
                       type="number"
                       min="0"
@@ -2585,7 +2665,9 @@
             </div>
 
             <div>
-              <label class="text-[11px] font-bold text-slate-700">D0160. PHQ-9 Total Severity Score</label>
+              <label class="text-[11px] font-bold text-slate-700"
+                >D0160. PHQ-9 Total Severity Score</label
+              >
               <input
                 type="number"
                 readonly
@@ -2610,7 +2692,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('diagnoses')" class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3">
+          <div
+            *ngIf="!isSectionCollapsed('diagnoses')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4 space-y-3"
+          >
             <!-- I8000 Primary Diagnosis -->
             <div>
               <label class="text-[11px] font-bold text-slate-700">
@@ -2682,7 +2767,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('health-conditions')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('health-conditions')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- J0510 Pain Effect on Sleep -->
               <div>
@@ -2719,9 +2807,7 @@
 
               <!-- J1900 Number of Falls (conditional) -->
               <div id="J1900-container" class="pl-4 border-l-2 border-rose-300 space-y-2">
-                <p class="text-[10px] text-slate-600 italic">
-                  Complete if J1800 = Yes
-                </p>
+                <p class="text-[10px] text-slate-600 italic">Complete if J1800 = Yes</p>
                 <div>
                   <label class="text-[11px] font-bold text-slate-700">
                     J1900A. Number of Falls - No Injury
@@ -2801,7 +2887,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('gg-prior')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('gg-prior')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <p class="text-[10px] text-slate-600 mb-3 italic bg-teal-50 p-2 rounded">
               <strong>Instructions:</strong> Prior to the current illness, exacerbation, or injury,
               what was the patient's usual ability with everyday activities?
@@ -2881,7 +2970,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('gg-prior-device')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('gg-prior-device')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <p class="text-[10px] text-slate-600 mb-3 italic bg-cyan-50 p-2 rounded">
               <strong>Instructions:</strong> Did the patient use any of the following prior to the
               current illness, exacerbation, or injury? (Check all that apply)
@@ -2934,7 +3026,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('gg-selfcare')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('gg-selfcare')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <p class="text-[10px] text-slate-600 mb-3 italic bg-purple-50 p-2 rounded">
               <strong>Coding:</strong> Code the patient's usual performance at admission. Use
               6-point scale: 06=Independent, 05=Setup help, 04=Supervision, 03=Partial assist,
@@ -3085,7 +3180,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('gg-mobility')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('gg-mobility')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <p class="text-[10px] text-slate-600 mb-3 italic bg-indigo-50 p-2 rounded">
               <strong>Coding:</strong> Code the patient's usual performance at admission. Same
               6-point scale as Self-Care section.
@@ -3415,7 +3513,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('nutritional')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('nutritional')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- K0520 Nutritional Approaches -->
               <div>
@@ -3463,13 +3564,16 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('integumentary')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('integumentary')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- M1306 Pressure Ulcers Present -->
               <div>
                 <label class="text-[11px] font-bold text-slate-700">
-                  M1306. Does this patient have at least one Unhealed Pressure Ulcer/Injury at Stage 2
-                  or Higher?
+                  M1306. Does this patient have at least one Unhealed Pressure Ulcer/Injury at Stage
+                  2 or Higher?
                   <span class="text-red-600 ml-1">*</span>
                 </label>
                 <select
@@ -3497,7 +3601,9 @@
                   <option value="2">2 - Stage 2</option>
                   <option value="3">3 - Stage 3</option>
                   <option value="4">4 - Stage 4</option>
-                  <option value="A1">A1 - Unstageable: Known but not stageable due to coverage</option>
+                  <option value="A1">
+                    A1 - Unstageable: Known but not stageable due to coverage
+                  </option>
                   <option value="A2">A2 - Unstageable: Deep tissue injury</option>
                   <option value="NA">NA - No pressure ulcers</option>
                 </select>
@@ -3606,7 +3712,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('respiratory')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('respiratory')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- M1400 Dyspnea -->
               <div>
@@ -3643,7 +3752,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('elimination')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('elimination')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- M1600 UTI -->
               <div>
@@ -3742,7 +3854,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('medications')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('medications')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- M2001 Drug Regimen Review -->
               <div>
@@ -3845,8 +3960,12 @@
                   <option value="1">
                     1 - Able to take if dosages prepared in advance or using dispensing device
                   </option>
-                  <option value="2">2 - Able to take if given reminders at appropriate times</option>
-                  <option value="3">3 - Unable to take unless administered by another person</option>
+                  <option value="2">
+                    2 - Able to take if given reminders at appropriate times
+                  </option>
+                  <option value="3">
+                    3 - Unable to take unless administered by another person
+                  </option>
                   <option value="NA">NA - No oral medications prescribed</option>
                 </select>
               </div>
@@ -3872,7 +3991,9 @@
                   <option value="2">
                     2 - Able to take if another person prepares and prompts at correct times
                   </option>
-                  <option value="3">3 - Unable to take unless administered by another person</option>
+                  <option value="3">
+                    3 - Unable to take unless administered by another person
+                  </option>
                   <option value="NA">NA - No injectable medications prescribed</option>
                 </select>
               </div>
@@ -3893,14 +4014,19 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('high-risk-drugs')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('high-risk-drugs')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <p class="text-[10px] text-slate-600 mb-3 italic bg-fuchsia-50 p-2 rounded">
               <strong>N0415. High-Risk Drug Classes:</strong> For each drug class, indicate if
               patient is currently taking and if indication is documented
             </p>
 
             <div class="space-y-3">
-              <div class="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-700 pb-2 border-b">
+              <div
+                class="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-700 pb-2 border-b"
+              >
                 <div>Drug Class</div>
                 <div>Currently Taking?</div>
               </div>
@@ -3972,7 +4098,9 @@
 
               <!-- N0415F Hypoglycemic -->
               <div class="grid grid-cols-2 gap-2 items-center">
-                <label class="text-xs text-slate-700">N0415F. Hypoglycemic (Diabetes medication)</label>
+                <label class="text-xs text-slate-700"
+                  >N0415F. Hypoglycemic (Diabetes medication)</label
+                >
                 <select
                   id="N0415F-select"
                   class="px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
@@ -3999,7 +4127,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('care-management')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('care-management')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- M2102 Types and Sources of Assistance -->
               <div>
@@ -4113,9 +4244,7 @@
                 <label class="text-[11px] font-bold text-slate-700">
                   M2420. Discharge Disposition
                 </label>
-                <p class="text-[10px] text-slate-600 italic mt-1">
-                  For discharge assessments only
-                </p>
+                <p class="text-[10px] text-slate-600 italic mt-1">For discharge assessments only</p>
                 <select
                   id="M2420-select"
                   class="mt-1 block w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs"
@@ -4143,7 +4272,10 @@
             ></ion-icon>
           </div>
 
-          <div *ngIf="!isSectionCollapsed('special-treatments')" class="bg-white border border-slate-300 rounded p-3 mb-4">
+          <div
+            *ngIf="!isSectionCollapsed('special-treatments')"
+            class="bg-white border border-slate-300 rounded p-3 mb-4"
+          >
             <div class="space-y-3">
               <!-- O0110 Special Treatments -->
               <div>
@@ -4257,7 +4389,9 @@
             <div class="space-y-2 text-xs">
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Items Completed:</span>
-                <span id="summary-items-completed" class="font-bold text-slate-900">{{ itemsAccepted() }} / {{ totalItems() }}</span>
+                <span id="summary-items-completed" class="font-bold text-slate-900"
+                  >{{ itemsAccepted() }} / {{ totalItems() }}</span
+                >
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">PDGM Clinical Group:</span>
@@ -4265,7 +4399,9 @@
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Comorbidity Tier:</span>
-                <span id="summary-comorbidity-tier" class="font-bold text-slate-900">{{ comorbidityTier() }}</span>
+                <span id="summary-comorbidity-tier" class="font-bold text-slate-900">{{
+                  comorbidityTier()
+                }}</span>
               </div>
               <div class="flex justify-between py-1 border-b border-emerald-200">
                 <span class="text-slate-700">Functional Level:</span>
@@ -4273,9 +4409,9 @@
               </div>
               <div class="flex justify-between pt-2 mt-2 border-t-2 border-emerald-400">
                 <span class="text-slate-700 font-bold">30-Day Payment Estimate:</span>
-                <span id="payment-estimate" class="font-bold text-xl text-emerald-600"
-                  >{{ currentPayment() | currency:'USD':'symbol':'1.2-2' }}</span
-                >
+                <span id="payment-estimate" class="font-bold text-xl text-emerald-600">{{
+                  currentPayment() | currency : 'USD' : 'symbol' : '1.2-2'
+                }}</span>
               </div>
               <p class="text-[10px] text-slate-500 italic mt-2">
                 *Payment estimates are based on current PDGM grouping and may change with additional
@@ -4380,7 +4516,9 @@
           style="width: 0%"
         ></div>
       </div>
-      <p class="text-sm text-slate-400 mt-3">Scanning form fields • Cross-referencing documentation • Validating PDGM logic</p>
+      <p class="text-sm text-slate-400 mt-3">
+        Scanning form fields • Cross-referencing documentation • Validating PDGM logic
+      </p>
     </div>
   </div>
 </div>
