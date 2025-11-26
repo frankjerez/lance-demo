@@ -320,6 +320,23 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   // Analyzer alerts state
   private allAnalyzerAlerts = signal<AnalyzerAlert[]>([
     {
+      id: 'alert-aspiration-missed',
+      type: 'coding_opportunity',
+      severity: 'high',
+      status: 'new',
+      title: 'Aspiration pneumonia documented but not present in OASIS I8000',
+      description:
+        'Discharge Summary documents aspiration pneumonia (J69.0). This diagnosis is not currently captured in I8000 comorbidity fields. Please double-check whether this was intentionally excluded.',
+      evidenceDocId: 'discharge-doc',
+      evidenceAnchorId: 'I8000-aspiration',
+      relatedOasisItem: 'I8000-comorbidity',
+      hippsImpact: {
+        delta: 287,
+        description: 'Potential comorbidity tier increase (+$287 illustrative).',
+      },
+      linkedRecommendationId: 'rec-aspiration',
+    },
+    {
       id: 'alert-hearing-inconsistent',
       type: 'inconsistency',
       severity: 'medium',
