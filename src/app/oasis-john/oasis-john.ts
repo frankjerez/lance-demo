@@ -687,6 +687,12 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       this.hideModal('save-processing-overlay');
       this.isSavingAssessment.set(false);
 
+      // Mark as saved to enable analyzer alerts filtering
+      this.hasBeenSaved.set(true);
+
+      // Re-compute alerts to filter out reviewed/dismissed ones
+      this.computeAnalyzerAlerts();
+
       // Reset progress bar for next time
       if (progressBar) {
         progressBar.style.width = '0%';
@@ -1633,6 +1639,10 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     }, 150);
   }
   handleAlertStatusChange(data: { alert: AnalyzerAlert; status: AnalyzerAlertStatus }): void {
+    // Persist to service for cross-session storage
+    this.oasisStateService.updateAlertStatus(data.alert.id, data.status);
+
+    // Update local signal - just update status, alert stays visible until next analyzer run
     this.analyzerAlerts.update((alerts) =>
       alerts.map((a) => (a.id === data.alert.id ? { ...a, status: data.status } : a))
     );
@@ -1711,22 +1721,37 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     const available = this.availableDocs();
 
     this.analyzerAlerts.set(
-      this.allAnalyzerAlerts().filter((alert) => {
-        // Filter 1: Only show alerts for available documents
-        if (!available.has(alert.evidenceDocId)) {
-          return false;
-        }
+      this.allAnalyzerAlerts()
+        .filter((alert) => {
+          // Filter 1: Only show alerts for available documents
+          if (!available.has(alert.evidenceDocId)) {
+            return false;
+          }
 
-        // Filter 2: If alert has a linked recommendation, only show if that recommendation was rejected or is still pending
-        if (alert.linkedRecommendationId) {
-          const rec = this.aiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
-          // Show alert if recommendation is rejected OR still pending (user hasn't addressed it yet)
-          return rec?.status === 'rejected' || rec?.status === 'pending';
-        }
+          // Filter 2: Exclude alerts that have been reviewed or dismissed
+          const savedStatus = this.oasisStateService.getAlertStatus(alert.id);
+          if (savedStatus && (savedStatus.status === 'reviewed' || savedStatus.status === 'dismissed')) {
+            return false;
+          }
 
-        // If no linked recommendation, always show the alert
-        return true;
-      })
+          // Filter 3: If alert has a linked recommendation, only show if that recommendation was rejected or is still pending
+          if (alert.linkedRecommendationId) {
+            const rec = this.aiRecommendations().find((r) => r.id === alert.linkedRecommendationId);
+            // Show alert if recommendation is rejected OR still pending (user hasn't addressed it yet)
+            return rec?.status === 'rejected' || rec?.status === 'pending';
+          }
+
+          // If no linked recommendation, always show the alert
+          return true;
+        })
+        .map((alert) => {
+          // Restore saved status if available
+          const savedStatus = this.oasisStateService.getAlertStatus(alert.id);
+          if (savedStatus) {
+            return { ...alert, status: savedStatus.status };
+          }
+          return alert;
+        })
     );
   }
 
