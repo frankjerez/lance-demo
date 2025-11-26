@@ -4407,11 +4407,26 @@
                 <span class="text-slate-700">Functional Level:</span>
                 <span class="font-bold text-slate-900">{{ functionalLevel() }}</span>
               </div>
-              <div class="flex justify-between pt-2 mt-2 border-t-2 border-emerald-400">
-                <span class="text-slate-700 font-bold">30-Day Payment Estimate:</span>
-                <span id="payment-estimate" class="font-bold text-xl text-emerald-600">{{
-                  currentPayment() | currency : 'USD' : 'symbol' : '1.2-2'
-                }}</span>
+
+              <!-- PDGM Payment Breakdown -->
+              <div class="mt-3 pt-3 border-t-2 border-emerald-400">
+                <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-wide mb-2">Payment Breakdown</p>
+                <div class="flex justify-between py-0.5">
+                  <span class="text-slate-600">Base Rate:</span>
+                  <span class="font-medium text-slate-800">{{ baseRate() | currency : 'USD' : 'symbol' : '1.2-2' }}</span>
+                </div>
+                <div class="flex justify-between py-0.5">
+                  <span class="text-slate-600">Comorbidity Adj:</span>
+                  <span class="font-medium" [ngClass]="comorbidityAdjustment() > 0 ? 'text-emerald-600' : 'text-slate-800'">
+                    {{ comorbidityAdjustment() > 0 ? '+' : '' }}{{ comorbidityAdjustment() | currency : 'USD' : 'symbol' : '1.2-2' }}
+                  </span>
+                </div>
+                <div class="flex justify-between pt-2 mt-1 border-t border-emerald-300">
+                  <span class="text-slate-700 font-bold">30-Day Estimate:</span>
+                  <span id="payment-estimate" class="font-bold text-lg text-emerald-600">{{
+                    currentPayment() | currency : 'USD' : 'symbol' : '1.2-2'
+                  }}</span>
+                </div>
               </div>
               <p class="text-[10px] text-slate-500 italic mt-2">
                 *Payment estimates are based on current PDGM grouping and may change with additional

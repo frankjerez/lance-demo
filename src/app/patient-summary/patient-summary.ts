@@ -744,7 +744,7 @@ export class PatientSummaryComponent implements OnInit {
       ],
       payment: {
         hippsCode: '2CB21',
-        baseRate: 2753.5,
+        baseRate: 2875.5,
         comorbidityAdjustment: this.paymentStateService.payment().comorbidityAdjustment,
         // functionalLevelAdjustment: 122.0,  // Commented out
         lutsAdjustment: 0,

@@ -312,6 +312,8 @@ export class OasisDocumentViewerComponent implements AfterContentInit {
         setTimeout(() => {
           this.isGeneratingVisitNote.set(false);
           this.onVisitNoteGenerated.emit();
+          // Force page reload after visit note generation
+          window.location.reload();
         }, 500);
       }
     }, 600);

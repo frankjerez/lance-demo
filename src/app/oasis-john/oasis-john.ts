@@ -61,7 +61,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
   // Signals for shared state
   totalItems = signal(89);
-  currentPayment = signal(2875.5);
+  baseRate = signal(2875.5);
+  comorbidityAdjustment = signal(0);
+  currentPayment = computed(() => this.baseRate() + this.comorbidityAdjustment());
   comorbidityTier = signal('None');
   functionalLevel = signal('Low');
   showAnalyzer = signal(false);
@@ -684,19 +686,22 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.activeDocId.set('referral-doc');
 
     // Reset payment and alerts
-    this.currentPayment.set(2875.5);
+    this.baseRate.set(2875.5);
+    this.comorbidityAdjustment.set(0);
+    this.comorbidityTier.set('None');
     this.paymentStateService.resetPayment();
     this.analyzerAlerts.set([]);
     this.oasisStateService.resetAlerts();
 
-    // Update payment display in DOM (since it's directly manipulated)
+    // Update payment display in DOM (since it's directly manipulated during animations)
     const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
     const paymentEstimateEl = document.getElementById('payment-estimate') as HTMLElement | null;
+    const resetPaymentValue = '$' + this.currentPayment().toFixed(2);
     if (pdgmValueEl) {
-      pdgmValueEl.innerText = '$2,875.50';
+      pdgmValueEl.innerText = resetPaymentValue;
     }
     if (paymentEstimateEl) {
-      paymentEstimateEl.innerText = '$2,875.50';
+      paymentEstimateEl.innerText = resetPaymentValue;
     }
 
     // Reset all recommendations to pending
@@ -1435,7 +1440,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
       // Revert payment if applicable
       if (recommendation.triggersPdgmUpdate) {
-        this.currentPayment.update((v) => Math.max(2875.5, v - 287));
+        this.comorbidityAdjustment.set(0);
+        this.comorbidityTier.set('None');
         this.paymentStateService.updatePayment(this.currentPayment(), 0);
 
         // Update DOM elements
@@ -1604,15 +1610,14 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     pdgmValueEl.style.transition = 'all 0.4s ease-in-out';
 
     setTimeout(() => {
-      // Update payment - always ADD $287 to current value
-      this.currentPayment.update((v) => v + 287);
-
-      // Determine comorbidity adjustment based on which recommendation
-      const comorbidityAdjustment =
-        recommendation.oasisTargetId === 'I8000-comorbidity' ? 287.0 : 0;
+      // Update comorbidity adjustment - this will recalculate currentPayment via computed signal
+      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
+        this.comorbidityAdjustment.set(287);
+        this.comorbidityTier.set('Low');
+      }
 
       // Update shared payment state for patient-summary
-      this.paymentStateService.updatePayment(this.currentPayment(), comorbidityAdjustment);
+      this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment());
 
       pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
       if (paymentEstimateEl) {
