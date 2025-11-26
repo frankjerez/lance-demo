@@ -27,6 +27,7 @@ import { PaymentStateService } from '../services/payment-state.service';
 import { DocumentStateService } from '../services/document-state.service';
 import { RecommendationStateService } from '../services/recommendation-state.service';
 import { OasisStateService } from '../services/oasis-state.service';
+import { EpisodeStateService, CompletedEpisodeSummary } from '../services/episode-state.service';
 
 @Component({
   selector: 'app-oasis-john',
@@ -47,6 +48,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   private documentStateService = inject(DocumentStateService);
   private recommendationStateService = inject(RecommendationStateService);
   private oasisStateService = inject(OasisStateService);
+  private episodeStateService = inject(EpisodeStateService);
 
   // Document mapping: patient-summary doc IDs -> oasis-john doc IDs
   private readonly DOC_MAPPING = {
@@ -64,7 +66,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   baseRate = signal(2875.5);
   functionalAdjustment = signal(0);
   comorbidityAdjustment = signal(0);
-  currentPayment = computed(() => this.baseRate() + this.functionalAdjustment() + this.comorbidityAdjustment());
+  currentPayment = computed(
+    () => this.baseRate() + this.functionalAdjustment() + this.comorbidityAdjustment()
+  );
   comorbidityTier = signal('None');
   functionalLevel = signal('Low');
   showAnalyzer = signal(false);
@@ -326,7 +330,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       evidenceDocId: 'audio-doc',
       evidenceAnchorId: 'transcript-hearing',
       relatedOasisItem: 'Sensory Status / B1000',
-      oasisFormFieldId: 'form-B1000-Vision-container',
+      oasisFormFieldId: 'form-B1000-Hearing-container',
     },
   ]);
 
@@ -725,6 +729,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.paymentStateService.resetPayment();
     this.analyzerAlerts.set([]);
     this.oasisStateService.resetAlerts();
+
+    // Reset episode state (marks Episode 5 back to Active)
+    this.episodeStateService.resetAll();
 
     // Update payment display in DOM (since it's directly manipulated during animations)
     const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
@@ -1475,7 +1482,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       if (recommendation.oasisTargetId === 'GG0170C') {
         this.functionalAdjustment.set(0);
         this.functionalLevel.set('Low');
-        this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
+        this.paymentStateService.updatePayment(
+          this.currentPayment(),
+          this.comorbidityAdjustment(),
+          this.functionalAdjustment()
+        );
 
         // Update DOM elements
         const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
@@ -1505,7 +1516,11 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         } else {
           this.comorbidityTier.set('Low');
         }
-        this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
+        this.paymentStateService.updatePayment(
+          this.currentPayment(),
+          this.comorbidityAdjustment(),
+          this.functionalAdjustment()
+        );
 
         // Update DOM elements
         const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
@@ -1662,8 +1677,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Create increase indicator
     const increaseEl = document.createElement('div');
-    increaseEl.className =
-      'absolute -top-10 right-0 font-black text-2xl animate-bounce z-50';
+    increaseEl.className = 'absolute -top-10 right-0 font-black text-2xl animate-bounce z-50';
     increaseEl.style.color = isFunctional ? '#9333ea' : '#10b981'; // Purple for functional, green for comorbidity
     increaseEl.innerHTML = `+$${amount}`;
 
@@ -1690,11 +1704,15 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       ) {
         // Add $287 to current comorbidity adjustment (cumulative)
         this.comorbidityAdjustment.update((current) => current + 287);
-        this.comorbidityTier.set(this.comorbidityAdjustment() >= 574 ? 'High' : 'Low');
+        this.comorbidityTier.set(this.comorbidityAdjustment() >= 574 ? 'High' : 'Medium');
       }
 
       // Update shared payment state for patient-summary
-      this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
+      this.paymentStateService.updatePayment(
+        this.currentPayment(),
+        this.comorbidityAdjustment(),
+        this.functionalAdjustment()
+      );
 
       pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
       if (paymentEstimateEl) {
@@ -1730,7 +1748,10 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
           // Filter 2: Exclude alerts that have been reviewed or dismissed
           const savedStatus = this.oasisStateService.getAlertStatus(alert.id);
-          if (savedStatus && (savedStatus.status === 'reviewed' || savedStatus.status === 'dismissed')) {
+          if (
+            savedStatus &&
+            (savedStatus.status === 'reviewed' || savedStatus.status === 'dismissed')
+          ) {
             return false;
           }
 
@@ -1941,6 +1962,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
+      // Mark episode as completed with OASIS summary data
+      this.completeCurrentEpisode(filename);
+
       // Show success notification
       this.showExportNotification(filename);
 
@@ -1949,6 +1973,58 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       console.error('❌ Error exporting XML:', error);
       this.showExportErrorNotification();
     }
+  }
+
+  /**
+   * Mark the current episode as completed with OASIS assessment data
+   */
+  private completeCurrentEpisode(exportedFileName: string): void {
+    // Count accepted recommendations
+    const acceptedRecommendations = this.aiRecommendations().filter(
+      (r: AiRecommendation) => r.status === 'accepted'
+    ).length;
+
+    // Get diagnoses from recommendations (kind === 'icd' for ICD codes)
+    const diagnosisRecs = this.aiRecommendations().filter(
+      (r: AiRecommendation) => r.status === 'accepted' && r.kind === 'icd'
+    );
+    const primaryDiagnosis =
+      diagnosisRecs.length > 0 ? diagnosisRecs[0].title : 'I63.511 - Cerebral infarction';
+    const secondaryDiagnoses = diagnosisRecs.slice(1).map((r: AiRecommendation) => r.title);
+
+    const summary: CompletedEpisodeSummary = {
+      episodeId: 'episode-5', // Current active episode for John Smith
+      patientId: 'p1',
+      completedAt: new Date().toISOString(),
+      exportedFileName,
+
+      // Assessment info
+      assessmentType: 'Start of Care',
+      clinician: 'RN Sarah Nguyen',
+
+      // Payment data
+      totalPayment: this.currentPayment(),
+      baseRate: this.baseRate(),
+      comorbidityAdjustment: this.comorbidityAdjustment(),
+      functionalAdjustment: this.functionalAdjustment(),
+      comorbidityTier: this.comorbidityTier(),
+      functionalLevel: this.functionalLevel(),
+
+      // Diagnoses
+      primaryDiagnosis,
+      secondaryDiagnoses,
+
+      // Progress
+      itemsAccepted: this.itemsAccepted(),
+      totalItems: this.totalItems(),
+      completionPercentage: this.oasisStateService.progressPercentage,
+
+      // AI stats
+      recommendationsAccepted: acceptedRecommendations,
+    };
+
+    this.episodeStateService.completeEpisode(summary);
+    console.log('📋 Episode marked as completed:', summary);
   }
 
   /**
@@ -2416,6 +2492,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         );
         if (option) {
           selectElement.value = option.value;
+          // Dispatch change event so Angular detects the change
+          selectElement.dispatchEvent(new Event('change', { bubbles: true }));
           filledCount++;
           return true;
         }
@@ -2458,18 +2536,15 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       filledCount += 3;
 
       // 7. HEALTH CONDITIONS - J Items (4 items)
-      allSelects.forEach((select) => {
-        const prevText = select.previousElementSibling?.textContent || '';
-        if (prevText.includes('J0510')) {
-          selectOption(select, '1'); // Pain affects sleep
-        }
-        if (prevText.includes('J1800')) {
-          selectOption(select, '0'); // No falls
-        }
-        if (prevText.includes('J2030')) {
-          selectOption(select, '1'); // Mild dyspnea
-        }
-      });
+      // Use IDs for reliable selection
+      const j0510Select = document.getElementById('J0510-select') as HTMLSelectElement;
+      if (j0510Select) selectOption(j0510Select, '1'); // Pain affects sleep
+
+      const j1800Select = document.getElementById('J1800-select') as HTMLSelectElement;
+      if (j1800Select) selectOption(j1800Select, '0'); // No falls
+
+      const j2030Select = document.getElementById('J2030-select') as HTMLSelectElement;
+      if (j2030Select) selectOption(j2030Select, '1'); // Mild dyspnea
 
       // 8. GG0100 PRIOR FUNCTIONING (3 items)
       document.querySelectorAll('select').forEach((select) => {
@@ -2708,25 +2783,25 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       this.recommendationStateService.updateRecommendationStatus(rec.id, 'accepted');
     });
 
-    // Mark assessment as saved to enable analyzer alerts
+    // Mark assessment as saved
     this.hasBeenSaved.set(true);
 
-    // Show all analyzer alerts and mark them as reviewed (completed)
+    // Mark all analyzer alerts as reviewed in state service (persisted)
     const available = this.availableDocs();
-    this.analyzerAlerts.set(
-      this.allAnalyzerAlerts()
-        .filter((alert) => available.has(alert.evidenceDocId))
-        .map((alert) => ({
-          ...alert,
-          status: 'reviewed' as AnalyzerAlertStatus,
-        }))
-    );
+    this.allAnalyzerAlerts()
+      .filter((alert) => available.has(alert.evidenceDocId))
+      .forEach((alert) => {
+        this.oasisStateService.updateAlertStatus(alert.id, 'reviewed');
+      });
 
-    // Show the analyzer panel
-    this.showAnalyzer.set(true);
+    // Clear visible alerts since all recommendations are accepted
+    this.analyzerAlerts.set([]);
+
+    // Hide the analyzer panel since there are no alerts to show
+    this.showAnalyzer.set(false);
 
     console.log('✅ All AI recommendations accepted during demo autofill');
-    console.log('✅ All analyzer alerts marked as reviewed');
+    console.log('✅ All analyzer alerts marked as reviewed and hidden');
   }
 
   private showAutofillNotification(): void {

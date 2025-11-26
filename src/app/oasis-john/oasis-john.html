@@ -2362,7 +2362,7 @@
               </select>
             </div>
 
-            <div>
+            <div id="form-B1000-Hearing-container">
               <label class="text-[11px] font-bold text-slate-700"
                 >B1200. Hearing (with hearing aid if applicable)</label
               >
@@ -4416,21 +4416,33 @@
 
               <!-- PDGM Payment Breakdown -->
               <div class="mt-3 pt-3 border-t-2 border-emerald-400">
-                <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-wide mb-2">Payment Breakdown</p>
+                <p class="text-[10px] font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                  Payment Breakdown
+                </p>
                 <div class="flex justify-between py-0.5">
                   <span class="text-slate-600">Base Rate:</span>
-                  <span class="font-medium text-slate-800">{{ baseRate() | currency : 'USD' : 'symbol' : '1.2-2' }}</span>
+                  <span class="font-medium text-slate-800">{{
+                    baseRate() | currency : 'USD' : 'symbol' : '1.2-2'
+                  }}</span>
                 </div>
                 <div class="flex justify-between py-0.5">
                   <span class="text-slate-600">Functional Adj:</span>
-                  <span class="font-medium" [ngClass]="functionalAdjustment() > 0 ? 'text-purple-600' : 'text-slate-800'">
-                    {{ functionalAdjustment() > 0 ? '+' : '' }}{{ functionalAdjustment() | currency : 'USD' : 'symbol' : '1.2-2' }}
+                  <span
+                    class="font-medium"
+                    [ngClass]="functionalAdjustment() > 0 ? 'text-purple-600' : 'text-slate-800'"
+                  >
+                    {{ functionalAdjustment() > 0 ? '+' : ''
+                    }}{{ functionalAdjustment() | currency : 'USD' : 'symbol' : '1.2-2' }}
                   </span>
                 </div>
                 <div class="flex justify-between py-0.5">
                   <span class="text-slate-600">Comorbidity Adj:</span>
-                  <span class="font-medium" [ngClass]="comorbidityAdjustment() > 0 ? 'text-emerald-600' : 'text-slate-800'">
-                    {{ comorbidityAdjustment() > 0 ? '+' : '' }}{{ comorbidityAdjustment() | currency : 'USD' : 'symbol' : '1.2-2' }}
+                  <span
+                    class="font-medium"
+                    [ngClass]="comorbidityAdjustment() > 0 ? 'text-emerald-600' : 'text-slate-800'"
+                  >
+                    {{ comorbidityAdjustment() > 0 ? '+' : ''
+                    }}{{ comorbidityAdjustment() | currency : 'USD' : 'symbol' : '1.2-2' }}
                   </span>
                 </div>
                 <div class="flex justify-between pt-2 mt-1 border-t border-emerald-300">

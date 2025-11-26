@@ -7,6 +7,7 @@ import { OasisStateService } from '../services/oasis-state.service';
 import { DocumentStateService } from '../services/document-state.service';
 import { PaymentStateService } from '../services/payment-state.service';
 import { RecommendationStateService } from '../services/recommendation-state.service';
+import { EpisodeStateService } from '../services/episode-state.service';
 
 @Component({
   selector: 'app-patient-list',
@@ -21,6 +22,7 @@ export class PatientListComponent implements OnInit {
   private documentStateService = inject(DocumentStateService);
   private paymentStateService = inject(PaymentStateService);
   private recommendationStateService = inject(RecommendationStateService);
+  private episodeStateService = inject(EpisodeStateService);
 
   // All patients
   allPatients = signal<PatientListItem[]>(myPatients);
@@ -456,6 +458,7 @@ export class PatientListComponent implements OnInit {
     this.documentStateService.resetDocuments();
     this.paymentStateService.resetPayment();
     this.recommendationStateService.resetRecommendations();
+    this.episodeStateService.resetAll();
 
     // Navigate to login
     this.router.navigate(['/login']);

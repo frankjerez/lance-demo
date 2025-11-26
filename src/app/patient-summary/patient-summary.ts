@@ -6,6 +6,7 @@ import { PatientSummary, MedicalDocument, EpisodeHistory } from './data/patient-
 import { CommonModule } from '@angular/common';
 import { PaymentStateService } from '../services/payment-state.service';
 import { DocumentStateService } from '../services/document-state.service';
+import { EpisodeStateService, CompletedEpisodeSummary } from '../services/episode-state.service';
 
 type SummaryTab = 'demographics' | 'history' | 'docs' | 'payment';
 
@@ -18,11 +19,13 @@ type SummaryTab = 'demographics' | 'history' | 'docs' | 'payment';
 export class PatientSummaryComponent implements OnInit {
   private paymentStateService = inject(PaymentStateService);
   private documentStateService = inject(DocumentStateService);
+  private episodeStateService = inject(EpisodeStateService);
 
   patientId!: string;
   activeTab: SummaryTab = 'demographics';
 
   selectedEpisode?: EpisodeHistory;
+  completedEpisodeSummary?: CompletedEpisodeSummary;
 
   patientSummary: PatientSummary = undefined as any;
 
@@ -32,6 +35,39 @@ export class PatientSummaryComponent implements OnInit {
   selectEpisode(ep: EpisodeHistory) {
     // click again to collapse
     this.selectedEpisode = this.selectedEpisode === ep ? undefined : ep;
+  }
+
+  /**
+   * Navigate to view the OASIS assessment for a completed episode
+   */
+  viewCompletedOasis(ep: EpisodeHistory): void {
+    if (ep.status === 'Completed' && this.completedEpisodeSummary) {
+      // Navigate to OASIS form to view the completed assessment
+      this.router.navigate(['/oasis']);
+    }
+  }
+
+  /**
+   * Check if an episode has a completed OASIS assessment that can be viewed
+   */
+  canViewOasis(ep: EpisodeHistory): boolean {
+    return ep.status === 'Completed' &&
+           ep.type.includes('Episode 5') &&
+           this.completedEpisodeSummary !== undefined;
+  }
+
+  /**
+   * Show the export summary modal
+   */
+  showExportSummaryModal(): void {
+    this.showModal('export-summary-modal');
+  }
+
+  /**
+   * Hide the export summary modal
+   */
+  hideExportSummaryModal(): void {
+    this.hideModal('export-summary-modal');
   }
 
   getUploadedDocsCount(): number {
@@ -269,21 +305,34 @@ export class PatientSummaryComponent implements OnInit {
         outcome:
           'Patient remained clinically fragile but stable with close monitoring; recertified for ongoing skilled services.',
       },
-      {
-        type: 'Episode 5 – Current Episode (Active)',
+      this.buildEpisode5(),
+    ];
+  }
+
+  /**
+   * Build Episode 5 dynamically based on completion status
+   */
+  private buildEpisode5(): EpisodeHistory {
+    const completedEpisode = this.episodeStateService.getCompletedEpisode('episode-5');
+    this.completedEpisodeSummary = completedEpisode;
+
+    if (completedEpisode) {
+      // Episode has been completed - show completion data
+      const completionDate = new Date(completedEpisode.completedAt);
+      const formattedDate = completionDate.toISOString().split('T')[0];
+
+      return {
+        type: 'Episode 5 – OASIS Assessment Complete',
         startDate: '2024-09-09',
-        endDate: '2024-11-07',
-        clinician: 'RN Sarah Nguyen',
-        status: 'Active',
+        endDate: formattedDate,
+        clinician: completedEpisode.clinician,
+        status: 'Completed',
         primaryReason:
           'Continued high-risk home health needs: CHF, COPD, diabetes with neuropathy, and risk for recurrent foot ulcer.',
         diagnoses: [
-          'CHF with ongoing symptoms',
-          'Type 2 diabetes with neuropathy',
-          'COPD',
-          'History of diabetic foot ulcer',
-          'Mild cognitive impairment (suspected)',
-        ],
+          completedEpisode.primaryDiagnosis,
+          ...completedEpisode.secondaryDiagnoses,
+        ].filter(d => d),
         planOfCare: [
           {
             title: 'Wound prevention and skin integrity',
@@ -301,39 +350,83 @@ export class PatientSummaryComponent implements OnInit {
               'Provide dietary reinforcement regarding sodium restriction.',
             ],
           },
-          {
-            title: 'Diabetes control',
-            items: [
-              'Review insulin timing and doses at each visit.',
-              'Evaluate for hypoglycemia and hyperglycemia episodes.',
-              'Reinforce BG log completion.',
-            ],
-          },
-          {
-            title: 'Cognitive monitoring & caregiver support',
-            items: [
-              'Monitor for worsening memory or confusion.',
-              'Encourage family involvement in med setup and appointment reminders.',
-            ],
-          },
-          {
-            title: 'Fall risk and environment',
-            items: [
-              'Reassess home for new hazards (e.g., new area rugs).',
-              'Reinforce safe walker use and pacing strategies.',
-            ],
-          },
         ],
         interventions: [
-          'Identified inconsistent insulin use and gaps in BG logging; flagged as high-priority adherence issue.',
-          'Noted new redness on right great toe, concerning for early skin breakdown; MD and podiatry referral considered.',
-          'Documented patient reporting intermittent night-time chest heaviness; provider notified for further evaluation.',
-          'Reinforced breathing treatment schedule; patient still requires reminders.',
+          `OASIS Assessment exported: ${completedEpisode.exportedFileName}`,
+          `Est. Payment: $${completedEpisode.totalPayment.toFixed(2)} (${completedEpisode.comorbidityTier} Comorbidity)`,
+          `Completion: ${completedEpisode.completionPercentage}% (${completedEpisode.itemsAccepted}/${completedEpisode.totalItems} items)`,
+          `AI Recommendations Accepted: ${completedEpisode.recommendationsAccepted}`,
         ],
         outcome:
-          'Episode in progress; multiple risk factors actively monitored. Several potential missed-opportunity scenarios appropriate for AI analyzer and coding support.',
-      },
-    ];
+          `Episode completed successfully. OASIS assessment finalized and exported for CMS submission. Final payment estimate: $${completedEpisode.totalPayment.toFixed(2)}.`,
+      };
+    }
+
+    // Episode is still active
+    return {
+      type: 'Episode 5 – Current Episode (Active)',
+      startDate: '2024-09-09',
+      endDate: '2024-11-07',
+      clinician: 'RN Sarah Nguyen',
+      status: 'Active',
+      primaryReason:
+        'Continued high-risk home health needs: CHF, COPD, diabetes with neuropathy, and risk for recurrent foot ulcer.',
+      diagnoses: [
+        'CHF with ongoing symptoms',
+        'Type 2 diabetes with neuropathy',
+        'COPD',
+        'History of diabetic foot ulcer',
+        'Mild cognitive impairment (suspected)',
+      ],
+      planOfCare: [
+        {
+          title: 'Wound prevention and skin integrity',
+          items: [
+            'Monitor for recurrence of foot ulcers, especially toes and pressure areas.',
+            'Educate on protective footwear and avoidance of barefoot walking.',
+            'Teach daily moisturizing to prevent skin cracks.',
+          ],
+        },
+        {
+          title: 'CHF & COPD dual management',
+          items: [
+            'Assess lung sounds, edema, and weight trends at each visit.',
+            'Reinforce breathing exercises and inhaler/nebulizer adherence.',
+            'Provide dietary reinforcement regarding sodium restriction.',
+          ],
+        },
+        {
+          title: 'Diabetes control',
+          items: [
+            'Review insulin timing and doses at each visit.',
+            'Evaluate for hypoglycemia and hyperglycemia episodes.',
+            'Reinforce BG log completion.',
+          ],
+        },
+        {
+          title: 'Cognitive monitoring & caregiver support',
+          items: [
+            'Monitor for worsening memory or confusion.',
+            'Encourage family involvement in med setup and appointment reminders.',
+          ],
+        },
+        {
+          title: 'Fall risk and environment',
+          items: [
+            'Reassess home for new hazards (e.g., new area rugs).',
+            'Reinforce safe walker use and pacing strategies.',
+          ],
+        },
+      ],
+      interventions: [
+        'Identified inconsistent insulin use and gaps in BG logging; flagged as high-priority adherence issue.',
+        'Noted new redness on right great toe, concerning for early skin breakdown; MD and podiatry referral considered.',
+        'Documented patient reporting intermittent night-time chest heaviness; provider notified for further evaluation.',
+        'Reinforced breathing treatment schedule; patient still requires reminders.',
+      ],
+      outcome:
+        'Episode in progress; multiple risk factors actively monitored. Several potential missed-opportunity scenarios appropriate for AI analyzer and coding support.',
+    };
   }
 
   constructor(private route: ActivatedRoute, private router: Router) {
