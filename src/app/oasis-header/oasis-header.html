@@ -23,7 +23,9 @@
             <h1
               (click)="handlePatientClick()"
               class="text-base font-semibold text-slate-900 hover:text-indigo-600 cursor-pointer transition-colors"
-            >{{ patientName() }}</h1>
+            >
+              {{ patientName() }}
+            </h1>
             <button
               (click)="handleEligibilityClick($event)"
               class="text-xs font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors flex items-center space-x-1"
@@ -41,12 +43,116 @@
     <div class="flex items-center space-x-6">
       <div class="w-px h-8 bg-slate-200"></div>
 
-      <!-- PDGM Payment -->
-      <div class="text-right">
-        <p class="text-xs text-slate-500">Est. Payment</p>
-        <p id="pdgm-value" class="text-sm font-semibold text-slate-900 transition-all">
-          ${{ currentPayment().toFixed(2) }}
-        </p>
+      <!-- PDGM Payment - Clickable with Popup -->
+      <div class="relative payment-popup-container">
+        <button
+          (click)="togglePaymentPopup($event)"
+          class="text-right hover:bg-slate-50 px-3 py-2 -mx-3 -my-2 rounded-lg transition-colors cursor-pointer"
+        >
+          <p class="text-xs text-slate-500 flex items-center justify-end space-x-1">
+            <span>Est. Payment</span>
+            <ion-icon
+              name="chevron-down-outline"
+              class="text-[10px]"
+              [class.rotate-180]="showPaymentPopup()"
+            ></ion-icon>
+          </p>
+          <p id="pdgm-value" class="text-sm font-semibold text-slate-900 transition-all">
+            ${{ currentPayment().toFixed(2) }}
+          </p>
+        </button>
+
+        <!-- Payment Details Popup -->
+        <div
+          *ngIf="showPaymentPopup()"
+          class="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+        >
+          <!-- Header -->
+          <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-sm">Payment Summary</h3>
+              <button (click)="closePaymentPopup()" class="text-white/80 hover:text-white">
+                <ion-icon name="close" class="text-lg"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-4 space-y-3">
+            <!-- Comorbidity Tier -->
+            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+              <span class="text-xs text-slate-500">Comorbidity Tier:</span>
+              <span
+                class="text-sm font-semibold"
+                [ngClass]="{
+                  'text-emerald-600': comorbidityTier() === 'High' || comorbidityTier() === 'Low',
+                  'text-slate-500': comorbidityTier() === 'None'
+                }"
+                >{{ comorbidityTier() }}</span
+              >
+            </div>
+
+            <!-- Functional Level -->
+            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+              <span class="text-xs text-slate-500">Functional Level:</span>
+              <span
+                class="text-sm font-semibold"
+                [ngClass]="{
+                  'text-purple-600': functionalLevel() === 'Medium' || functionalLevel() === 'High',
+                  'text-slate-500': functionalLevel() === 'Low'
+                }"
+                >{{ functionalLevel() }}</span
+              >
+            </div>
+
+            <!-- Payment Breakdown Header -->
+            <div class="pt-2 mt-2 border-t-2 border-emerald-200">
+              <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                Payment Breakdown
+              </p>
+
+              <!-- Base Rate -->
+              <div class="flex justify-between py-1">
+                <span class="text-xs text-slate-500">Base Rate:</span>
+                <span class="text-xs font-medium text-slate-700">${{ baseRate().toFixed(2) }}</span>
+              </div>
+
+              <!-- Functional Adj -->
+              <div class="flex justify-between py-1">
+                <span class="text-xs text-slate-500">Functional Adj:</span>
+                <span
+                  class="text-xs font-medium"
+                  [ngClass]="functionalAdjustment() > 0 ? 'text-purple-600' : 'text-slate-500'"
+                >
+                  {{ functionalAdjustment() > 0 ? '+' : '' }}${{
+                    functionalAdjustment().toFixed(2)
+                  }}
+                </span>
+              </div>
+
+              <!-- Comorbidity Adj -->
+              <div class="flex justify-between py-1">
+                <span class="text-xs text-slate-500">Comorbidity Adj:</span>
+                <span
+                  class="text-xs font-medium"
+                  [ngClass]="comorbidityAdjustment() > 0 ? 'text-emerald-600' : 'text-slate-500'"
+                >
+                  {{ comorbidityAdjustment() > 0 ? '+' : '' }}${{
+                    comorbidityAdjustment().toFixed(2)
+                  }}
+                </span>
+              </div>
+
+              <!-- Total -->
+              <div class="flex justify-between pt-2 mt-2 border-t border-emerald-200">
+                <span class="text-sm font-bold text-slate-700">30-Day Estimate:</span>
+                <span class="text-sm font-bold text-emerald-600"
+                  >${{ currentPayment().toFixed(2) }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="w-px h-8 bg-slate-200"></div>

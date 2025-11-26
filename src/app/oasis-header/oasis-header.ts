@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, HostListener, input, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-oasis-header',
@@ -20,6 +20,17 @@ export class OasisHeaderComponent {
   newAnalyzerAlertCount = input<number>(0);
   showAnalyzer = input<boolean>(false);
   isSavingAssessment = input<boolean>(false);
+
+  // Payment breakdown inputs
+  baseRate = input<number>(2875.5);
+  comorbidityAdjustment = input<number>(0);
+  functionalAdjustment = input<number>(0);
+  comorbidityTier = input<string>('None');
+  functionalLevel = input<string>('Low');
+  clinicalGroup = input<string>('MS-Rehab');
+
+  // Payment popup state
+  showPaymentPopup = signal(false);
 
   // Outputs to parent
   onBackToDashboard = output<void>();
@@ -71,5 +82,23 @@ export class OasisHeaderComponent {
 
   handleValidateClick(): void {
     this.onValidate.emit();
+  }
+
+  togglePaymentPopup(event: Event): void {
+    event.stopPropagation();
+    this.showPaymentPopup.update((v) => !v);
+  }
+
+  closePaymentPopup(): void {
+    this.showPaymentPopup.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    // Close popup when clicking outside
+    const target = event.target as HTMLElement;
+    if (!target.closest('.payment-popup-container')) {
+      this.showPaymentPopup.set(false);
+    }
   }
 }

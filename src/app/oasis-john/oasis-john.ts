@@ -62,8 +62,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
   // Signals for shared state
   totalItems = signal(89);
   baseRate = signal(2875.5);
+  functionalAdjustment = signal(0);
   comorbidityAdjustment = signal(0);
-  currentPayment = computed(() => this.baseRate() + this.comorbidityAdjustment());
+  currentPayment = computed(() => this.baseRate() + this.functionalAdjustment() + this.comorbidityAdjustment());
   comorbidityTier = signal('None');
   functionalLevel = signal('Low');
   showAnalyzer = signal(false);
@@ -130,7 +131,7 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       formFieldId: 'form-I8000-primary-answer',
       oasisTargetId: 'I8000-primary',
       acceptValue: 'I63.511 - Cerebral infarction due to embolism of right middle cerebral artery',
-      triggersPdgmUpdate: true,
+      triggersPdgmUpdate: false,
       progressIncrement: 25,
       status: 'pending',
     },
@@ -217,14 +218,16 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       title: '03 – Partial/moderate assistance for short-distance ambulation and transfers',
       rationaleHtml:
         'PT/OT document left hemiparesis with need for moderate to maximal assistance for transfers and short-distance ambulation (25–50 ft) with a rolling walker, wheelchair dependent for community mobility. This supports coding GG0170 items at a partial/moderate assistance level.',
-      contextLabel: 'Mobility',
+      contextLabel: 'Functional adjustment',
       evidenceDocLabel: 'Referral / Therapy notes',
+      badgeLabel: 'High impact',
+      badgeClass: 'bg-purple-50 text-purple-700',
       selectionOasisKey: 'GG0170-mobility',
       evidenceDocId: 'referral-doc',
       formFieldId: 'form-GG0170C-answer',
       oasisTargetId: 'GG0170C',
       ggValue: '03',
-      triggersPdgmUpdate: false,
+      triggersPdgmUpdate: true,
       progressIncrement: 0,
       status: 'pending',
     },
@@ -348,10 +351,33 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     this.initializeAvailableDocuments();
     this.filterRecommendationsAndAlerts();
     this.restoreSavedRecommendationStates();
+    this.restorePaymentState(); // Restore payment from localStorage
     this.handleNavigationState();
     // Items accepted count restored automatically by OasisStateService
     this.collapseAllSections(); // Start with all sections collapsed
     this.showPage('copilot-page');
+  }
+
+  /**
+   * Restore payment state from localStorage via payment state service
+   */
+  private restorePaymentState(): void {
+    const savedPayment = this.paymentStateService.payment();
+    if (savedPayment.comorbidityAdjustment > 0) {
+      this.comorbidityAdjustment.set(savedPayment.comorbidityAdjustment);
+      // Update tier based on restored adjustment
+      if (savedPayment.comorbidityAdjustment >= 574) {
+        this.comorbidityTier.set('High');
+      } else {
+        this.comorbidityTier.set('Low');
+      }
+      console.log('💰 Restored comorbidity adjustment:', savedPayment.comorbidityAdjustment);
+    }
+    if (savedPayment.functionalAdjustment > 0) {
+      this.functionalAdjustment.set(savedPayment.functionalAdjustment);
+      this.functionalLevel.set('Medium');
+      console.log('💰 Restored functional adjustment:', savedPayment.functionalAdjustment);
+    }
   }
 
   /**
@@ -506,10 +532,9 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
               isOtherDiagnosis
             );
 
-            // Update payment if applicable (visual only, no count increment)
-            if (rec.triggersPdgmUpdate) {
-              this.updatePaymentDisplay(rec);
-            }
+            // NOTE: Do NOT call updatePaymentDisplay here!
+            // Payment state is already restored from localStorage in restorePaymentState()
+            // Calling it here would add $287 again on every page load
           }
         });
       }, 200);
@@ -687,6 +712,8 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     // Reset payment and alerts
     this.baseRate.set(2875.5);
+    this.functionalAdjustment.set(0);
+    this.functionalLevel.set('Low');
     this.comorbidityAdjustment.set(0);
     this.comorbidityTier.set('None');
     this.paymentStateService.resetPayment();
@@ -1438,11 +1465,41 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
       // Decrement items count
       this.oasisStateService.updateItemsAccepted(Math.max(0, this.itemsAccepted() - 1));
 
-      // Revert payment if applicable
-      if (recommendation.triggersPdgmUpdate) {
-        this.comorbidityAdjustment.set(0);
-        this.comorbidityTier.set('None');
-        this.paymentStateService.updatePayment(this.currentPayment(), 0);
+      // Revert functional adjustment for GG0170C
+      if (recommendation.oasisTargetId === 'GG0170C') {
+        this.functionalAdjustment.set(0);
+        this.functionalLevel.set('Low');
+        this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
+
+        // Update DOM elements
+        const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
+        const paymentEstimateEl = document.getElementById('payment-estimate') as HTMLElement | null;
+        if (pdgmValueEl) {
+          pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
+        }
+        if (paymentEstimateEl) {
+          paymentEstimateEl.innerText = '$' + this.currentPayment().toFixed(2);
+        }
+
+        console.log('💰 Functional adjustment reverted, payment:', this.currentPayment());
+      }
+
+      // Revert payment if applicable (for comorbidity-impacting recommendations)
+      if (
+        recommendation.oasisTargetId === 'I8000-comorbidity' ||
+        recommendation.oasisTargetId === 'I8000-pad'
+      ) {
+        // Subtract $287 from comorbidity adjustment
+        this.comorbidityAdjustment.update((current) => Math.max(0, current - 287));
+        // Update tier based on new total
+        if (this.comorbidityAdjustment() === 0) {
+          this.comorbidityTier.set('None');
+        } else if (this.comorbidityAdjustment() >= 574) {
+          this.comorbidityTier.set('High');
+        } else {
+          this.comorbidityTier.set('Low');
+        }
+        this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
 
         // Update DOM elements
         const pdgmValueEl = document.getElementById('pdgm-value') as HTMLElement | null;
@@ -1455,11 +1512,6 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
         }
 
         console.log('💰 Payment reverted to:', this.currentPayment());
-      }
-
-      // If it was comorbidity recommendation, reset tier display
-      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
-        this.comorbidityTier.set('None');
       }
     }
 
@@ -1594,30 +1646,45 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
 
     if (!pdgmValueEl || !pdgmValueEl.parentElement) return;
 
+    // Determine amount based on recommendation type
+    const isFunctional = recommendation.oasisTargetId === 'GG0170C';
+    const amount = isFunctional ? 120 : 287;
+
     // Create increase indicator
     const increaseEl = document.createElement('div');
     increaseEl.className =
-      'absolute -top-10 right-0 text-emerald-600 font-black text-2xl animate-bounce z-50';
-    increaseEl.innerHTML = '+$287';
+      'absolute -top-10 right-0 font-black text-2xl animate-bounce z-50';
+    increaseEl.style.color = isFunctional ? '#9333ea' : '#10b981'; // Purple for functional, green for comorbidity
+    increaseEl.innerHTML = `+$${amount}`;
 
     pdgmValueEl.parentElement.style.position = 'relative';
     pdgmValueEl.parentElement.appendChild(increaseEl);
 
     // Scale up dramatically
     pdgmValueEl.style.transform = 'scale(1.8)';
-    pdgmValueEl.style.color = '#10b981';
+    pdgmValueEl.style.color = isFunctional ? '#9333ea' : '#10b981';
     pdgmValueEl.style.fontWeight = '900';
     pdgmValueEl.style.transition = 'all 0.4s ease-in-out';
 
     setTimeout(() => {
-      // Update comorbidity adjustment - this will recalculate currentPayment via computed signal
-      if (recommendation.oasisTargetId === 'I8000-comorbidity') {
-        this.comorbidityAdjustment.set(287);
-        this.comorbidityTier.set('Low');
+      // Update functional adjustment for GG0170C
+      if (recommendation.oasisTargetId === 'GG0170C') {
+        this.functionalAdjustment.set(120);
+        this.functionalLevel.set('Medium');
+      }
+
+      // Update comorbidity adjustment for J69.0 (aspiration) and I73.9 (PAD)
+      if (
+        recommendation.oasisTargetId === 'I8000-comorbidity' ||
+        recommendation.oasisTargetId === 'I8000-pad'
+      ) {
+        // Add $287 to current comorbidity adjustment (cumulative)
+        this.comorbidityAdjustment.update((current) => current + 287);
+        this.comorbidityTier.set(this.comorbidityAdjustment() >= 574 ? 'High' : 'Low');
       }
 
       // Update shared payment state for patient-summary
-      this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment());
+      this.paymentStateService.updatePayment(this.currentPayment(), this.comorbidityAdjustment(), this.functionalAdjustment());
 
       pdgmValueEl.innerText = '$' + this.currentPayment().toFixed(2);
       if (paymentEstimateEl) {
@@ -1923,169 +1990,172 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
    */
   private readonly OASIS_ITEM_DEFINITIONS: Record<string, string> = {
     // Section A - Administrative
-    'A1005': 'A1005. Ethnicity',
-    'A1010': 'A1010. Race',
-    'A1110': 'A1110. Language',
-    'A1250': 'A1250. Transportation (NACHC©)',
-    'A2120': 'A2120. Provision of Current Reconciled Medication List to Subsequent Provider at Transfer',
-    'A2121': 'A2121. Provision of Current Reconciled Medication List to Subsequent Provider at Discharge',
-    'A2123': 'A2123. Provision of Current Reconciled Medication List to Patient at Discharge',
-    'A2124': 'A2124. Route of Current Reconciled Medication List Transmission to Patient',
+    A1005: 'A1005. Ethnicity',
+    A1010: 'A1010. Race',
+    A1110: 'A1110. Language',
+    A1250: 'A1250. Transportation (NACHC©)',
+    A2120:
+      'A2120. Provision of Current Reconciled Medication List to Subsequent Provider at Transfer',
+    A2121:
+      'A2121. Provision of Current Reconciled Medication List to Subsequent Provider at Discharge',
+    A2123: 'A2123. Provision of Current Reconciled Medication List to Patient at Discharge',
+    A2124: 'A2124. Route of Current Reconciled Medication List Transmission to Patient',
 
     // Section B - Hearing, Speech, Vision
-    'B0200': 'B0200. Hearing',
-    'B1000': 'B1000. Vision',
-    'B1300': 'B1300. Health Literacy',
+    B0200: 'B0200. Hearing',
+    B1000: 'B1000. Vision',
+    B1300: 'B1300. Health Literacy',
 
     // Section C - Cognitive Patterns
-    'C0100': 'C0100. Should Brief Interview for Mental Status (C0200-C0500) be Conducted?',
-    'C0200': 'C0200. Repetition of Three Words',
-    'C0300': 'C0300. Temporal Orientation',
-    'C0400': 'C0400. Recall',
-    'C0500': 'C0500. BIMS Summary Score',
-    'C0600': 'C0600. Should the Staff Assessment of Mental Status be Conducted?',
-    'C0700': 'C0700. Short-term Memory OK',
-    'C0800': 'C0800. Long-term Memory OK',
-    'C0900': 'C0900. Memory/Recall Ability',
-    'C1000': 'C1000. Cognitive Skills for Daily Decision Making',
-    'C1310': 'C1310. Signs and Symptoms of Delirium',
+    C0100: 'C0100. Should Brief Interview for Mental Status (C0200-C0500) be Conducted?',
+    C0200: 'C0200. Repetition of Three Words',
+    C0300: 'C0300. Temporal Orientation',
+    C0400: 'C0400. Recall',
+    C0500: 'C0500. BIMS Summary Score',
+    C0600: 'C0600. Should the Staff Assessment of Mental Status be Conducted?',
+    C0700: 'C0700. Short-term Memory OK',
+    C0800: 'C0800. Long-term Memory OK',
+    C0900: 'C0900. Memory/Recall Ability',
+    C1000: 'C1000. Cognitive Skills for Daily Decision Making',
+    C1310: 'C1310. Signs and Symptoms of Delirium',
 
     // Section D - Mood
-    'D0150': 'D0150. Patient Mood Interview (PHQ-2)',
-    'D0160': 'D0160. Total Severity Score',
+    D0150: 'D0150. Patient Mood Interview (PHQ-2)',
+    D0160: 'D0160. Total Severity Score',
 
     // Section GG - Functional Abilities
-    'GG0100A': 'GG0100A. Prior Functioning - Self-Care',
-    'GG0100B': 'GG0100B. Prior Functioning - Indoor Mobility',
-    'GG0100C': 'GG0100C. Prior Functioning - Stairs',
-    'GG0100D': 'GG0100D. Prior Functioning - Functional Cognition',
-    'GG0130A1': 'GG0130A1. Self-Care - Eating (SOC/ROC Performance)',
-    'GG0130A2': 'GG0130A2. Self-Care - Eating (Discharge Goal)',
-    'GG0130B1': 'GG0130B1. Self-Care - Oral Hygiene (SOC/ROC Performance)',
-    'GG0130B2': 'GG0130B2. Self-Care - Oral Hygiene (Discharge Goal)',
-    'GG0130C1': 'GG0130C1. Self-Care - Toileting Hygiene (SOC/ROC Performance)',
-    'GG0130C2': 'GG0130C2. Self-Care - Toileting Hygiene (Discharge Goal)',
-    'GG0130E1': 'GG0130E1. Self-Care - Shower/Bathe Self (SOC/ROC Performance)',
-    'GG0130E2': 'GG0130E2. Self-Care - Shower/Bathe Self (Discharge Goal)',
-    'GG0130F1': 'GG0130F1. Self-Care - Upper Body Dressing (SOC/ROC Performance)',
-    'GG0130F2': 'GG0130F2. Self-Care - Upper Body Dressing (Discharge Goal)',
-    'GG0130G1': 'GG0130G1. Self-Care - Lower Body Dressing (SOC/ROC Performance)',
-    'GG0130G2': 'GG0130G2. Self-Care - Lower Body Dressing (Discharge Goal)',
-    'GG0130H1': 'GG0130H1. Self-Care - Putting On/Taking Off Footwear (SOC/ROC Performance)',
-    'GG0130H2': 'GG0130H2. Self-Care - Putting On/Taking Off Footwear (Discharge Goal)',
-    'GG0170A1': 'GG0170A1. Mobility - Roll Left and Right (SOC/ROC Performance)',
-    'GG0170A2': 'GG0170A2. Mobility - Roll Left and Right (Discharge Goal)',
-    'GG0170B1': 'GG0170B1. Mobility - Sit to Lying (SOC/ROC Performance)',
-    'GG0170B2': 'GG0170B2. Mobility - Sit to Lying (Discharge Goal)',
-    'GG0170C1': 'GG0170C1. Mobility - Lying to Sitting on Side of Bed (SOC/ROC Performance)',
-    'GG0170C2': 'GG0170C2. Mobility - Lying to Sitting on Side of Bed (Discharge Goal)',
-    'GG0170D1': 'GG0170D1. Mobility - Sit to Stand (SOC/ROC Performance)',
-    'GG0170D2': 'GG0170D2. Mobility - Sit to Stand (Discharge Goal)',
-    'GG0170E1': 'GG0170E1. Mobility - Chair/Bed-to-Chair Transfer (SOC/ROC Performance)',
-    'GG0170E2': 'GG0170E2. Mobility - Chair/Bed-to-Chair Transfer (Discharge Goal)',
-    'GG0170F1': 'GG0170F1. Mobility - Toilet Transfer (SOC/ROC Performance)',
-    'GG0170F2': 'GG0170F2. Mobility - Toilet Transfer (Discharge Goal)',
-    'GG0170G1': 'GG0170G1. Mobility - Car Transfer (SOC/ROC Performance)',
-    'GG0170G2': 'GG0170G2. Mobility - Car Transfer (Discharge Goal)',
-    'GG0170I1': 'GG0170I1. Mobility - Walk 10 Feet (SOC/ROC Performance)',
-    'GG0170I2': 'GG0170I2. Mobility - Walk 10 Feet (Discharge Goal)',
-    'GG0170J1': 'GG0170J1. Mobility - Walk 50 Feet with Two Turns (SOC/ROC Performance)',
-    'GG0170J2': 'GG0170J2. Mobility - Walk 50 Feet with Two Turns (Discharge Goal)',
-    'GG0170K1': 'GG0170K1. Mobility - Walk 150 Feet (SOC/ROC Performance)',
-    'GG0170K2': 'GG0170K2. Mobility - Walk 150 Feet (Discharge Goal)',
-    'GG0170L1': 'GG0170L1. Mobility - Walking 10 Feet on Uneven Surfaces (SOC/ROC Performance)',
-    'GG0170L2': 'GG0170L2. Mobility - Walking 10 Feet on Uneven Surfaces (Discharge Goal)',
-    'GG0170M1': 'GG0170M1. Mobility - 1 Step (Curb) (SOC/ROC Performance)',
-    'GG0170M2': 'GG0170M2. Mobility - 1 Step (Curb) (Discharge Goal)',
-    'GG0170N1': 'GG0170N1. Mobility - 4 Steps (SOC/ROC Performance)',
-    'GG0170N2': 'GG0170N2. Mobility - 4 Steps (Discharge Goal)',
-    'GG0170O1': 'GG0170O1. Mobility - 12 Steps (SOC/ROC Performance)',
-    'GG0170O2': 'GG0170O2. Mobility - 12 Steps (Discharge Goal)',
-    'GG0170P1': 'GG0170P1. Mobility - Picking Up Object (SOC/ROC Performance)',
-    'GG0170P2': 'GG0170P2. Mobility - Picking Up Object (Discharge Goal)',
-    'GG0170R1': 'GG0170R1. Mobility - Wheel 50 Feet with Two Turns (SOC/ROC Performance)',
-    'GG0170R2': 'GG0170R2. Mobility - Wheel 50 Feet with Two Turns (Discharge Goal)',
-    'GG0170S1': 'GG0170S1. Mobility - Wheel 150 Feet (SOC/ROC Performance)',
-    'GG0170S2': 'GG0170S2. Mobility - Wheel 150 Feet (Discharge Goal)',
+    GG0100A: 'GG0100A. Prior Functioning - Self-Care',
+    GG0100B: 'GG0100B. Prior Functioning - Indoor Mobility',
+    GG0100C: 'GG0100C. Prior Functioning - Stairs',
+    GG0100D: 'GG0100D. Prior Functioning - Functional Cognition',
+    GG0130A1: 'GG0130A1. Self-Care - Eating (SOC/ROC Performance)',
+    GG0130A2: 'GG0130A2. Self-Care - Eating (Discharge Goal)',
+    GG0130B1: 'GG0130B1. Self-Care - Oral Hygiene (SOC/ROC Performance)',
+    GG0130B2: 'GG0130B2. Self-Care - Oral Hygiene (Discharge Goal)',
+    GG0130C1: 'GG0130C1. Self-Care - Toileting Hygiene (SOC/ROC Performance)',
+    GG0130C2: 'GG0130C2. Self-Care - Toileting Hygiene (Discharge Goal)',
+    GG0130E1: 'GG0130E1. Self-Care - Shower/Bathe Self (SOC/ROC Performance)',
+    GG0130E2: 'GG0130E2. Self-Care - Shower/Bathe Self (Discharge Goal)',
+    GG0130F1: 'GG0130F1. Self-Care - Upper Body Dressing (SOC/ROC Performance)',
+    GG0130F2: 'GG0130F2. Self-Care - Upper Body Dressing (Discharge Goal)',
+    GG0130G1: 'GG0130G1. Self-Care - Lower Body Dressing (SOC/ROC Performance)',
+    GG0130G2: 'GG0130G2. Self-Care - Lower Body Dressing (Discharge Goal)',
+    GG0130H1: 'GG0130H1. Self-Care - Putting On/Taking Off Footwear (SOC/ROC Performance)',
+    GG0130H2: 'GG0130H2. Self-Care - Putting On/Taking Off Footwear (Discharge Goal)',
+    GG0170A1: 'GG0170A1. Mobility - Roll Left and Right (SOC/ROC Performance)',
+    GG0170A2: 'GG0170A2. Mobility - Roll Left and Right (Discharge Goal)',
+    GG0170B1: 'GG0170B1. Mobility - Sit to Lying (SOC/ROC Performance)',
+    GG0170B2: 'GG0170B2. Mobility - Sit to Lying (Discharge Goal)',
+    GG0170C1: 'GG0170C1. Mobility - Lying to Sitting on Side of Bed (SOC/ROC Performance)',
+    GG0170C2: 'GG0170C2. Mobility - Lying to Sitting on Side of Bed (Discharge Goal)',
+    GG0170D1: 'GG0170D1. Mobility - Sit to Stand (SOC/ROC Performance)',
+    GG0170D2: 'GG0170D2. Mobility - Sit to Stand (Discharge Goal)',
+    GG0170E1: 'GG0170E1. Mobility - Chair/Bed-to-Chair Transfer (SOC/ROC Performance)',
+    GG0170E2: 'GG0170E2. Mobility - Chair/Bed-to-Chair Transfer (Discharge Goal)',
+    GG0170F1: 'GG0170F1. Mobility - Toilet Transfer (SOC/ROC Performance)',
+    GG0170F2: 'GG0170F2. Mobility - Toilet Transfer (Discharge Goal)',
+    GG0170G1: 'GG0170G1. Mobility - Car Transfer (SOC/ROC Performance)',
+    GG0170G2: 'GG0170G2. Mobility - Car Transfer (Discharge Goal)',
+    GG0170I1: 'GG0170I1. Mobility - Walk 10 Feet (SOC/ROC Performance)',
+    GG0170I2: 'GG0170I2. Mobility - Walk 10 Feet (Discharge Goal)',
+    GG0170J1: 'GG0170J1. Mobility - Walk 50 Feet with Two Turns (SOC/ROC Performance)',
+    GG0170J2: 'GG0170J2. Mobility - Walk 50 Feet with Two Turns (Discharge Goal)',
+    GG0170K1: 'GG0170K1. Mobility - Walk 150 Feet (SOC/ROC Performance)',
+    GG0170K2: 'GG0170K2. Mobility - Walk 150 Feet (Discharge Goal)',
+    GG0170L1: 'GG0170L1. Mobility - Walking 10 Feet on Uneven Surfaces (SOC/ROC Performance)',
+    GG0170L2: 'GG0170L2. Mobility - Walking 10 Feet on Uneven Surfaces (Discharge Goal)',
+    GG0170M1: 'GG0170M1. Mobility - 1 Step (Curb) (SOC/ROC Performance)',
+    GG0170M2: 'GG0170M2. Mobility - 1 Step (Curb) (Discharge Goal)',
+    GG0170N1: 'GG0170N1. Mobility - 4 Steps (SOC/ROC Performance)',
+    GG0170N2: 'GG0170N2. Mobility - 4 Steps (Discharge Goal)',
+    GG0170O1: 'GG0170O1. Mobility - 12 Steps (SOC/ROC Performance)',
+    GG0170O2: 'GG0170O2. Mobility - 12 Steps (Discharge Goal)',
+    GG0170P1: 'GG0170P1. Mobility - Picking Up Object (SOC/ROC Performance)',
+    GG0170P2: 'GG0170P2. Mobility - Picking Up Object (Discharge Goal)',
+    GG0170R1: 'GG0170R1. Mobility - Wheel 50 Feet with Two Turns (SOC/ROC Performance)',
+    GG0170R2: 'GG0170R2. Mobility - Wheel 50 Feet with Two Turns (Discharge Goal)',
+    GG0170S1: 'GG0170S1. Mobility - Wheel 150 Feet (SOC/ROC Performance)',
+    GG0170S2: 'GG0170S2. Mobility - Wheel 150 Feet (Discharge Goal)',
 
     // Section J - Health Conditions
-    'J0510': 'J0510. Pain Effect on Sleep',
-    'J1800': 'J1800. Any Falls Since SOC/ROC',
-    'J1900A': 'J1900A. Number of Falls - No Injury',
-    'J1900B': 'J1900B. Number of Falls - Injury (except major)',
-    'J1900C': 'J1900C. Number of Falls - Major Injury',
-    'J2030': 'J2030. Shortness of Breath (Dyspnea)',
+    J0510: 'J0510. Pain Effect on Sleep',
+    J1800: 'J1800. Any Falls Since SOC/ROC',
+    J1900A: 'J1900A. Number of Falls - No Injury',
+    J1900B: 'J1900B. Number of Falls - Injury (except major)',
+    J1900C: 'J1900C. Number of Falls - Major Injury',
+    J2030: 'J2030. Shortness of Breath (Dyspnea)',
 
     // Section K - Swallowing/Nutritional Status
-    'K0520A': 'K0520A. Nutritional Approaches - Parenteral/IV Feeding',
-    'K0520B': 'K0520B. Nutritional Approaches - Feeding Tube',
-    'K0520C': 'K0520C. Nutritional Approaches - Mechanically Altered Diet',
-    'K0520D': 'K0520D. Nutritional Approaches - Therapeutic Diet',
-    'K0520Z': 'K0520Z. Nutritional Approaches - None of the Above',
+    K0520A: 'K0520A. Nutritional Approaches - Parenteral/IV Feeding',
+    K0520B: 'K0520B. Nutritional Approaches - Feeding Tube',
+    K0520C: 'K0520C. Nutritional Approaches - Mechanically Altered Diet',
+    K0520D: 'K0520D. Nutritional Approaches - Therapeutic Diet',
+    K0520Z: 'K0520Z. Nutritional Approaches - None of the Above',
 
     // Section M - Skin Conditions
-    'M1306': 'M1306. Unhealed Pressure Ulcer(s) Present',
-    'M1324': 'M1324. Stage of Most Problematic Unhealed Pressure Ulcer',
-    'M1330': 'M1330. Does this Patient have a Stasis Ulcer?',
-    'M1334': 'M1334. Status of Most Problematic Stasis Ulcer',
-    'M1340': 'M1340. Does this Patient have a Surgical Wound?',
-    'M1342': 'M1342. Status of Most Problematic Surgical Wound',
-    'M1350': 'M1350. Skin Lesion or Open Wound',
-    'M1400': 'M1400. When is the Patient Dyspneic?',
-    'M1600': 'M1600. Has this patient been treated for a Urinary Tract Infection in the past 14 days?',
-    'M1610': 'M1610. Urinary Incontinence or Urinary Catheter Presence',
-    'M1620': 'M1620. Bowel Incontinence Frequency',
-    'M1630': 'M1630. Ostomy for Bowel Elimination',
-    'M2001': 'M2001. Drug Regimen Review',
-    'M2003': 'M2003. Medication Follow-up',
-    'M2005': 'M2005. Medication Intervention',
-    'M2010': 'M2010. Patient/Caregiver High Risk Drug Education',
-    'M2020': 'M2020. Management of Oral Medications',
-    'M2030': 'M2030. Management of Injectable Medications',
-    'M2102ADL': 'M2102. Types and Sources of Assistance - ADL',
-    'M2102IADL': 'M2102. Types and Sources of Assistance - IADL',
-    'M2102Med': 'M2102. Types and Sources of Assistance - Medication',
-    'M2102Proc': 'M2102. Types and Sources of Assistance - Procedures',
-    'M2102Equip': 'M2102. Types and Sources of Assistance - Equipment',
-    'M2102Advocacy': 'M2102. Types and Sources of Assistance - Advocacy',
-    'M2102Financial': 'M2102. Types and Sources of Assistance - Financial',
-    'M2102Emotional': 'M2102. Types and Sources of Assistance - Emotional',
-    'M2102None': 'M2102. Types and Sources of Assistance - None',
-    'M2250Med': 'M2250. Plan of Care Synopsis - Medication',
-    'M2250Nutrition': 'M2250. Plan of Care Synopsis - Nutrition',
-    'M2250Skin': 'M2250. Plan of Care Synopsis - Skin',
-    'M2250Pain': 'M2250. Plan of Care Synopsis - Pain',
-    'M2250Behavioral': 'M2250. Plan of Care Synopsis - Behavioral',
+    M1306: 'M1306. Unhealed Pressure Ulcer(s) Present',
+    M1324: 'M1324. Stage of Most Problematic Unhealed Pressure Ulcer',
+    M1330: 'M1330. Does this Patient have a Stasis Ulcer?',
+    M1334: 'M1334. Status of Most Problematic Stasis Ulcer',
+    M1340: 'M1340. Does this Patient have a Surgical Wound?',
+    M1342: 'M1342. Status of Most Problematic Surgical Wound',
+    M1350: 'M1350. Skin Lesion or Open Wound',
+    M1400: 'M1400. When is the Patient Dyspneic?',
+    M1600:
+      'M1600. Has this patient been treated for a Urinary Tract Infection in the past 14 days?',
+    M1610: 'M1610. Urinary Incontinence or Urinary Catheter Presence',
+    M1620: 'M1620. Bowel Incontinence Frequency',
+    M1630: 'M1630. Ostomy for Bowel Elimination',
+    M2001: 'M2001. Drug Regimen Review',
+    M2003: 'M2003. Medication Follow-up',
+    M2005: 'M2005. Medication Intervention',
+    M2010: 'M2010. Patient/Caregiver High Risk Drug Education',
+    M2020: 'M2020. Management of Oral Medications',
+    M2030: 'M2030. Management of Injectable Medications',
+    M2102ADL: 'M2102. Types and Sources of Assistance - ADL',
+    M2102IADL: 'M2102. Types and Sources of Assistance - IADL',
+    M2102Med: 'M2102. Types and Sources of Assistance - Medication',
+    M2102Proc: 'M2102. Types and Sources of Assistance - Procedures',
+    M2102Equip: 'M2102. Types and Sources of Assistance - Equipment',
+    M2102Advocacy: 'M2102. Types and Sources of Assistance - Advocacy',
+    M2102Financial: 'M2102. Types and Sources of Assistance - Financial',
+    M2102Emotional: 'M2102. Types and Sources of Assistance - Emotional',
+    M2102None: 'M2102. Types and Sources of Assistance - None',
+    M2250Med: 'M2250. Plan of Care Synopsis - Medication',
+    M2250Nutrition: 'M2250. Plan of Care Synopsis - Nutrition',
+    M2250Skin: 'M2250. Plan of Care Synopsis - Skin',
+    M2250Pain: 'M2250. Plan of Care Synopsis - Pain',
+    M2250Behavioral: 'M2250. Plan of Care Synopsis - Behavioral',
 
     // Section N - Medications
-    'N0415A': 'N0415A. High-Risk Drug Classes - Antipsychotic',
-    'N0415B': 'N0415B. High-Risk Drug Classes - Anticoagulant',
-    'N0415C': 'N0415C. High-Risk Drug Classes - Antibiotic',
-    'N0415D': 'N0415D. High-Risk Drug Classes - Opioid',
-    'N0415E': 'N0415E. High-Risk Drug Classes - Antiplatelet',
-    'N0415F': 'N0415F. High-Risk Drug Classes - Hypoglycemic',
+    N0415A: 'N0415A. High-Risk Drug Classes - Antipsychotic',
+    N0415B: 'N0415B. High-Risk Drug Classes - Anticoagulant',
+    N0415C: 'N0415C. High-Risk Drug Classes - Antibiotic',
+    N0415D: 'N0415D. High-Risk Drug Classes - Opioid',
+    N0415E: 'N0415E. High-Risk Drug Classes - Antiplatelet',
+    N0415F: 'N0415F. High-Risk Drug Classes - Hypoglycemic',
 
     // Administrative M Items
-    'M0010': 'M0010. CMS Certification Number',
-    'M0014': 'M0014. Branch State',
-    'M0016': 'M0016. Branch ID Number',
-    'M0018': 'M0018. National Provider Identifier (NPI)',
-    'M0020': 'M0020. Patient ID Number',
-    'M0030': 'M0030. Start of Care Date',
-    'M0064': 'M0064. Social Security Number',
-    'M0066': 'M0066. Birth Date',
-    'M0069': 'M0069. Gender',
-    'M0080': 'M0080. Discipline of Person Completing Assessment',
-    'M0090': 'M0090. Date Assessment Completed',
-    'M0100': 'M0100. Reason for Assessment',
-    'M0102': 'M0102. Date of Physician-Ordered SOC',
-    'M0104': 'M0104. Date of Referral',
-    'M0150': 'M0150. Current Payment Sources for Home Care',
+    M0010: 'M0010. CMS Certification Number',
+    M0014: 'M0014. Branch State',
+    M0016: 'M0016. Branch ID Number',
+    M0018: 'M0018. National Provider Identifier (NPI)',
+    M0020: 'M0020. Patient ID Number',
+    M0030: 'M0030. Start of Care Date',
+    M0064: 'M0064. Social Security Number',
+    M0066: 'M0066. Birth Date',
+    M0069: 'M0069. Gender',
+    M0080: 'M0080. Discipline of Person Completing Assessment',
+    M0090: 'M0090. Date Assessment Completed',
+    M0100: 'M0100. Reason for Assessment',
+    M0102: 'M0102. Date of Physician-Ordered SOC',
+    M0104: 'M0104. Date of Referral',
+    M0150: 'M0150. Current Payment Sources for Home Care',
 
     // Diagnoses
-    'I8000_primary': 'I8000. Primary Diagnosis',
-    'I8000_comorbidity': 'I8000. Comorbidity Diagnosis',
-    'I8000_other': 'I8000. Other Diagnosis',
+    I8000_primary: 'I8000. Primary Diagnosis',
+    I8000_comorbidity: 'I8000. Comorbidity Diagnosis',
+    I8000_other: 'I8000. Other Diagnosis',
   };
 
   /**
@@ -2661,4 +2731,3 @@ export class OasisJohnComponent implements OnInit, AfterViewInit {
     }, 3000);
   }
 }
-

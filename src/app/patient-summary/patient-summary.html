@@ -155,17 +155,17 @@
                 }}
               </span>
             </div>
-            <!-- Functional Level Adjustment - Commented out
+
             <div class="flex flex-col">
               <span class="text-slate-600">Functional</span>
               <span class="font-bold text-emerald-700">
                 +{{
-                  patientSummary.payment.functionalLevelAdjustment
+                  patientSummary.payment.functionalAdjustment
                     | currency : 'USD' : 'symbol' : '1.2-2'
                 }}
               </span>
             </div>
-            -->
+
             <div class="flex flex-col">
               <span class="text-slate-600">LUPA/LUTS</span>
               <span class="font-bold text-emerald-700">
@@ -299,7 +299,13 @@
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-1">
                     <ion-icon
-                      [name]="doc.type === 'Audio' ? 'volume-high' : (doc.uploaded ? 'document-text' : 'alert-circle')"
+                      [name]="
+                        doc.type === 'Audio'
+                          ? 'volume-high'
+                          : doc.uploaded
+                          ? 'document-text'
+                          : 'alert-circle'
+                      "
                       class="text-base"
                       [ngClass]="doc.uploaded ? 'text-slate-600' : 'text-indigo-600'"
                     ></ion-icon>
@@ -381,7 +387,10 @@
                     class="w-8 h-8 flex items-center justify-center rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
                     title="{{ isAudioPlaying() ? 'Pause' : 'Play' }}"
                   >
-                    <ion-icon [name]="isAudioPlaying() ? 'pause' : 'play'" class="text-base"></ion-icon>
+                    <ion-icon
+                      [name]="isAudioPlaying() ? 'pause' : 'play'"
+                      class="text-base"
+                    ></ion-icon>
                   </button>
 
                   <!-- Fast Forward 10s -->
@@ -396,7 +405,9 @@
 
                   <!-- Progress Bar & Time -->
                   <div class="flex items-center gap-2 ml-1">
-                    <span class="text-[0.6rem] text-slate-500 w-8 text-right">{{ formatTime(audioCurrentTime()) }}</span>
+                    <span class="text-[0.6rem] text-slate-500 w-8 text-right">{{
+                      formatTime(audioCurrentTime())
+                    }}</span>
                     <div
                       (click)="seekAudio($event)"
                       class="w-24 h-1.5 bg-slate-200 rounded-full cursor-pointer hover:h-2 transition-all"
@@ -406,7 +417,9 @@
                         [style.width.%]="getProgressPercent()"
                       ></div>
                     </div>
-                    <span class="text-[0.6rem] text-slate-500 w-8">{{ formatTime(audioDuration()) }}</span>
+                    <span class="text-[0.6rem] text-slate-500 w-8">{{
+                      formatTime(audioDuration())
+                    }}</span>
                   </div>
 
                   <!-- Hidden audio element -->

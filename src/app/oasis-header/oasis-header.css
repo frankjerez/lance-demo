@@ -1,1 +1,26 @@
 /* Header-specific styles */
+
+/* Chevron rotation transition */
+ion-icon[name="chevron-down-outline"] {
+  transition: transform 0.2s ease-in-out;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Payment popup animation */
+.payment-popup-container > div:last-child {
+  animation: popupSlideIn 0.2s ease-out;
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

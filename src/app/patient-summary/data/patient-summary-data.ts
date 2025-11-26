@@ -35,7 +35,7 @@ export interface PDGMPaymentBreakdown {
   hippsCode: string;
   baseRate: number;
   comorbidityAdjustment: number;
-  // functionalLevelAdjustment: number;  // Commented out
+  functionalAdjustment: number;
   lutsAdjustment: number;
   totalPayment: number;
 }
@@ -147,9 +147,9 @@ export const myPatientSummary: PatientSummary = {
 
   payment: {
     hippsCode: '2CB21',
-    baseRate: 2753.5,
+    baseRate: 2875.5,
     comorbidityAdjustment: 0, // Will increase by +$287 when high comorbidity is added
-    // functionalLevelAdjustment: 122.0,  // Commented out
+    functionalAdjustment: 0, // Will increase by +$120 when functional level is updated
     lutsAdjustment: 0,
     totalPayment: 2875.5, // Matches initial oasis-john component payment
   },

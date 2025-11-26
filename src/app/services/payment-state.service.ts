@@ -3,6 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export interface PaymentState {
   totalPayment: number;
   comorbidityAdjustment: number;
+  functionalAdjustment: number;
   lastUpdated: Date;
 }
 
@@ -16,6 +17,7 @@ export class PaymentStateService {
   private paymentState = signal<PaymentState>({
     totalPayment: 2875.5,
     comorbidityAdjustment: 0,
+    functionalAdjustment: 0,
     lastUpdated: new Date(),
   });
 
@@ -26,10 +28,15 @@ export class PaymentStateService {
     this.loadFromStorage();
   }
 
-  updatePayment(totalPayment: number, comorbidityAdjustment: number): void {
+  updatePayment(
+    totalPayment: number,
+    comorbidityAdjustment: number,
+    functionalAdjustment: number = 0
+  ): void {
     this.paymentState.set({
       totalPayment,
       comorbidityAdjustment,
+      functionalAdjustment,
       lastUpdated: new Date(),
     });
     this.saveToStorage();
@@ -39,6 +46,7 @@ export class PaymentStateService {
     this.paymentState.set({
       totalPayment: 2875.5,
       comorbidityAdjustment: 0,
+      functionalAdjustment: 0,
       lastUpdated: new Date(),
     });
     this.saveToStorage();
